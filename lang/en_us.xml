@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pycacic>
+	<about>
+		<version>0.1</version>
+		<author>Dataprev - ES</author>
+		<date>15 january 2008</date>
+		<language type="en" location="USA">English</language>
+		<description>Pycacic translation for English</description>
+	</about>
+	<mode type="text" viewer="console">
+		<description>Translation for the text mode version</description>
+		<header>
+			<welcome>Welcome to PyCacic</welcome>
+			<version type="alpha">0.1</version>
+			<description>version 0.1 alpha (text mode)</description>
+		</header>
+		<menu>
+			<item id="0" href="col_hard">Hardware Collector</item>
+			<item id="1" href="col_soft">Software Collector</item>
+			<item id="2" href="col_patr">Coletor de Patrimonio</item>
+			<item id="3" href="exit">Exit</item>
+		</menu>
+		<messages>
+			<hitkeys>
+				<hitkey key="enter">Press enter key to continue</hitkey>
+				<hitkey key="spacebar">Press spacebar key to continue</hitkey>
+			</hitkeys>			
+		</messages>		
+	</mode>
+	<mode type="gui" viewer="gtk">
+		<description>Translation for the GUI mode version</description>
+	</mode>
+</pycacic>
