@@ -4,7 +4,7 @@ from xml.dom import minidom, Node
 
 class IOConfig:
     
-    FILE = sys.path[0] + '/config/default.xml'
+    FILE = sys.path[0] + '/config/pycacic.xml'
     
     def exists():
         return (os.path.exists(IOConfig.FILE))
@@ -18,7 +18,7 @@ class IOConfig:
     def getRoot():
         """Retorna o node principal do XML"""        
         if not IOConfig.exists():
-            raise Exception('Arquivo de configuração não encontrado.')
+            raise Exception('Arquivo de configuração (%s) não encontrado.' % IOConfig.FILE)
         else:
             xml = minidom.parse(IOConfig.FILE)
             root = xml.getElementsByTagName('config')[0]
