@@ -1,8 +1,11 @@
 
 class Cacic:
     
+    # versao do gerente
+    GER_VERSION = '2.4.0'
+    
     # versao do agente
-    VERSION = '1.0.0'
+    VERSION = '0.1.0'
     
     def __init__(self):
         pass
