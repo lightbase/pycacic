@@ -1,0 +1,15 @@
+pyCacic - CACIC client in python
+
+This file explain how to setup the CACIC client
+
+Create a config file
+   You need to create a file named as pycacic.xml on "config" subdir.
+   There are a file named as pycacic-dist.xml witch one is an example how to 
+   build your own pycacic.xml.
+   Copy the file pycacic-dist.xml to pycacic.xml and change this one with your
+   own needs.
+
+Change pycacic.xml content (its xml elements)
+   "address" - CACIC server
+   Please, don't change any other element unless you know what are you doing
+   
