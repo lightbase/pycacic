@@ -33,18 +33,4 @@ class Col_Network(Coletor):
         self.addChave('te_gateway', net.getGateway())
         self.addChave("te_serv_dhcp", net.getDHCP())
     
-    """
-    def dictToPost(self):
-        Devolve um dicionario para ser enviado para o Gerente Web
-        d = {}
-        d['te_ip']              = self.encripta(self.dicionario['te_ip'])
-        d['te_mascara']         = self.encripta(self.dicionario['te_mascara'])
-        d['te_serv_dhcp']       = self.encripta(self.dicionario['te_serv_dhcp'])
-        d['te_gateway']         = self.encripta(self.dicionario['te_gateway'])
-        d['te_dns_primario']    = self.encripta(self.dicionario['te_dns_primario'])
-        d['te_dns_secundario']  = self.encripta(self.dicionario['te_dns_secundario'])
-        d['te_dominio_dns']     = self.encripta(self.dicionario['te_dominio_dns'])
-        d['te_nome_host']       = self.encripta(self.dicionario['te_nome_host'])
-        return d
-    """
     
