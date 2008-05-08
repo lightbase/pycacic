@@ -8,7 +8,6 @@ import sys
 import commands
 from ger_cols import *
 from config.io import * 
-from egg.trayicon import TrayIcon
 
 from socket import *
 
