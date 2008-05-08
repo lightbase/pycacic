@@ -1,0 +1,24 @@
+################################################################
+#    ______  ___    ___   ___  _____      ____   __   ____     #
+#    |  _  \ \  \  /  / /  __| |    \    / ___| |  | /  __|    #
+#    | |_/  | \  \/  / / /     | |\ \   | /     |  | |  /      #
+#    |  ___/   \   /  | |  _  |   _  \  | |   _ |  | | |  _    #
+#    |  |      /  /   | \_/ | |  | \  \ |  \_/ ||  | | \_/ |   #
+#    |__|     /__/    \____/ |__|   \__\ \____/ |__|  \____/   #
+#                                                              #
+#                                              VERSAO TESTE    #
+#                                                              #
+################################################################
+
+ Primeiramente deve-se alterar, configurar, o arquivo /config/cacic.conf 
+ informando o endereco, usuario e senha do Gerente Web.
+ 
+ Apos executar, como super usuario, o arquivo /cacic.py que ficara rodando em background.
+ Para utilizar a interface deve executar o arquivo /gui.py (como usuario normal), 
+ e necessario ter instalado o GTK+, PyGTK e o Glade. Caso execute corretamente ira
+ aparecer um icone no systray. Ao clicar nesse icone abre a janela com a possibilidade
+ de forcar uma coleta.
+ 
+ obs: Ao clicar em "Forcar Coleta" observe no terminal que esta rodando o /cacic.py se apareceu
+ a mensagem de "coleta forcada".
+ 
