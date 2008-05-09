@@ -44,7 +44,7 @@ class URL :
         dados['te_so']              = defaults['te_so']
         dados['te_nome_computador'] = defaults['hostname']
         dados['padding_key']        = defaults['padding_key']
-        dados['agente']             = defaults['agente_cacic']
+        dados['AgenteLinux']        = defaults['agente_linux']
         
         query = urllib.urlencode(dados)
         

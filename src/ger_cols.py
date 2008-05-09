@@ -17,6 +17,8 @@ import sys
 from coletores.coletor import *
 from coletores.col_network import *
 from coletores.col_hard import *
+from coletores.col_soft import *
+from coletores.col_patr import *
 
 from coletores.lib.url import *
 from coletores.lib.arquivo import *
@@ -29,6 +31,8 @@ from threading import Thread
 from xml.dom import minidom, Node
 
 from config.io import *
+
+from globals import Globals
 
 
 class Ger_Cols:
@@ -43,7 +47,7 @@ class Ger_Cols:
         configuracoes.
     """
     
-    OUTPUT_DAT = '%s/cacic2.dat' % sys.path[0]
+    OUTPUT_DAT = '%s/cacic2.dat' % Globals.PATH
 
     def __init__(self, version):
         # para controle de intervalo
@@ -77,35 +81,36 @@ class Ger_Cols:
         self.update_path = ''
         self.update_user = ''
         self.update_pass = ''
-        # coletores
-        self.initColetores()
         # coletas a serem realizadas
-        self.coletas = []
+        self.coletores = {}
         self.coletas_enviar = {}
-        self.coleta_forcada = False
+        # lista com as coletas forcadas
+        self.coletas_forcadas = []
+        # se for True forca todas as coletas
+        self.all_forcada = False
         # Informacoes a serem passadas para o Gerente Web
-        self.computador.ip_ativo = self.computador.getIPAtivo(self.cacic_server)
+        self.computador.ipAtivo = self.computador.getIPAtivo(self.cacic_server)
         net = Rede()
-        netmask = net.__getMask__(self.computador.ip_ativo)
-        iprede = net.__getIPRede__(self.computador.ip_ativo, netmask);
+        netmask = net.__getMask__(self.computador.ipAtivo)
+        iprede = net.__getIPRede__(self.computador.ipAtivo, netmask);
         self.defaults = {
-            'agente_cacic' : self.coletor.encripta('pycacic'),
+            'agente_linux' : self.coletor.encripta('PyCacic'),
             'user'         : self.coletor.encripta(server['username']),
             'pwd'          : self.coletor.encripta(server['password']),
             'agent'        : self.coletor.encripta(server['agent']),     
             'id_so'        : self.coletor.encripta('-1'),
             'te_so'        : self.coletor.encripta(self.computador.getSO()),
             'hostname'     : self.coletor.encripta(self.computador.getHostName()),
-            'ip'           : self.coletor.encripta(self.computador.ip_ativo),
+            'ip'           : self.coletor.encripta(self.computador.ipAtivo),
             'id_rede'      : self.coletor.encripta(iprede),
-            'mac'          : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ip_ativo)),
+            'mac'          : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ipAtivo)),
             'padding_key'  : self.coletor.getPadding(),
         }        
         self.dicionario = {
             'te_versao_cacic'    : version,
             'te_versao_gercols'  : version,
-            'in_chkcacic'        : self.coletor.encripta(Reader.getStatus('install')['value']),
-            'in_teste'           : self.coletor.encripta(Reader.getStatus('test')['value']),                
+            'in_chkcacic'        : self.coletor.encripta(''),
+            'in_teste'           : self.coletor.encripta(''),                
             'te_workgroup'       : self.coletor.encripta('Desconhecido'),
             'te_nome_computador' : self.coletor.encripta(self.computador.getHostName()),
             'id_ftp'             : self.coletor.encripta(''),
@@ -117,14 +122,6 @@ class Ger_Cols:
         
         self.separador = '=CacicIsFree='
         
-    def initColetores(self):
-        self.coletores = {}
-        """ Network """
-        col_network = Col_Network(self.computador)
-        self.coletores[col_network.getName()] = col_network
-        """ Hardware """
-        col_hard = Col_Hard(self.computador)
-        self.coletores[col_hard.getName()] = col_hard
         
     def start(self):
         """Inicia o Gerente de Coletas em background"""
@@ -168,19 +165,21 @@ class Ger_Cols:
             raise Exception(e.message)
     
     def addColeta(self, col, valor):
-        """Adiciona a coleta na lista, se o seu valor for 'S'"""
+        """Adiciona o coletor na lista, se o seu valor for 'S'"""
         if valor.upper() == 'S':
-            self.coletas.append(col)
+            self.coletores[col.getName()] = col
             
     def readXML(self, xml):
         """ Le o XML gerado pelo servidor WEB """
         # returns void
-        self.coletas = ['tcp_ip']
         self.xml = minidom.parseString(xml)
         # se nao achar o status==OK, retorna
         if not self.url.isOK(self.xml):
             raise Exception('Erro ao ler XML do servidor, status não disponível')
         root = self.xml.getElementsByTagName('CONFIGS')[0]
+        # Coletores
+        self.coletores.clear()
+        self.addColeta(Col_Network(self.computador), 'S')
         for no in root.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
                 if no.firstChild.nodeValue != '':
@@ -188,17 +187,20 @@ class Ger_Cols:
                         self.update_auto = self.decode(no.firstChild.nodeValue)
                     # COLETAS
                     elif no.nodeName == 'cs_coleta_forcada' and self.decode(no.firstChild.nodeValue) == 'OK':
-                        self.coleta_forcada = True
-                    elif no.nodeName == 'cs_coleta_compart':
-                        self.addColeta('col_comp', self.decode(no.firstChild.nodeValue))
+                        self.all_forcada = True
+                    elif no.nodeName == 'cs_coleta_compart':                       
+                        #self.addColeta(None, self.decode(no.firstChild.nodeValue))
+                        pass
                     elif no.nodeName == 'cs_coleta_hardware':
-                        self.addColeta('col_hard', self.decode(no.firstChild.nodeValue))
+                        self.addColeta(Col_Hard(self.computador), self.decode(no.firstChild.nodeValue))
                     elif no.nodeName == 'cs_coleta_monitorado':
-                        self.addColeta('col_moni', self.decode(no.firstChild.nodeValue))
+                        #self.addColeta(None, self.decode(no.firstChild.nodeValue))
+                        pass
                     elif no.nodeName == 'cs_coleta_software':
-                        self.addColeta('col_soft', self.decode(no.firstChild.nodeValue))
+                        self.addColeta(Col_Soft(self.computador), self.decode(no.firstChild.nodeValue))
                     elif no.nodeName == 'cs_coleta_unid_disc':
-                        self.addColeta('col_undi', self.decode(no.firstChild.nodeValue))
+                        #self.addColeta(None, self.decode(no.firstChild.nodeValue))
+                        pass
                     # VERSOES
                     elif no.nodeName == 'DT_VERSAO_CACIC2_DISPONIVEL':
                         self.versao_disponivel = self.decode(no.firstChild.nodeValue)
@@ -239,12 +241,10 @@ class Ger_Cols:
 
     def isNew(self, current, new):
         """Compara as versoes, atual com a disponivel."""
-        return (current.replace('.','') < new.replace('.',''))   
-
+        return (current.replace('.','') < new.replace('.',''))
     
     def atualiza(self):
         """Atualiza os modulos dos coletores"""
-        # returns void
         """
             TODO: definir como vai ficar a string de destino dos arquivos
         """
@@ -261,17 +261,14 @@ class Ger_Cols:
             raise Exception('Erro ao tentar atualizar: %s' % e.message)
 
     def startColeta(self):
-        """ Inicia as Coletas """
-        # returns void
-        """
-            TODO: Habilitar outras coletas alem do Col_Hard (apos as mesmas estarem prontas)
-        """
+        """ Inicia as Coletas"""
         # limpa o dicionario da ultima coleta
         self.coletas_enviar.clear()
         self.computador.coletar()
+        # adiciona o coletor padrao (Col_Network)
         for col in self.coletores.values():
-            if self.coleta_forcada or col.isReady():
-                col.start()
+            col.start()
+            if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):                
                 page = Reader.getColetor(col.getName())['page']
                 dict = col.getEncryptedDict()
                 self.coletas_enviar[col.getName()] = {'page': page, 'dict' : dict }

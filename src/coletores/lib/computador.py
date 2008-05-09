@@ -20,6 +20,7 @@ import stat
 import commands
 import socket, fcntl, struct
 from xml.dom import minidom, Node
+from globals import Globals
 
 
 DEFAULT_STRING_VALUE = ''
@@ -114,6 +115,7 @@ class Video :
 	"""Classe contendo as informacoes de vídeo"""
 	
 	def __init__(self) :
+		self.res = ""
 		self.cores = 0 # int
 		self.ram = 0.0 # double
 		self.descricao = DEFAULT_STRING_VALUE # string
@@ -127,6 +129,16 @@ class Video :
 		""" define a quantidade de ram do video """
 		# returns 
 		self.ram = ram
+	
+	def getResolucao (self) :
+		""" retorna a resolução do video """
+		# returns double
+		return self.res
+	
+	def setResolucao (self, res) :
+		""" define a resolução do video """
+		# returns 
+		self.res = res
 		
 	def getCores (self) :
 		""" retorna a quantidade de cores do video """
@@ -272,11 +284,13 @@ class Rede:
 			Pega a o IP da Rede referente ao IP da maquina e mascara
 			Gets the Network IP based on this machine IP and the mask.
 		"""
-		longnetmask = struct.unpack('!I', socket.inet_aton(netmask))[0]
-		longip = struct.unpack('!I', socket.inet_aton(ip))[0]
-		longnetwork = longnetmask & longip
-		network = socket.inet_ntoa(struct.pack("!I", longnetwork))
-		return network
+		if netmask != "":
+			longnetmask = struct.unpack('!I', socket.inet_aton(netmask))[0]
+			longip = struct.unpack('!I', socket.inet_aton(ip))[0]
+			longnetwork = longnetmask & longip
+			network = socket.inet_ntoa(struct.pack("!I", longnetwork))
+			return network
+		return ""
 	
 	def __getMac__(self, ip):
 		"""
@@ -290,8 +304,10 @@ class Rede:
 		"""Pega o endereco do Default Gateway"""
 		ls = commands.getoutput("netstat -rn | grep " + logicalname).split('\n')
 		for l in ls: 
-			if self.__getIpList__(l)[0] == '0.0.0.0':
-				return self.__getIpList__(l)[1]
+			iplist = self.__getIpList__(l)
+			if len(iplist) > 0:
+				if self.__getIpList__(l)[0] == '0.0.0.0':
+					return self.__getIpList__(l)[1]
 		return ''
 	
 	def __getDNS__(self):
@@ -492,7 +508,12 @@ class PC_XML:
 	
 	def getXML(self):
 		"""Executa o binario para gerar arquivo xml com as informacoes do hardware"""
-		lshw = "%s/coletores/lib/lshw" % sys.path[0]
+		if Globals.PC_XML != "":
+			f = open(Globals.PC_XML)
+			content = f.read()
+			return content
+		
+		lshw = "%s/coletores/lib/lshw" % Globals.PATH
 		if os.path.exists(lshw):
 			# modificando a permissao do arquivo
 			if stat.S_IMODE(os.lstat(lshw)[stat.ST_MODE]) < 448:
@@ -518,6 +539,9 @@ class PC_XML:
 		except ComputerException, e:
 			raise ComputerException(e.message)
 		except Exception, e:
+			print e
+			import traceback
+			traceback.print_exc()
 			raise ComputerException('Erro ao abrir arquivo XML, formato inesperado')
 		
 	def getPlacaMaeInfo(self, no):
@@ -539,6 +563,8 @@ class PC_XML:
 	                    self.getCPUInfo(filho)
 	                if a == 'id' and valor[0:3] == 'pci':
 	                    self.getPCIInfo(filho)
+	                if a == 'id' and valor == 'display':
+ 						self.getVideoInfo(filho)
 	                if a == 'id' and valor == 'bridge':
  						self.getRedeInfo(filho)
 
@@ -549,7 +575,7 @@ class PC_XML:
 	        	self.bios.setFabricante(filho.firstChild.nodeValue)
 	        if filho.nodeName == 'version':
 	            # expressao regular para pegar data da bios
-	            p = re.compile('[0-9][1-9]/[0-9][1-9]/[1-9][0-9][0-9][0-9]')
+	            p = re.compile('[0-9]{1,2}/[0-9]{1,2}/[0-9]{1,4}')
 	            self.bios.setData(p.findall(filho.firstChild.nodeValue)[0])
 	            self.bios.setDescricao(filho.firstChild.nodeValue)
 
@@ -648,14 +674,14 @@ class PC_XML:
 	            desc1 = filho.firstChild.nodeValue
 	        if filho.nodeName == 'product':
 	            desc2 = filho.firstChild.nodeValue
-	        if filho.nodeName == 'width':
-	        	video.setCores(filho.firstChild.nodeValue)
+	        #if filho.nodeName == 'width':
+	        #	video.setCores(filho.firstChild.nodeValue)
 	    video.setDescricao(desc1 + ' - ' + desc2)
-	    video.setRam(self.getVideoSystemInfo())  
+	    self.__getVideoSystemInfo__(video)
 	    self.video.append(video)  
                         
-	def getVideoSystemInfo(self):
-	    """Pega as informacoes de Video atraves da linhad e comando"""
+	def __getVideoSystemInfo__(self, video):
+	    """Pega as informacoes de Video atraves da linha de comando"""
 	    s = commands.getoutput("grep -i video /var/log/Xorg.0.log")
 	    s = s.lower()
 	    pesqBus = s.find("videoram:")
@@ -663,8 +689,19 @@ class PC_XML:
 	        primeiro = pesqBus+10
 	        fim = (s.find("k",primeiro))
 	        if(primeiro > 0 and fim > 0):
-	            return int(s[primeiro:fim])/1024  
-	    return DEFAULT_STRING_VALUE
+	            video.setRam(int(s[primeiro:fim])/1024)
+	    s = commands.getoutput("grep -i *Built-in /var/log/Xorg.0.log")
+	    pesqBus = s.find("*Built-in mode ")
+	    if pesqBus > 0:
+	    	primeiro = pesqBus+16
+	    	fim = s.find("\n", primeiro)
+	    	video.setResolucao(s[primeiro:fim])
+	    s = commands.getoutput('grep -i "(--) Depth" /var/log/Xorg.0.log')
+	    pesqBus = s.find("format is ")
+	    if pesqBus > 0:
+	    	primeiro = pesqBus+10
+	    	fim = s.find(" ", primeiro)
+	    	video.setCores(s[primeiro:fim])
   
 	def getIDEInfo(self, no):
 	    """Pega as informacoes de IDE atraves do no do XML"""
@@ -953,8 +990,9 @@ class Computador :
 	"""
 	def __init__(self):
 		devices = self.__get_input_devices__()
-		self.ip_ativo = ''
+		self.ipAtivo = ''
 		self.hostName = self.__get_host_name__()
+		self.ultimoLogin = self.__get_last_login__() 
 		self.so = SO_Info.getSO()
 		self.mouse = devices['mouse']
 		self.teclado = devices['teclado']
@@ -977,7 +1015,6 @@ class Computador :
 		return True
 
 	def coletar(self):
-		print "COLETAR"
 		"""Inicia a coleta de informacoes do computador"""
 		try:
 			if not self.isRoot():
@@ -999,8 +1036,7 @@ class Computador :
 	
 	def __get_host_name__(self):
 		"""Retorna o hostname da maquina atraves de socket"""
-		return socket.gethostname()
-	
+		return socket.gethostname()	
 	
 	def __get_last_login__(self):
 		"""Retorna o ultimo login atras de bash"""

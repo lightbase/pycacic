@@ -14,6 +14,8 @@
 import os;
 from lib.arquivo import *
 from lib.ccrypt import *
+from lib.computador import Computador
+from globals import Globals
 
 class Coletor:
     """
@@ -62,7 +64,7 @@ class Coletor:
         return self.dicionario
     
     
-    def isReady(self):
+    def isReady(self, dat=None):
         """ Retorna True se o coletor está pronto/pretende enviar uma coleta, False caso contrário """
         return True
                     

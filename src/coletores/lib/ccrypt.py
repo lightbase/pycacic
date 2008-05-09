@@ -32,7 +32,7 @@ class CCrypt:
     AES.block_size = 16 # 16 bytes = 128 bits 
     AES.key_size = 32 # 32 bytes = 256 bits
     mode = AES.MODE_CBC
-    KEY = 'CacicBrasil'
+    KEY = 'CacicES2005'
     IV = 'abcdefghijklmnop'
     cipher = AES.new
     

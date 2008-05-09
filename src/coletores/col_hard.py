@@ -17,7 +17,6 @@ import sys
 import commands
 from time import strftime
 from coletor import *
-from lib.computador import * 
 
 class Col_Hard(Coletor):
     """Classe responsavel por coletar os dados de Hardware"""
@@ -27,6 +26,9 @@ class Col_Hard(Coletor):
 
     def __init__(self, computer):
         Coletor.__init__(self, computer)
+        
+    def getName(self):
+        return "col_hard"
 
     def start(self):
         self.setDicionario()
@@ -51,11 +53,16 @@ class Col_Hard(Coletor):
         self.addChave('te_placa_mae_desc', self.computer.getPlacaMae().getDescricao())
         # Placas de Video
         if len(self.computer.getVideo()) > 0:
-            cores , desc, vmem = self.computer.getVideo()[0].getCores(), self.computer.getVideo()[0].getDescricao(), self.computer.getVideo()[0].getRam()
+            video = self.computer.getVideo()[0]
+            cores = video.getCores()
+            desc = video.getDescricao()
+            vmem = video.getRam()
+            resolucao = video.getResolucao()
         else:
-            cores , desc, vmem = '', '', ''
+            cores , desc, vmem, resolucao = '', '', '', ''
         self.addChave('qt_placa_video_cores', cores)
         self.addChave('te_placa_video_desc', desc)
+        self.addChave('te_placa_video_resolucao', resolucao)
         self.addChave("qt_placa_video_mem", vmem)
         # Placas de Som
         self.addChave('te_placa_som_desc', self.getFirst(self.computer.getAudio()))
@@ -76,35 +83,9 @@ class Col_Hard(Coletor):
         # INICIO-FIM
         self.addChave('Inicio', inicio)
         self.addChave('Fim', strftime("%H:%M:%S"))
-        
-    def getName(self):
-        return "col_hard"
     
-    def isReady(self):
-        return self.getUVCDat(self.OUTPUT_DAT, 'Coleta.Hardware') != self.getChave('UVC')
-    
-    """
-    def dictToPost(self):
-        d = {}
-        d['te_Tripa_TCPIP']           = self.encripta(self.dicionario['te_Tripa_TCPIP'])
-        d['te_Tripa_CPU']             = self.encripta(self.dicionario['te_Tripa_CPU'])
-        d['te_Tripa_CDROM']           = self.encripta(self.dicionario['te_Tripa_CDROM'])
-        d['te_mem_ram_desc']          = self.encripta(self.dicionario['te_mem_ram_desc'])
-        d['qt_mem_ram']               = self.encripta(self.dicionario['qt_mem_ram'])
-        d['te_bios_desc']             = self.encripta(self.dicionario['te_bios_desc'])
-        d['te_bios_data']             = self.encripta(self.dicionario['te_bios_data'])
-        d['te_bios_fabricante']       = self.encripta(self.dicionario['te_bios_fabricante'])
-        d['te_placa_mae_fabricante']  = self.encripta(self.dicionario['te_placa_mae_fabricante'])
-        d['te_placa_mae_desc']        = self.encripta(self.dicionario['te_placa_mae_desc'])
-        d['te_placa_video_desc']      = self.encripta(self.dicionario['te_placa_video_desc'])
-        d['qt_placa_video_cores']     = self.encripta(self.dicionario['qt_placa_video_cores'])
-        d['qt_placa_video_mem']       = self.encripta(self.dicionario['qt_placa_video_mem'])
-        d['te_placa_som_desc']        = self.encripta(self.dicionario['te_placa_som_desc'])
-        d['te_teclado_desc']          = self.encripta(self.dicionario['te_teclado_desc'])
-        d['te_modem_desc']            = self.encripta(self.dicionario['te_modem_desc'])
-        d['te_mouse_desc']            = self.encripta(self.dicionario['te_mouse_desc'])
-        return d
-    """
+    def isReady(self, dat):
+        return self.getUVCDat(dat, 'Coleta.Hardware') != self.getChave('UVC')
     
     def getFirst(self, list):
         """Retorna o primeiro item da lista"""

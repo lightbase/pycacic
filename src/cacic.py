@@ -7,24 +7,27 @@ import thread
 from config.io import *
 from socket import *
 from ger_cols import *
+from config.io import Writer
+from globals import Globals
 
 class Cacic:
     
     VERSION = '1.0.0'
     
-    def __init__(self):
-        
-        sys.path[0] = self.getDir()
-        
-        print "\n\tBem-Vindo ao PyCacic\n"
-        try:
+    def __init__(self):       
+        #try:            
+            if not Globals.INSTALLED:
+                self.install()
+
             if not self.isRoot():
                 raise Exception("Para executar o programa é necessário estar como super usuário (root).")
+            
+            print "\n\tBem-Vindo ao PyCacic\n"
             # flags do Gerente de Coletas
             self.gc_stopped = False
             self.gc_started = False
             self.gc_ok = False
-            self.isforcada = False
+            self.isforcada = []
             # Gerente de Coletas
             self.gc = Ger_Cols(self.VERSION)
             # configuracao do socket para comunicacao interna
@@ -54,42 +57,51 @@ class Cacic:
                     #self.atualiza()
                 # se nao estiver executando e esta habilitado a executar
                 # ou e uma coleta forcada
-                if not self.gc_started and (self.gc_ok or self.isforcada):
+                if not self.gc_started and (self.gc_ok or len(self.isforcada) > 0):
                     # muda estado para nao habilitado
                     self.gc_ok = False
                     # inicia coletas
-                    self.gc.coleta_forcada = self.isforcada
-                    thread.start_new_thread(self.start, ())                    
+                    self.gc.coletas_forcadas = self.isforcada
+                    thread.start_new_thread(self.start, ())
                 # executa thread para escutar o socket
                 thread.start_new_thread(self.checkSocket, ())
                 time.sleep(2)
             # fechando conexao
             self.udp_sock.close()
-        except Exception, e:
-            print e 
-            
-    def getDir(self):
-        av = sys.argv[0]
-        if av[0] == "/":
-            return os.path.dirname(av)
-        else:
-            return os.path.dirname(os.getcwd() + "/" + av)
+        #except Exception, e:
+        #    print e 
     
     def isRoot(self):
         """Retorna se o usuario e root ou nao"""
         if os.getuid() != 0:
             return False
         return True
+    
+    def install(self):
+        """Abre console para configuracao do PyCacic"""
+        print "\n\t--- Bem-Vindo a Configuracao do PyCacic ---"
+        print "\n\tapos preencher as informacoes abaixo o programa ira iniciar\n"
+        addr = raw_input("End. do  Servidor ('ex: http://10.0.0.1'): ")
+        user = raw_input("Usuario do Servidor: ")
+        pwd = raw_input("Senha: ")
+        if raw_input("\n\t*** Os dados estao corretos? [y|n]").lower() != 'y':
+            self.install()
+        else:
+            Writer.setStatus('installed', True)
+            if addr[len(addr)-1] == '/': addr = addr[:-1]
+            Writer.setServer('address', addr)
+            Writer.setServer('username', user)
+            Writer.setServer('password', pwd)
+        print "\t--- Configuracao concluida com sucesso ---\n\n"
 
     def start(self):
         """Inicia as coletas"""
         try:
             self.gc_started = True            
-            if self.isforcada:
-                self.isforcada = False
-                print '*** iniciando coleta forcada ***'
+            self.isforcada = []
             print(" --- INICIO DAS COLETAS ---")
-            print('\tColetas a serem feitas: \n\t%s' % ', '.join(self.gc.coletas))
+            print 'Total Coletas: %s' % len(self.gc.coletores)
+            print('\tColetas a serem feitas: \n\t(%s)' % ', '.join(self.gc.coletores.keys()))
             self.gc.startColeta()
             self.gc.createDat()
             self.gc.sendColetas()
@@ -112,10 +124,14 @@ class Cacic:
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
         data, self.addr = self.udp_sock.recvfrom(self.buf)
-        self.isforcada = (data == 'col_hard')
+        self.isforcada.append(data)
         time.sleep(1)
 
 
 if __name__ == '__main__':
+    ver =  sys.version_info
+    version = int(''.join([ '%s' %sys.version_info[x] for x in range(3)]))
+    if version < 240:
+        print "ERROR: Python 2.4 or greater required"
+        sys.exit(1)
     Cacic()
-    

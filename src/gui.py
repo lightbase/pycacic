@@ -7,15 +7,16 @@ import gtk, gtk.glade
 import sys
 import commands
 from ger_cols import *
-from config.io import * 
+from config.io import *
+from globals import Globals 
 
 from socket import *
 
 
 class GUI:
 
-    ICON_PATH = "%s/img/logo.png" % sys.path[0]
-    GLADE_PATH = '%s/glade/' % sys.path[0]
+    ICON_PATH = "%s/img/logo.png" % Globals.PATH
+    GLADE_PATH = '%s/glade/' % Globals.PATH
       
     main_visible = False
     
@@ -135,6 +136,8 @@ class MainWindow(GUI):
 
 if __name__ == '__main__':
     try:
+        if not Globals.INSTALLED:
+            raise Exception("O PyCacic nao esta configurado, favor configura-lo.")
         GUI()
         gtk.main()
     except Exception, e:

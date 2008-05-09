@@ -14,7 +14,6 @@ import re
 import sys, os
 from xml.dom import minidom, Node
 
-
 class IOConfig:
     """
         Classe IOConfig
@@ -23,7 +22,7 @@ class IOConfig:
         configuracao do Cacic e efetuar a leitura dos nos principais
         dele.        
     """
-    
+
     FILE = '%s/config/cacic.conf' % sys.path[0]
     
     def exists():
@@ -172,24 +171,17 @@ class Writer:
         old = re_att.findall(node)[0]        
         return node.replace(old, ('%s="%s"' % (attrib, value)))
 
-    def setServer(address, agent, password):
-        """Grava endereco, arquivo e password do Gerente Web no XML"""
+    def setServer(node, value):
+        """Altera o no especificado das informacoes do servidor"""
         config = IOConfig.getFile()
         re_sv = re.compile('<server(?:.|\n)*</server>')
-        re_ws = re.compile('<ws.*</ws>')
-        re_ad = re.compile('<address.*</address>')
-        re_ag = re.compile('<agent.*</agent>')
-        re_pw = re.compile('<password.*</password>')
-        sv = re_sv.findall(config)[0]
-        ws = re_ws.findall(sv)[0]
-        ad = re_ad.findall(sv)[0] 
-        ag = re_ag.findall(sv)[0]
-        pw = re_pw.findall(sv)[0]        
+        re_node = re.compile('<%s.*</%s>' % (node, node))
+        sv = re_sv.findall(config)[0]        
+        if len(re_node.findall(sv)) == 0:
+            return False
+        node = re_node.findall(sv)[0]        
         server = sv
-        server = server.replace(ws, Writer.setNodeValue(ws, address))
-        server = server.replace(ad, Writer.setNodeValue(ad, address))
-        server = server.replace(ag, Writer.setNodeValue(ag, agent))
-        server = server.replace(pw, Writer.setNodeValue(pw, password))
+        server = server.replace(node, Writer.setNodeValue(node, value))
         Writer.saveXML(config.replace(sv, server))
         
     def setStatus(s, v):
@@ -201,9 +193,9 @@ class Writer:
         pr = re_pr.findall(config)[0]
         status = st
         if (v):
-            v = "OK"
+            v = "yes"
         else:
-            v = "NOK"
+            v = "no"
         status = status.replace(pr, Writer.setNodeAttrib(pr, "value", v))
         Writer.saveXML(config.replace(st, status))
         

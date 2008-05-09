@@ -3,6 +3,7 @@
     da maquina local (32 ou 64 bits) e da versao do Glibc
 """
 import commands, sys
+from globals import Globals 
 
 import sys
 
@@ -11,9 +12,9 @@ if __name__ == 'coletores.lib.ccrypt_lib':
     x_64 = 'X86_64'
     # AES.so paths
     dic = {
-           '32'   : '%s/coletores/lib/x32' % sys.path[0],
-           '64'   : '%s/coletores/lib/x64' % sys.path[0], 
-           '32_4' : '%s/coletores/lib/x32/libc4' % sys.path[0],
+           '32'   : '%s/coletores/lib/x32' % Globals.PATH,
+           '64'   : '%s/coletores/lib/x64' % Globals.PATH, 
+           '32_4' : '%s/coletores/lib/x32/libc4' % Globals.PATH,
            }
     # output uname shell
     arch = commands.getoutput("uname -m")
@@ -24,7 +25,7 @@ if __name__ == 'coletores.lib.ccrypt_lib':
         """
             TODO: pegar a versao do glib instalada
         """
-        sys.path.append(dic['32'])        
+        sys.path.append(dic['32_4'])        
 
 else:
     # dont called 
