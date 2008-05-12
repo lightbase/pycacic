@@ -14,7 +14,7 @@ class Cacic:
     
     def __init__(self):       
         try:
-            
+            # adiciona o diretorio do pycacic ao sys.path
             sys.path[0] = Globals.PATH
             
             if not Globals.INSTALLED:
@@ -36,15 +36,15 @@ class Cacic:
             # criando socket
             self.udp_sock = socket.socket(AF_INET, SOCK_DGRAM)
             self.udp_sock.bind(self.addr)
+            # executa thread para escutar o socket
+            thread.start_new_thread(self.checkSocket, ())
             while 1:
                 # verifica se o coletor nao esta parado
                 if not self.gc_stopped:
                     # muda estado do coletor para parado
                     self.gc_stopped = 1 # True
                     # conecta ao servidor para pegar as informacoes
-                    xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
-                    print(" Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
-                    self.gc.readXML(xml)
+                    self.conecta()
                     # com o coletor parado (dormindo) dispara timeout para iniciar a coleta
                     # apos o intervalo de tempo definido pelo servidor 
                     thread.start_new_thread(self.timeout, ())
@@ -57,42 +57,36 @@ class Cacic:
                 if not self.gc_started and (self.gc_ok or len(self.isforcada) > 0):
                     # muda estado para nao habilitado
                     self.gc_ok = 0 # False
+                    # conecta ao servidor para pegar as informacoes
+                    # pode ter ocorrido alguma mudanca desde a ultima
+                    self.conecta()
                     # inicia coletas
                     self.gc.coletas_forcadas = self.isforcada
-                    thread.start_new_thread(self.start, ())
-                # executa thread para escutar o socket
-                thread.start_new_thread(self.checkSocket, ())
+                    thread.start_new_thread(self.start, ())                
                 time.sleep(2)
             # fechando conexao
             self.udp_sock.close()
         except Exception, e:
-            import traceback
-            traceback.print_exc()
             print e
-
     
     def isRoot(self):
         """Retorna se o usuario e root ou nao"""
         if os.getuid() != 0:
             return 0 # False
-        return 1 # True
-    
+        return 1 # True    
 
     def start(self):
         """Inicia as coletas"""
-        try:
-            self.gc_started = 1 # True            
-            self.isforcada = []
-            print(" --- INICIO DAS COLETAS ---")
-            print 'Total Coletas: %s' % len(self.gc.coletores)
-            print('\tColetas a serem feitas: \n\t(%s)' % ', '.join(self.gc.coletores.keys()))
-            self.gc.startColeta()
-            self.gc.createDat()
-            self.gc.sendColetas()
-            self.gc_started = 0 # False
-            print(" --- FIM DAS COLETAS ---")
-        except Exception, e:
-            print e
+        self.gc_started = 1 # True            
+        self.isforcada = []
+        print(" --- INICIO DAS COLETAS ---")
+        print 'Total Coletas: %s' % len(self.gc.coletores)
+        print('\tColetas a serem feitas: \n\t(%s)' % ', '.join(self.gc.coletores.keys()))
+        self.gc.startColeta()
+        self.gc.createDat()
+        self.gc.sendColetas()
+        self.gc_started = 0 # False
+        print(" --- FIM DAS COLETAS ---")
 
     def timeout(self):
         """
@@ -104,11 +98,18 @@ class Cacic:
         print '---- timeout !!!'
         self.gc_stopped = 0 # False
         self.gc_ok = 1 # True
+        
+    def conecta(self):
+        """Conecta ao Gerente Web para pegar informacoes de configuracao"""
+        xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
+        print(" Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
+        self.gc.readXML(xml)
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
         data, self.addr = self.udp_sock.recvfrom(self.buf)
         self.isforcada.append(data)
+        self.checkSocket()
 
 
 if __name__ == '__main__':
