@@ -18,8 +18,9 @@
 import re
 import binascii
 import base64
-import ccrypt_lib
-from Crypto.Cipher import AES
+
+from Python_AES import Python_AES
+
 
 class CCrypt:
     """
@@ -29,28 +30,29 @@ class CCrypt:
         utilizando AES (modo CBC) e Base64
     """
     
-    AES.block_size = 16 # 16 bytes = 128 bits 
-    AES.key_size = 32 # 32 bytes = 256 bits
-    mode = AES.MODE_CBC
-    KEY = 'CacicBrasil'
+    KEY = 'CacicES2005'
+    AES_KEY_SIZE = 32
+    AES_BLOCK_SIZE = 16
     IV = 'abcdefghijklmnop'
-    cipher = AES.new
+    
     
     def __init__(self):
         self.char = '@'
-        self.key = self.padding(self.KEY, AES.key_size, self.char)
-        self.iv = self.padding(self.IV, AES.block_size, self.char)
-
+        self.key = self.padding(self.KEY, self.AES_KEY_SIZE, self.char)
+        self.iv = self.padding(self.IV, self.AES_BLOCK_SIZE, self.char)
+        
     def encrypt(self, text):
         """Encrypta uma string com AES (CBC) e depois em BASE64"""
-        cifrado = self.cipher(self.key, self.mode, self.iv).encrypt(self.padding(text, AES.block_size, self.char))
-        return base64.b64encode(cifrado)
+        self.cipher = Python_AES(self.key, 2, self.iv)
+        cifrado = self.cipher.encrypt(self.padding(text, self.AES_BLOCK_SIZE, self.char))
+        return base64.encodestring(cifrado)[0:-1]
     
     def decrypt(self, text):
         """Decripta uma string convertida pelo metodo encrypt()"""
         # ER para remover o padding da string
         rm = re.compile("(?:"+ self.char +")*$")
-        decifrado = self.cipher(self.key, self.mode, self.iv).decrypt(base64.b64decode(text))
+        self.cipher = Python_AES(self.key, 2, self.iv)
+        decifrado = self.cipher.decrypt(base64.decodestring(text))
         return decifrado.replace(rm.findall(decifrado)[0],'')
 
     def padding(self, s, tam, char):

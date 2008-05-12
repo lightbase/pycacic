@@ -178,7 +178,7 @@ class Writer:
         re_node = re.compile('<%s.*</%s>' % (node, node))
         sv = re_sv.findall(config)[0]        
         if len(re_node.findall(sv)) == 0:
-            return False
+            return 0 # False
         node = re_node.findall(sv)[0]        
         server = sv
         server = server.replace(node, Writer.setNodeValue(node, value))

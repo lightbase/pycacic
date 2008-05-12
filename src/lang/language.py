@@ -91,7 +91,7 @@ class Language:
         """Retorna o cabecalho do programa"""
         no = self.getMode(self.mode)
         if not no:
-            return False
+            return 0 # False
         header = {}
         for filho in no.childNodes:
             if filho.nodeType == Node.ELEMENT_NODE and filho.nodeName == 'header':
@@ -105,7 +105,7 @@ class Language:
         """Retorna o menu principal do programa"""
         no = self.getMode(self.mode)
         if not no:
-            return False
+            return 0 # False
         menu = {}
         for filho in no.childNodes:
             if filho.nodeType == Node.ELEMENT_NODE and filho.nodeName == 'menu':
@@ -119,7 +119,7 @@ class Language:
         """Retorna as mensagens de pressionar botao"""
         no = self.getMessages()
         if not no:
-            return False
+            return 0 # False
         messages = {}
         for filho in no.childNodes:
             if filho.nodeType == Node.ELEMENT_NODE and filho.nodeName == 'hitkeys':
@@ -133,7 +133,7 @@ class Language:
         """Retorna todas a mensagens do programa"""
         no = self.getMode(self.mode)
         if not no:
-            return False
+            return 0 # False
         return no.getElementsByTagName('messages')[0]
     
     
@@ -143,7 +143,7 @@ class Language:
             programa do modo especificado
         """
         if not mode in ('text', 'gui'):
-            return False
+            return 0 # False
         root = self.getRoot()
         for no in root.childNodes:
             if no.nodeType == Node.ELEMENT_NODE and no.nodeName == 'mode':

@@ -42,9 +42,9 @@ class Coletor:
         """
         if not self.dicionario.has_key(chave):
             self.dicionario[chave] = valor
-            return True
+            return 1 # True
         self.setChave(chave, valor)
-        return False
+        return 0 # False
     
     def setChave(self, chave, valor):
         self.dicionario[chave] = valor
@@ -66,7 +66,7 @@ class Coletor:
     
     def isReady(self, dat=None):
         """ Retorna True se o coletor está pronto/pretende enviar uma coleta, False caso contrário """
-        return True
+        return 1 # True
                     
     def createDat(self, chaves, path, prefixo=''):
         """

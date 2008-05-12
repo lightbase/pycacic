@@ -13,7 +13,7 @@ class Col_Soft(Coletor):
         return "col_soft"
 
     def isReady(self, dat=None):        
-        return False
+        return 0
     
     def start(self):
         self.setDicionario()

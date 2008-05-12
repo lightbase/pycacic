@@ -298,7 +298,7 @@ class Rede:
 			Get the net mac address by the IP address
 		"""
 		p = re.compile('[0-9A-F]{2}(?:\:[0-9A-F]{2}){5}')
-		return p.findall(commands.getoutput("ifconfig -a | grep -B 1 -A 1 " + ip))[0]
+		return p.findall(commands.getoutput("ifconfig -a | grep -B 1 -A 1 " + ip).upper())[0]
 	
 	def __getGateway__(self, logicalname):
 		"""Pega o endereco do Default Gateway"""
@@ -591,7 +591,7 @@ class PC_XML:
 	            slot = ""
 	            size = ""
 	            desc = ""
-	            hasSize = False
+	            hasSize = 0 # False
 	            for folha in filho.childNodes:
 	                if folha.nodeName == 'description':
 	                    desc = folha.firstChild.nodeValue
@@ -599,10 +599,10 @@ class PC_XML:
 	                    slot = folha.firstChild.nodeValue
 	                if folha.nodeName == 'size':
 	                    size = (int(folha.firstChild.nodeValue)/1048576)
-	                    hasSize = True
-	                if hasSize == True:
+	                    hasSize = 1 # True
+	                if hasSize == 1: # True:
 	                	self.ram.setSlot(slot, size, desc)
-	                	hasSize = False
+	                	hasSize = 0 # False
 
 	def getCPUInfo(self, no):
 		"""Pega as informacoes do Processador atraves do no do XML """
@@ -690,11 +690,11 @@ class PC_XML:
 	        fim = (s.find("k",primeiro))
 	        if(primeiro > 0 and fim > 0):
 	            video.setRam(int(s[primeiro:fim])/1024)
-	    s = commands.getoutput("grep -i *Built-in /var/log/Xorg.0.log")
-	    pesqBus = s.find("*Built-in mode ")
+	    s = commands.getoutput('grep -i "Virtual size" /var/log/Xorg.0.log')
+	    pesqBus = s.find("Virtual size is ")
 	    if pesqBus > 0:
 	    	primeiro = pesqBus+16
-	    	fim = s.find("\n", primeiro)
+	    	fim = s.find(" ", primeiro)
 	    	video.setResolucao(s[primeiro:fim])
 	    s = commands.getoutput('grep -i "(--) Depth" /var/log/Xorg.0.log')
 	    pesqBus = s.find("format is ")
@@ -969,10 +969,10 @@ class Pacotes:
 		output = commands.getoutput(self.__getMethod__(os) + pkg_installed)
 		if mng == 'dpkg':
 			if 'install' in output:
-				return True
+				return 1 # True
 		else:
 			if output != '':
-				return True
+				return 1 # True
 		return False
 			
 	def getAllInstalled(self, os):
@@ -1011,8 +1011,8 @@ class Computador :
 	def isRoot(self):
 		"""Retorna se o usuario e root ou nao"""
 		if os.getuid() != 0:
-			return False
-		return True
+			return 0 # False
+		return 1 # True
 
 	def coletar(self):
 		"""Inicia a coleta de informacoes do computador"""

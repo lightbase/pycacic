@@ -66,8 +66,8 @@ class URL :
         """Retorna se o XML gerado esta valido ou nao"""
         status = xml.getElementsByTagName('STATUS')[0].firstChild.nodeValue
         if status != "OK":
-            return False
-        return True
+            return 0 # False
+        return 1 # True
     
     def ftpConecta(self, server, login, senha):
         """Conecta a um servidor FTP"""

@@ -13,7 +13,7 @@ class Col_Patr(Coletor):
         return "col_patr"
 
     def isReady(self, dat=None):        
-        return False
+        return 0
     
     def start(self):
         self.setDicionario()
