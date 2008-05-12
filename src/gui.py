@@ -5,9 +5,6 @@ pygtk.require('2.0')
 import gtk, gtk.glade
 
 import sys
-import commands
-from ger_cols import *
-from config.io import *
 from globals import Globals 
 
 from socket import *
@@ -17,6 +14,7 @@ class GUI:
 
     ICON_PATH = "%s/img/logo.png" % Globals.PATH
     GLADE_PATH = '%s/glade/' % Globals.PATH
+    TITLE = 'PyCacic'
       
     main_visible = False
     
@@ -25,11 +23,11 @@ class GUI:
         self.mw = MainWindow()        
     
     def createTray(self):
-        # TrayIcon        
+        # TrayIcon
         self.statusIcon = gtk.StatusIcon()
         
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_title("StatusIcon test (II)")
+        self.window.set_title(self.TITLE)
         self.window.connect('delete_event', self.delete_cb, self.statusIcon)
  
         self.menu = gtk.Menu()
@@ -42,10 +40,10 @@ class GUI:
         
         self.imageicon = gtk.Image()
         pixbuf = gtk.gdk.pixbuf_new_from_file(self.ICON_PATH)
-        scaled_buf = pixbuf.scale_simple(23, 23, gtk.gdk.INTERP_BILINEAR)
+        scaled_buf = pixbuf.scale_simple(21, 23, gtk.gdk.INTERP_BILINEAR)
         self.statusIcon.set_from_pixbuf(scaled_buf)
         
-        self.statusIcon.set_tooltip("Pycacic")
+        self.statusIcon.set_tooltip(self.TITLE)
         self.statusIcon.connect('activate', self.activate_icon_cb)
         self.statusIcon.connect('popup-menu', self.popup_menu_cb, self.menu)
         self.statusIcon.set_visible(True)
@@ -58,7 +56,7 @@ class GUI:
     def quit_cb(self, widget, data = None):
         if data:
             dialog = gtk.MessageDialog( None, gtk.DIALOG_MODAL, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Deseja realmente sair?')        
-            dialog.set_title('PyCacic')                
+            dialog.set_title(self.TITLE)                
             dialog.set_icon_from_file(self.ICON_PATH)
             dialog.width, dialog.height = dialog.get_size()
             dialog.move(gtk.gdk.screen_width()/2-dialog.width/2, gtk.gdk.screen_height()/2-dialog.height/2)
@@ -97,7 +95,14 @@ class MainWindow(GUI):
         self.xml = gtk.glade.XML(self.GLADE_PATH + 'main_window.glade')
         self.xml.signal_autoconnect(self)
         self.window = self.xml.get_widget('main_window')
-        
+        self.connect()
+    
+    def connect(self):
+        # Set the socket parameters
+        self.host, self.port, self.buf, self.addr = Globals.getSocketAttr()
+        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
+            
+    
     def show(self):
         self.window.show()       
         
@@ -114,13 +119,6 @@ class MainWindow(GUI):
 
     def on_btn_executar_clicked(self, button):
         """Executa o ger_cols"""
-        # Set the socket parameters
-        sock = Reader.getSocket()
-        self.host = sock['host']
-        self.port = int(sock['port'])
-        self.buf  = int(sock['buffer'])
-        self.addr = (self.host, self.port)
-        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
         self.udp_sock.sendto('col_hard' , self.addr)
         self.udp_sock.close()
         
@@ -141,4 +139,6 @@ if __name__ == '__main__':
         GUI()
         gtk.main()
     except Exception, e:
-        print e.message
+        print e
+        import traceback
+        traceback.print_exc()

@@ -51,7 +51,7 @@ class Ger_Cols:
 
     def __init__(self, version):
         # para controle de intervalo
-        self.first_time = True
+        self.first_time = 1 # True
         # Inicializa o objeto que representa o computador
         self.computador = Computador()
         # Coletor para auxiliar com arquivos
@@ -87,7 +87,7 @@ class Ger_Cols:
         # lista com as coletas forcadas
         self.coletas_forcadas = []
         # se for True forca todas as coletas
-        self.all_forcada = False
+        self.all_forcada = 0 # False
         # Informacoes a serem passadas para o Gerente Web
         self.computador.ipAtivo = self.computador.getIPAtivo(self.cacic_server)
         net = Rede()
@@ -140,13 +140,15 @@ class Ger_Cols:
             self.sendColetas()
             print(" --- FIM ---")
         except Exception, e:
+            import traceback
+            traceback.print_exc()
             print(e)
 
     def getInterval(self):
         """Retorna o tempo em minutos do intervalo da coleta"""
         interval = self.intervalo_exec
         if self.first_time:
-            self.first_time = False
+            self.first_time = 0 # False
             interval = self.exec_apos
         return interval
            
@@ -172,6 +174,7 @@ class Ger_Cols:
     def readXML(self, xml):
         """ Le o XML gerado pelo servidor WEB """
         # returns void
+        #print "XML: "+xml
         self.xml = minidom.parseString(xml)
         # se nao achar o status==OK, retorna
         if not self.url.isOK(self.xml):
@@ -187,7 +190,7 @@ class Ger_Cols:
                         self.update_auto = self.decode(no.firstChild.nodeValue)
                     # COLETAS
                     elif no.nodeName == 'cs_coleta_forcada' and self.decode(no.firstChild.nodeValue) == 'OK':
-                        self.all_forcada = True
+                        self.all_forcada = 1 # True
                     elif no.nodeName == 'cs_coleta_compart':                       
                         #self.addColeta(None, self.decode(no.firstChild.nodeValue))
                         pass
@@ -202,7 +205,7 @@ class Ger_Cols:
                         #self.addColeta(None, self.decode(no.firstChild.nodeValue))
                         pass
                     # VERSOES
-                    elif no.nodeName == 'DT_VERSAO_CACIC2_DISPONIVEL':
+                    elif no.nodeName == 'TE_VERSAO_PYCACIC_DISPONIVEL':
                         self.versao_disponivel = self.decode(no.firstChild.nodeValue)
                     elif no.nodeName == 'in_exibe_bandeja':
                         self.exibe_bandeja = self.decode(no.firstChild.nodeValue)
