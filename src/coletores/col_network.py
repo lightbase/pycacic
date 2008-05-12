@@ -9,6 +9,9 @@ from globals import Globals
 
 class Col_Network(Coletor):
     """Classe responsavel por coletar os dados de TCP IP"""
+    
+    # nome do arquivo de saida (DAT)
+    OUTPUT_DAT = 'col_network.dat'
 
     def __init__(self, computer):
         Coletor.__init__(self, computer)
@@ -21,8 +24,12 @@ class Col_Network(Coletor):
     def getName(self):
         return "col_network"
     
+    def getUVCKey(self):
+        return 'Coleta.Network'
+    
     def start(self):
         self.setDicionario()
+        self.createDat(self.dicionario, self.PATH + self.OUTPUT_DAT, 'Col_Network.')
 
     def setDicionario(self):
         """Monta o dicionario"""      
@@ -41,4 +48,5 @@ class Col_Network(Coletor):
             self.addChave('te_nome_host', self.computer.getHostName())
             self.addChave('te_gateway', net.getGateway())
             self.addChave("te_serv_dhcp", net.getDHCP())
+        self.addChave('UVC', self.getUVC(self.dicionario))
     

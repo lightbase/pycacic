@@ -29,11 +29,13 @@ class Col_Hard(Coletor):
         
     def getName(self):
         return "col_hard"
+    
+    def getUVCKey(self):
+        return 'Coleta.Hardware'
 
     def start(self):
         self.setDicionario()
         self.createDat(self.dicionario, self.PATH + self.OUTPUT_DAT, 'Col_Hard.')
-        self.addChave('Coleta.Hardware', self.getChave('UVC'))
 
     def setDicionario(self):
         """Monta o dicionario"""

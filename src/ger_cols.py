@@ -182,6 +182,7 @@ class Ger_Cols:
         root = self.xml.getElementsByTagName('CONFIGS')[0]
         # Coletores
         self.coletores.clear()
+        # adiciona o coletor padrao (Col_Network)
         self.addColeta(Col_Network(self.computador), 'S')
         for no in root.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
@@ -268,9 +269,9 @@ class Ger_Cols:
         # limpa o dicionario da ultima coleta
         self.coletas_enviar.clear()
         self.computador.coletar()
-        # adiciona o coletor padrao (Col_Network)
         for col in self.coletores.values():
             col.start()
+            self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))            
             if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):                
                 page = Reader.getColetor(col.getName())['page']
                 dict = col.getEncryptedDict()

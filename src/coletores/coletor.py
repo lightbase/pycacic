@@ -15,7 +15,6 @@ import os;
 from lib.arquivo import *
 from lib.ccrypt import *
 from lib.computador import Computador
-from globals import Globals
 
 class Coletor:
     """
@@ -57,12 +56,15 @@ class Coletor:
         """ Retorna o nome do coletor """
         raise Exception("Abstract method getName(), must override")
     
+    def getUVCKey(self):
+        """ Retorna o nome da chave do UVC """
+        raise Exception("Abstract method getUVCKey(), must override")
+    
     def getEncryptedDict(self):
         """ Retorna o dicionario de dados da coleta encryptado """
         for key, value in self.dicionario.items():
             self.dicionario[key] = self.encripta(self.dicionario[key])
         return self.dicionario
-    
     
     def isReady(self, dat=None):
         """ Retorna True se o coletor está pronto/pretende enviar uma coleta, False caso contrário """
@@ -85,7 +87,7 @@ class Coletor:
             ultima coleta contida no arquivo .dat
         """
         data = Arquivo.openFile(path)
-        dat = self.decripta(data)        
+        dat = self.decripta(data)       
         for i in dat.split(self.spd_key):
             item = i.split(self.spd_value)
             if item[0] == chave:

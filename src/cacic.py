@@ -26,7 +26,6 @@ class Cacic:
             print "\n\tBem-Vindo ao PyCacic\n"
             # flags do Gerente de Coletas
             self.gc_stopped = 0 # False
-            self.gc_started = 0 # False
             self.gc_ok = 0 # False
             self.isforcada = []
             # Gerente de Coletas
@@ -52,9 +51,8 @@ class Cacic:
                     self.interval = self.gc.getInterval()
                     print(" `---- Coleta iniciara daqui a %s minutos" % (self.interval/60))
                     #self.atualiza()
-                # se nao estiver executando e esta habilitado a executar
-                # ou e uma coleta forcada
-                if not self.gc_started and (self.gc_ok or len(self.isforcada) > 0):
+                # se esta habilitado a executar ou e uma coleta forcada
+                if self.gc_ok or len(self.isforcada) > 0:
                     # muda estado para nao habilitado
                     self.gc_ok = 0 # False
                     # conecta ao servidor para pegar as informacoes
@@ -62,22 +60,23 @@ class Cacic:
                     self.conecta()
                     # inicia coletas
                     self.gc.coletas_forcadas = self.isforcada
-                    thread.start_new_thread(self.start, ())                
+                    self.start()
                 time.sleep(2)
             # fechando conexao
             self.udp_sock.close()
         except Exception, e:
+            import traceback
+            traceback.print_exc()
             print e
     
     def isRoot(self):
         """Retorna se o usuario e root ou nao"""
         if os.getuid() != 0:
             return 0 # False
-        return 1 # True    
+        return 1 # True
 
     def start(self):
         """Inicia as coletas"""
-        self.gc_started = 1 # True            
         self.isforcada = []
         print(" --- INICIO DAS COLETAS ---")
         print 'Total Coletas: %s' % len(self.gc.coletores)
@@ -85,17 +84,14 @@ class Cacic:
         self.gc.startColeta()
         self.gc.createDat()
         self.gc.sendColetas()
-        self.gc_started = 0 # False
         print(" --- FIM DAS COLETAS ---")
 
     def timeout(self):
         """
             Espera determinado intervalo de tempo. E apos isto marca o estado
             do Gerente de Coletas como nao parado e habilita execucao das coletas
-        """
-        print '---- esperando intervalo'        
+        """       
         time.sleep(self.interval)
-        print '---- timeout !!!'
         self.gc_stopped = 0 # False
         self.gc_ok = 1 # True
         

@@ -30,7 +30,7 @@ class CCrypt:
         utilizando AES (modo CBC) e Base64
     """
     
-    KEY = 'CacicBrasil'
+    KEY = 'CacicES2005'
     AES_KEY_SIZE = 32
     AES_BLOCK_SIZE = 16
     IV = 'abcdefghijklmnop'
