@@ -4,25 +4,30 @@ import os
 import sys
 import time
 import thread
+
 from socket import *
 from ger_cols import *
 from globals import Globals
 
+import gc as garbage_collector
+
 class Cacic:
     
-    VERSION = '1.0.0'
+    VERSION = '0.0.1'
     
     def __init__(self):       
         try:
-            # adiciona o diretorio do pycacic ao sys.path
-            sys.path[0] = Globals.PATH
+            # somente executa se estiver como root
+            if not self.isRoot():
+                raise Exception("Para executar o programa é necessário ser super-usuário (root).")
             
+            # verifica se o pycacic esta instalado
+            # senao chama configurador do cacic.conf
             if not Globals.INSTALLED:
                 Globals.install()
             
-            if not self.isRoot():
-                raise Exception("Para executar o programa é necessário estar como super usuário (root).")
-            
+            # Habilita o coletor de lixo do Python
+            garbage_collector.enable()                        
             print "\n\tBem-Vindo ao PyCacic\n"
             # flags do Gerente de Coletas
             self.gc_stopped = 0 # False
@@ -33,8 +38,9 @@ class Cacic:
             # configuracao do socket para comunicacao interna
             self.host, self.port, self.buf, self.addr = Globals.getSocketAttr()
             # criando socket
-            self.udp_sock = socket.socket(AF_INET, SOCK_DGRAM)
-            self.udp_sock.bind(self.addr)
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.bind(self.addr)
             # executa thread para escutar o socket
             thread.start_new_thread(self.checkSocket, ())
             while 1:
@@ -45,12 +51,11 @@ class Cacic:
                     # conecta ao servidor para pegar as informacoes
                     self.conecta()
                     # com o coletor parado (dormindo) dispara timeout para iniciar a coleta
-                    # apos o intervalo de tempo definido pelo servidor 
+                    # apos o intervalo de tempo definido pelo servidor
                     thread.start_new_thread(self.timeout, ())
                     # intervalo
                     self.interval = self.gc.getInterval()
-                    print(" `---- Coleta iniciara daqui a %s minutos" % (self.interval/60))
-                    #self.atualiza()
+                    print(" `---- Coleta iniciara em %s minutos" % (self.interval/60))
                 # se esta habilitado a executar ou e uma coleta forcada
                 if self.gc_ok or len(self.isforcada) > 0:
                     # muda estado para nao habilitado
@@ -60,14 +65,19 @@ class Cacic:
                     self.conecta()
                     # inicia coletas
                     self.gc.coletas_forcadas = self.isforcada
-                    self.start()
+                    self.start()                    
+                    # Executa o coletor de lixo
+                    garbage_collector.collect()
                 time.sleep(2)
-            # fechando conexao
-            self.udp_sock.close()
+            # sai
+            self.quit()
+        except socket.error, e:   
+            print 'PyCacic already is running.'
         except Exception, e:
-            import traceback
-            traceback.print_exc()
-            print e
+            print e        
+        # remover depois
+        import traceback
+        traceback.print_exc()
     
     def isRoot(self):
         """Retorna se o usuario e root ou nao"""
@@ -100,13 +110,29 @@ class Cacic:
         xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
         print(" Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
         self.gc.readXML(xml)
+        # verifica atualizacao
+        """
+        if self.gc.hasNew():
+            print ' Versao nova disponivel !!!'
+            print ' `--- Iniciando atualizacao...'
+            self.gc.atualiza()
+            print ' `--- Novo pacote salvo'
+            #chama atualizador e sai
+            os.system('python %s/update.py -pkg %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, 'pycacic_temp'))
+            #self.quit()
+        """
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
-        data, self.addr = self.udp_sock.recvfrom(self.buf)
-        self.isforcada.append(data)
-        self.checkSocket()
+        while 1:
+            data, self.addr = self.sock.recvfrom(self.buf)
+            self.isforcada.append(data)
 
+    def quit(self):
+        """Sai do programa fechando conexao do socket"""
+        self.sock.close()
+        print 'Bye'
+        sys.exit()
 
 if __name__ == '__main__':
     ver =  sys.version_info

@@ -5,6 +5,8 @@ import sys
 import codecs
 from xml.dom import minidom, Node
 
+from globals import Globals
+
 class Language:
     """Classe que controla o idioma do aplicativo"""
     
@@ -41,7 +43,7 @@ class Language:
     
     def openXML(self):
         """Abre o arquivo XML contendo o idioma escolhido"""
-        xml_file = open(sys.path[0] + '/lang/' + self.langs[self.lang], 'r').read()
+        xml_file = open(Globals.PATH + '/lang/' + self.langs[self.lang], 'r').read()
         self.xml = minidom.parseString(xml_file)
     
     

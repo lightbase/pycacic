@@ -13,17 +13,18 @@
 import re
 import sys, os
 from xml.dom import minidom, Node
+from globals import Globals
 
 class IOConfig:
     """
         Classe IOConfig
         
         Responsavel por guardar o caminho do arquivo de
-        configuracao do Cacic e efetuar a leitura dos nos principais
+        configuracao do PyCacic e efetuar a leitura dos nos principais
         dele.        
     """
 
-    FILE = '%s/config/cacic.conf' % sys.path[0]
+    FILE = '%s/config/cacic.conf' % Globals.PATH
     
     def exists():
         """Retorna se um arquivo existe ou nao"""
@@ -58,10 +59,17 @@ class IOConfig:
         root = IOConfig.getRoot()
         return root.getElementsByTagName('coletores')[0]
     
-    def getStatus():
-        """Retorna o node de status"""
+    def getPycacic():
+        """Retorna o node do Pycacic"""
         root = IOConfig.getRoot()
-        return root.getElementsByTagName('status')[0]    
+        return root.getElementsByTagName('pycacic')[0]
+    
+    def getPycacicStatus():
+        """Retorna o node de status"""
+        pycacic = IOConfig.getPycacic()
+        for no in pycacic.childNodes:
+            if no.nodeType == Node.ELEMENT_NODE and no.nodeName == 'status':
+                return no
     
     def getSocket():
         """Retorna o node de socket"""
@@ -73,7 +81,8 @@ class IOConfig:
     getRoot = staticmethod(getRoot)
     getServer = staticmethod(getServer)
     getColetores = staticmethod(getColetores)
-    getStatus = staticmethod(getStatus)
+    getPycacic = staticmethod(getPycacic)
+    getPycacicStatus = staticmethod(getPycacicStatus)
     getSocket = staticmethod(getSocket)
 
 class Reader:
@@ -81,7 +90,7 @@ class Reader:
         Classe Reader
         
         Responsavel por efetuar a leitura do arquivo de configuracao
-        do cacic. Informando dados como endereco do Gerente Web,
+        do PyCacic. Informando dados como endereco do Gerente Web,
         usuario e senha, etc.
         
     """
@@ -97,6 +106,15 @@ class Reader:
             if no.nodeType == Node.ELEMENT_NODE:
                 server[no.nodeName] = no.firstChild.nodeValue                
         return server
+    
+    def getPycacic():
+        """Retorna um dicionario contendo as informacoes sobre o PyCacic"""
+        pycacic = {'dir' : '', 'hash' : '', 'password' : ''}
+        config = IOConfig.getPycacic()
+        for no in config.childNodes:
+            if no.nodeType == Node.ELEMENT_NODE:
+                pycacic[no.nodeName] = no.firstChild.nodeValue                
+        return pycacic
 
     def getColetor(id):
         """
@@ -112,13 +130,13 @@ class Reader:
                     coletor['page'] = no.attributes['page'].nodeValue
                     return coletor
     
-    def getStatus(id):
+    def getPycacicStatus(id):
         """
             Retorna um dicionario contendo as informacoes de
             status (param) especificado por parametro
         """
         status = {'id' : '', 'value' : ''}
-        sts = IOConfig.getStatus()
+        sts = IOConfig.getPycacicStatus()
         for no in sts.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
                 if no.nodeName == 'param' and no.attributes['id'].nodeValue == id:
@@ -137,17 +155,17 @@ class Reader:
     
     
     getServer = staticmethod(getServer)
+    getPycacic = staticmethod(getPycacic)
     getColetor = staticmethod(getColetor)
-    getStatus = staticmethod(getStatus)
-    getSocket = staticmethod(getSocket)
-    
+    getPycacicStatus = staticmethod(getPycacicStatus)
+    getSocket = staticmethod(getSocket)    
     
 class Writer:
     """
         Classe Write
         
         Responsavel por efetuar a escrita no arquivo de configuracao
-        do cacic. Alterando dados como se e instalacao, endereco do
+        do PyCacic. Alterando dados como se e instalacao, endereco do
         Gerente Web, usuario e senha, etc.        
     """
     
@@ -184,25 +202,28 @@ class Writer:
         server = server.replace(node, Writer.setNodeValue(node, value))
         Writer.saveXML(config.replace(sv, server))
         
-    def setStatus(s, v):
-        """Modifica o status"""
+    def setPycacicStatus(s, v):
+        """Modifica o status do Pycacic"""
         config = IOConfig.getFile()
+        re_pc = re.compile('<pycacic(?:.|\n)*</pycacic>')
         re_st = re.compile('<status(?:.|\n)*</status>')
         re_pr = re.compile('<param.*?id="'+s+'".*?/>')
+        pc = re_pc.findall(config)[0]
         st = re_st.findall(config)[0]
         pr = re_pr.findall(config)[0]
         status = st
+        pycacic = pc
         if (v):
             v = "yes"
         else:
             v = "no"
         status = status.replace(pr, Writer.setNodeAttrib(pr, "value", v))
-        Writer.saveXML(config.replace(st, status))
-        
+        pycacic = pycacic.replace(st, status)
+        Writer.saveXML(config.replace(pc, pycacic))
 
     saveXML = staticmethod(saveXML)
     setServer = staticmethod(setServer)
-    setStatus = staticmethod(setStatus)
+    setPycacicStatus = staticmethod(setPycacicStatus)
     setNodeValue = staticmethod(setNodeValue)
     setNodeAttrib = staticmethod(setNodeAttrib)
     

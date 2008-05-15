@@ -517,7 +517,7 @@ class PC_XML:
 		if os.path.exists(lshw):
 			# modificando a permissao do arquivo
 			if stat.S_IMODE(os.lstat(lshw)[stat.ST_MODE]) < 448:
-				os.chmod(lshw, 777)
+				os.chmod(lshw, 0755)
 			return commands.getoutput(lshw + " -xml")
 		else:
 			raise ComputerException('Erro ao executar o lshw, arquivo nao encontrado')
@@ -646,7 +646,7 @@ class PC_XML:
  						self.getVideoInfo(filho)
  					if a == 'id' and valor[0:3] == 'ide':
  						self.getIDEInfo(filho)
- 					if a == 'id' and valor in ('network', 'bridge'):
+ 					if a == 'id' and (valor[0:7] == 'network' or valor[0:6] == 'bridge'):
  						self.getRedeInfo(filho)
  					if a == 'id' and valor == 'communication':
  						self.getModemInfo(filho)

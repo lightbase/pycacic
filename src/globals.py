@@ -14,8 +14,7 @@ import os
 import re
 import sys
 import commands
-from config.io import Reader
-from config.io import Writer
+
 
 class Globals:
         
@@ -29,6 +28,7 @@ class Globals:
     
     def getSocketAttr():
         """Retorna as informacoes do Socket"""
+        from config.io import Reader
         sock = Reader.getSocket()
         host = sock['host']
         port = int(sock['port'])
@@ -38,6 +38,7 @@ class Globals:
     
     def install():
         """Abre console para configuracao do PyCacic"""
+        from config.io import Writer
         print "\n\t--- Bem-Vindo a Configuracao do PyCacic ---"
         print "\n\tapos preencher as informacoes abaixo o programa ira iniciar\n"
         addr = raw_input("End. do  Servidor ('ex: http://10.0.0.1'): ")
@@ -57,7 +58,7 @@ class Globals:
         if raw_input("\n\t*** Os dados estao corretos? [y|n]").lower() != 'y':
             Globals.install()
             return
-        Writer.setStatus('installed', 1)
+        Writer.setPycacicStatus('installed', 1)
         if addr[len(addr)-1] == '/': addr = addr[:-1]
         Writer.setServer('address', addr)
         Writer.setServer('username', user)
@@ -82,7 +83,8 @@ def getArgs():
             Globals.PC_XML = arg[5:]
 
 def isInstalled():
-    return (Reader.getStatus('installed')['value'] == 'yes')
+    from config.io import Reader
+    return (Reader.getPycacicStatus('installed')['value'] == 'yes')
 
 
     

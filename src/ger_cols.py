@@ -13,6 +13,7 @@
 
 import os
 import sys
+import commands
 
 from coletores.coletor import *
 from coletores.col_network import *
@@ -62,7 +63,9 @@ class Ger_Cols:
         self.mac_invalidos = ''
         # configuracoes gerais
         self.versao_atual = version
-        self.versao_disponivel = ''
+        self.hash_atual = Reader.getPycacic()['hash']
+        self.hash_disponivel = 'ZZZ'
+        self.pacote_disponivel = ''
         self.exibe_bandeja = 'N'
         self.exibe_erros_criticos = 'N'
         self.exec_apos = 0
@@ -107,19 +110,16 @@ class Ger_Cols:
             'padding_key'  : self.coletor.getPadding(),
         }        
         self.dicionario = {
-            'te_versao_cacic'    : version,
-            'te_versao_gercols'  : version,
             'in_chkcacic'        : self.coletor.encripta(''),
             'in_teste'           : self.coletor.encripta(''),                
             'te_workgroup'       : self.coletor.encripta('Desconhecido'),
             'te_nome_computador' : self.coletor.encripta(self.computador.getHostName()),
             'id_ftp'             : self.coletor.encripta(''),
             'te_fila_ftp'        : self.coletor.encripta(''),
-            'te_versao_cacic'    : self.coletor.encripta(version),
-            'te_versao_gercols'  : self.coletor.encripta(version),
+            'te_versao_cacic'    : self.coletor.encripta(self.versao_atual),
+            'te_versao_gercols'  : self.coletor.encripta(self.versao_atual),
             'te_tripa_perfis'    : self.coletor.encripta(''),
-        }     
-        
+        }       
         self.separador = '=CacicIsFree='
         
         
@@ -164,7 +164,7 @@ class Ger_Cols:
             xml = xml[:xml.find('?>')+2] + '<cacic>' + xml[xml.find('?>')+2:] + '</cacic>'
             return xml 
         except Exception, e:
-            raise Exception(e.message)
+            raise Exception(e)
     
     def addColeta(self, col, valor):
         """Adiciona o coletor na lista, se o seu valor for 'S'"""
@@ -174,11 +174,10 @@ class Ger_Cols:
     def readXML(self, xml):
         """ Le o XML gerado pelo servidor WEB """
         # returns void
-        #print "XML: "+xml
-        self.xml = minidom.parseString(xml)
         # se nao achar o status==OK, retorna
-        if not self.url.isOK(self.xml):
+        if not self.url.isOK(xml):
             raise Exception('Erro ao ler XML do servidor, status não disponível')
+        self.xml = minidom.parseString(xml)        
         root = self.xml.getElementsByTagName('CONFIGS')[0]
         # Coletores
         self.coletores.clear()
@@ -186,7 +185,7 @@ class Ger_Cols:
         self.addColeta(Col_Network(self.computador), 'S')
         for no in root.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
-                if no.firstChild.nodeValue != '':
+                if no.firstChild.nodeValue != '':                   
                     if no.nodeName == 'cs_auto_update':
                         self.update_auto = self.decode(no.firstChild.nodeValue)
                     # COLETAS
@@ -206,8 +205,10 @@ class Ger_Cols:
                         #self.addColeta(None, self.decode(no.firstChild.nodeValue))
                         pass
                     # VERSOES
-                    elif no.nodeName == 'TE_VERSAO_PYCACIC_DISPONIVEL':
-                        self.versao_disponivel = self.decode(no.firstChild.nodeValue)
+                    elif no.nodeName == 'TE_HASH_PYCACIC':
+                        self.hash_disponivel = self.decode(no.firstChild.nodeValue)
+                    elif no.nodeName == 'TE_PACOTE_PYCACIC_DISPONIVEL':
+                        self.pacote_disponivel = self.decode(no.firstChild.nodeValue)
                     elif no.nodeName == 'in_exibe_bandeja':
                         self.exibe_bandeja = self.decode(no.firstChild.nodeValue)
                     elif no.nodeName == 'in_exibe_erros_criticos':
@@ -243,23 +244,23 @@ class Ger_Cols:
         """Decodifica a string vindo do Servidor, e remove os caracteres nulos"""
         return self.coletor.decripta(data).replace('\x00','')
 
-    def isNew(self, current, new):
+    def hasNew(self, current='', new=''):
         """Compara as versoes, atual com a disponivel."""
-        return (current.replace('.','') < new.replace('.',''))
+        if current == '' or new == '':
+            current, new = self.hash_atual, self.hash_disponivel
+        return (current != new)       
     
     def atualiza(self):
-        """Atualiza os modulos dos coletores"""
-        """
-            TODO: definir como vai ficar a string de destino dos arquivos
-        """
+        """Atualiza os modulos dos coletores caso tenha alguma versao nova."""
         try:
             # se nao tem versao nova retorna
-            if not self.isNew(self.versao_atual, self.versao_disponivel):
-                return
+            if not self.hasNew(): return ''
             # conecta ao servidor ftp para buscar atualizacao
             self.url.ftpConecta(self.update_server, self.update_user, self.update_pass)
+            # altera o diretorio do servidor para aonde esta o pacote
             self.url.ftpAlteraDir(self.update_path)
-            #self.url.getFile('vaca.exe', 'vaca.exe')
+            # pega o pacote e salva no temporario
+            self.url.getFile(self.pacote_disponivel, '/tmp/%s' % self.pacote_disponivel)
             self.url.ftpDesconecta()
         except Exception, e:
             raise Exception('Erro ao tentar atualizar: %s' % e.message)
@@ -271,8 +272,8 @@ class Ger_Cols:
         self.computador.coletar()
         for col in self.coletores.values():
             col.start()
-            self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))            
-            if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):                
+            self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))
+            if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):
                 page = Reader.getColetor(col.getName())['page']
                 dict = col.getEncryptedDict()
                 self.coletas_enviar[col.getName()] = {'page': page, 'dict' : dict }
@@ -286,7 +287,7 @@ class Ger_Cols:
             print(' - Enviando dados de %s' % col)
             server = '%s%s%s' % (self.cacic_server, self.cacic_ws, self.coletas_enviar[col]['page'])
             xml = self.conecta(server, self.coletas_enviar[col]['dict'])
-            if self.url.isOK(minidom.parseString(xml)):
+            if self.url.isOK(xml):
                 print(' `---- Envio OK')
             else:
                 print(' `---- Erro no Envio')

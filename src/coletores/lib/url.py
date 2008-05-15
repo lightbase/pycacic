@@ -21,6 +21,7 @@ import base64
 import urllib, urllib2
 import ftplib
 from coletores.coletor import *
+from xml.dom import minidom, Node
 
 class URL :
     """Responsavel por efetuar acessos HTTP e FTP ao servidor"""
@@ -64,10 +65,14 @@ class URL :
 
     def isOK(self, xml):
         """Retorna se o XML gerado esta valido ou nao"""
-        status = xml.getElementsByTagName('STATUS')[0].firstChild.nodeValue
-        if status != "OK":
-            return 0 # False
-        return 1 # True
+        try:
+            xml = minidom.parseString(xml)
+            status = xml.getElementsByTagName('STATUS')[0].firstChild.nodeValue
+            if status != "OK":
+                return 0 # False
+            return 1 # True
+        except:
+            return 0
     
     def ftpConecta(self, server, login, senha):
         """Conecta a um servidor FTP"""

@@ -42,7 +42,8 @@ class Col_Hard(Coletor):
         self.dicionario.clear()
         inicio = strftime("%H:%M:%S")
         # CPUs
-        CPUs = '#CPU#'.join(['#FIELD#'.join(['te_cpu_desc###%s' % i.getDescricao(), 'te_cpu_fabricante###%s' % i.getFabricante(), 'te_cpu_serial###%s' % i.getSerial(), 'te_cpu_frequencia###%s' % i.getFrequencia()]) for i in self.computer.getCPU()])
+        # removido frequencia CPUs = '#CPU#'.join(['#FIELD#'.join(['te_cpu_desc###%s' % i.getDescricao(), 'te_cpu_fabricante###%s' % i.getFabricante(), 'te_cpu_serial###%s' % i.getSerial(), 'te_cpu_frequencia###%s' % i.getFrequencia()]) for i in self.computer.getCPU()])
+        CPUs = '#CPU#'.join(['#FIELD#'.join(['te_cpu_desc###%s' % i.getDescricao(), 'te_cpu_fabricante###%s' % i.getFabricante(), 'te_cpu_serial###%s' % i.getSerial()]) for i in self.computer.getCPU()])
         self.addChave('te_Tripa_CPU', CPUs)
         # Placas/Configuracoes de Redes
         TCPIP = '#TCPIP#'.join(['#FIELD#'.join(['te_placa_rede_desc###%s' % i.getDescricao(), 'te_node_address###%s' % i.getMAC().replace(':','-'), 'te_ip###%s' % i.getIP(), 'te_mascara###%s' % i.getMascara(), 'te_gateway###%s' % i.getGateway(), 'te_serv_dhcp###%s' % i.getDHCP()]) for i in self.computer.getPlacaRede()])
