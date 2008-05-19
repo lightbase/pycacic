@@ -63,8 +63,8 @@ class Ger_Cols:
         self.mac_invalidos = ''
         # configuracoes gerais
         self.versao_atual = version
-        self.hash_atual = Reader.getPycacic()['hash']
-        self.hash_disponivel = 'ZZZ'
+        self.hash_atual = open("/usr/share/pycacic/config/MD5SUM", "r").read()
+        self.hash_disponivel = ''
         self.pacote_disponivel = ''
         self.exibe_bandeja = 'N'
         self.exibe_erros_criticos = 'N'

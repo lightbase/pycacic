@@ -21,11 +21,6 @@ class Cacic:
             if not self.isRoot():
                 raise Exception("Para executar o programa é necessário ser super-usuário (root).")
             
-            # verifica se o pycacic esta instalado
-            # senao chama configurador do cacic.conf
-            if not Globals.INSTALLED:
-                Globals.install()
-            
             # Habilita o coletor de lixo do Python
             garbage_collector.enable()                        
             print "\n\tBem-Vindo ao PyCacic\n"
@@ -111,16 +106,14 @@ class Cacic:
         print(" Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
         self.gc.readXML(xml)
         # verifica atualizacao
-        """
         if self.gc.hasNew():
             print ' Versao nova disponivel !!!'
             print ' `--- Iniciando atualizacao...'
             self.gc.atualiza()
             print ' `--- Novo pacote salvo'
             #chama atualizador e sai
-            os.system('python %s/update.py -pkg %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, 'pycacic_temp'))
-            #self.quit()
-        """
+            os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
+            self.quit()
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
@@ -131,7 +124,6 @@ class Cacic:
     def quit(self):
         """Sai do programa fechando conexao do socket"""
         self.sock.close()
-        print 'Bye'
         sys.exit()
 
 if __name__ == '__main__':

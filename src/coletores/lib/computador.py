@@ -19,9 +19,11 @@ import sys
 import stat
 import commands
 import socket, fcntl, struct
-from xml.dom import minidom, Node
-from globals import Globals
 
+from urlparse import urlparse
+from xml.dom import minidom, Node
+
+from globals import Globals
 
 DEFAULT_STRING_VALUE = ''
 
@@ -327,10 +329,7 @@ class Rede:
 				return dns[pos+len("search "):pos2]
 			else:	
 				return dns[pos+len("search "):]
-		return ""
-		
-		
-		
+		return ""		
 	
 	def __getDHCP__(self, ip):
 		"""Pega o endereco do servidor DHCP"""
@@ -499,6 +498,7 @@ class PC_XML:
 			self.bios = Bios() # Bios
 			self.video = [] # list
 			self.audio = [] # list
+			self.n_cpu = 0
 			self.cpu = [] # list
 			self.modem = [] # list
 			# inicia leitura do XML			
@@ -530,12 +530,17 @@ class PC_XML:
 			root = xml.getElementsByTagName('node')[0]
 			for no in root.childNodes:
 				if no.nodeType == Node.ELEMENT_NODE:
-					atributos = no.attributes
-					for a in atributos.keys():
-						valor = atributos.get(a).nodeValue
-						if a == 'id' and valor == 'core':
-							self.getPlacaMaeInfo(no)
-							return
+					if no.nodeName == 'configuration':
+						for filho in no.childNodes:
+							if filho.nodeName == 'setting' and filho.attributes.get('id').nodeValue == 'cpus':								
+								self.n_cpu = int(filho.attributes.get('value').nodeValue)
+					elif no.nodeName == 'node':
+						atributos = no.attributes
+						for a in atributos.keys():
+							valor = atributos.get(a).nodeValue
+							if a == 'id' and valor == 'core':
+								self.getPlacaMaeInfo(no)
+								return
 		except ComputerException, e:
 			raise ComputerException(e.message)
 		except Exception, e:
@@ -557,15 +562,15 @@ class PC_XML:
 	                valor = atributos.get(a).nodeValue
 	                if a == 'id' and valor == 'firmware':
 	                    self.getBiosInfo(filho)
-	                if a == 'id' and valor == 'memory':
+	                elif a == 'id' and valor == 'memory':
 	                    self.getMemoriaInfo(filho)
-	                if a == 'id' and valor[0:3] == 'cpu':
+	                elif a == 'id' and valor[0:3] == 'cpu':
 	                    self.getCPUInfo(filho)
-	                if a == 'id' and valor[0:3] == 'pci':
+	                elif a == 'id' and valor[0:3] == 'pci':
 	                    self.getPCIInfo(filho)
-	                if a == 'id' and valor == 'display':
+	                elif a == 'id' and valor == 'display':
  						self.getVideoInfo(filho)
-	                if a == 'id' and valor == 'bridge':
+	                elif a == 'id' and valor == 'bridge':
  						self.getRedeInfo(filho)
 
 	def getBiosInfo(self, no):
@@ -573,7 +578,7 @@ class PC_XML:
 	    for filho in no.childNodes:
 	        if filho.nodeName == 'vendor':
 	        	self.bios.setFabricante(filho.firstChild.nodeValue)
-	        if filho.nodeName == 'version':
+	        elif filho.nodeName == 'version':
 	            # expressao regular para pegar data da bios
 	            p = re.compile('[0-9]{1,2}/[0-9]{1,2}/[0-9]{1,4}')
 	            self.bios.setData(p.findall(filho.firstChild.nodeValue)[0])
@@ -587,7 +592,7 @@ class PC_XML:
 	            # como resultado pego esta em bytes converte para megas
 	            self.ram.setTamanho((int(filho.firstChild.nodeValue)/1048576))
 	        # monta uma unica string contendo informacoes sobre os slots
-	        if filho.nodeName == 'node':
+	        elif filho.nodeName == 'node':
 	            slot = ""
 	            size = ""
 	            desc = ""
@@ -595,12 +600,12 @@ class PC_XML:
 	            for folha in filho.childNodes:
 	                if folha.nodeName == 'description':
 	                    desc = folha.firstChild.nodeValue
-	                if folha.nodeName == 'physid':
+	                elif folha.nodeName == 'physid':
 	                    slot = folha.firstChild.nodeValue
-	                if folha.nodeName == 'size':
+	                elif folha.nodeName == 'size':
 	                    size = (int(folha.firstChild.nodeValue)/1048576)
 	                    hasSize = 1 # True
-	                if hasSize == 1: # True:
+	                elif hasSize == 1: # True:
 	                	self.ram.setSlot(slot, size, desc)
 	                	hasSize = 0 # False
 
@@ -611,19 +616,19 @@ class PC_XML:
 		for filho in no.childNodes:
 		    if filho.nodeName == 'product':
 		    	c.setDescricao(filho.firstChild.nodeValue)
-		    if filho.nodeName == 'vendor':
+		    elif filho.nodeName == 'vendor':
 		    	c.setFabricante(filho.firstChild.nodeValue)
-		    if filho.nodeName == 'serial':
+		    elif filho.nodeName == 'serial':
 		    	c.setSerial(filho.firstChild.nodeValue)
-		    if filho.nodeName == 'size':
+		    elif filho.nodeName == 'size':
 		        # "converte" a frequencia de Hz para GHz
 		        c.setFrequencia((int(filho.firstChild.nodeValue)/1000000))
 		if c.getDescricao() != "":
 			self.cpu.append(c)
 		# Caso exista um novo processador mas a descrição está vazia
 		# assuma que sao mais de um nucleo e replica as informacoes do
-		# ultimo adicionado
-		elif len(self.cpu) > 0:
+		# ultimo adicionado. Compara tambem com o total de cpu encontrada pelo lshw
+		elif len(self.cpu) > 0 and len(self.cpu) < self.n_cpu:
 			c.setDescricao(self.cpu[len(self.cpu)-1].getDescricao())
 			c.setFabricante(self.cpu[len(self.cpu)-1].getFabricante())
 			c.setSerial(self.cpu[len(self.cpu)-1].getSerial())
@@ -640,17 +645,17 @@ class PC_XML:
  					# recursividade
  					if a == 'id' and valor[0:3] == 'pci':
  						self.getPCIInfo(filho)
- 					if a == 'id' and valor == 'multimedia':
+ 					elif a == 'id' and valor == 'multimedia':
  						self.getAudioInfo(filho)
- 					if a == 'id' and valor == 'display':
+ 					elif a == 'id' and valor == 'display':
  						self.getVideoInfo(filho)
- 					if a == 'id' and valor[0:3] == 'ide':
+ 					elif a == 'id' and valor[0:3] == 'ide':
  						self.getIDEInfo(filho)
- 					if a == 'id' and (valor[0:7] == 'network' or valor[0:6] == 'bridge'):
+ 					elif a == 'id' and (valor[0:7] == 'network' or valor[0:6] == 'bridge'):
  						self.getRedeInfo(filho)
- 					if a == 'id' and valor == 'communication':
+ 					elif a == 'id' and valor == 'communication':
  						self.getModemInfo(filho)
- 					if a == 'id' and valor == 'storage':
+ 					elif a == 'id' and valor == 'storage':
  						self.getStorageInfo(filho)
                    
 	def getAudioInfo(self, no):
@@ -660,7 +665,7 @@ class PC_XML:
 	    for filho in no.childNodes:
 	        if filho.nodeName == 'vendor':
 	            desc1 = filho.firstChild.nodeValue
-	        if filho.nodeName == 'product':
+	        elif filho.nodeName == 'product':
 	            desc2 = filho.firstChild.nodeValue	                    
 	    self.audio.append(desc1 + ' - ' + desc2)
     
@@ -672,7 +677,7 @@ class PC_XML:
 	    for filho in no.childNodes:
 	        if filho.nodeName == 'vendor':
 	            desc1 = filho.firstChild.nodeValue
-	        if filho.nodeName == 'product':
+	        elif filho.nodeName == 'product':
 	            desc2 = filho.firstChild.nodeValue
 	        #if filho.nodeName == 'width':
 	        #	video.setCores(filho.firstChild.nodeValue)
@@ -713,9 +718,9 @@ class PC_XML:
 	                # recursividade
 	                if a == 'id' and valor[0:3] == 'ide':
 	                    self.getIDEInfo(filho)
-	                if a == 'id' and valor[0:4] == 'scsi':
+	                elif a == 'id' and valor[0:4] == 'scsi':
 	                    self.getSCSIInfo(filho)
-	                if a == 'id' and valor[0:5] == 'cdrom':
+	                elif a == 'id' and valor[0:5] == 'cdrom':
 	                	self.getCDROMInfo(filho)
 
 	def getSCSIInfo(self, no):
@@ -728,13 +733,13 @@ class PC_XML:
 	    for filho in no.childNodes:
 	    	if filho.nodeName == 'vendor':
 	    		rede.fabricante = filho.firstChild.nodeValue
-	    	if filho.nodeName == 'product':
+	    	elif filho.nodeName == 'product':
 	    		rede.descricao = filho.firstChild.nodeValue
-	    	if filho.nodeName == 'product':
+	    	elif filho.nodeName == 'product':
 	    		rede.descricao = filho.firstChild.nodeValue
-	    	if filho.nodeName == 'serial':
+	    	elif filho.nodeName == 'serial':
 	    		rede.mac = filho.firstChild.nodeValue.upper()
-	    	if filho.nodeName == 'logicalname':
+	    	elif filho.nodeName == 'logicalname':
 	    		rede.logicalname = filho.firstChild.nodeValue
 	    		rede.gateway = rede.__getGateway__(rede.logicalname)
 	    	# pegando o ip
@@ -754,7 +759,7 @@ class PC_XML:
 		for filho in no.childNodes:
 			if filho.nodeName == 'vendor':
 				desc.append(filho.firstChild.nodeValue)
-			if filho.nodeName == 'product':
+			elif filho.nodeName == 'product':
 				desc.append(filho.firstChild.nodeValue)
 		self.modem.append(' - '.join(desc))
 
@@ -764,9 +769,9 @@ class PC_XML:
 		for filho in no.childNodes:
 			if filho.nodeName == 'vendor':
 				desc.append(filho.firstChild.nodeValue)
-			if filho.nodeName == 'description':
+			elif filho.nodeName == 'description':
 				desc.append(filho.firstChild.nodeValue)
-			if filho.nodeName == 'product':
+			elif filho.nodeName == 'product':
 				desc.append(filho.firstChild.nodeValue)
 		self.rom.append(' - '.join(desc))
 		
@@ -786,9 +791,9 @@ class PC_XML:
 		for filho in no.childNodes:
 			if filho.nodeName == 'vendor':
 				hd.setFabricante(filho.firstChild.nodeValue)
-			if filho.nodeName == 'product':
+			elif filho.nodeName == 'product':
 				hd.setDescricao(filho.firstChild.nodeValue)
-			if filho.nodeName == 'size':
+			elif filho.nodeName == 'size':
 				# convertendo de bytes para megas
 				hd.setTamanho(int(filho.firstChild.nodeValue) / 1024)
 		self.hardDisk.append(hd)
@@ -1121,12 +1126,12 @@ class Computador :
 		return self.placaRede
 	
 	def getIPAtivo(self, server):
-		""" retorna o endereco de IP que conecta no server especificado """		
-		p = re.compile('[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-		ips = p.findall(server)
-		if len(ips) == 0:
-			raise ComputerException("Endereço do Servidor inválido. Não foi possível detectar o ip ativo.")			
-		return Rede().getIPAtivo(ips[0])
+		""" retorna o endereco de IP que conecta no server especificado """
+		ips = urlparse(server)[1]
+		if ips == "":
+			raise ComputerException("Endereço do Servidor inválido. Não foi possível detectar o ip ativo.")
+		ips = socket.gethostbyname(ips)		
+		return Rede().getIPAtivo(ips)
 	
 	def getMACAtivo(self, ip):
 		""" retorna o endereco de IP que conecta no server especificado """			

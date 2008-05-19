@@ -113,5 +113,5 @@ class Coletor:
     
     def getPadding(self):
         """Retorna o preenchemento utilizado para encriptar"""
-        return self.crpt.key.replace(CCrypt.KEY, '')
+        return self.crpt.getKeyPadding()
     

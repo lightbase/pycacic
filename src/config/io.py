@@ -12,8 +12,14 @@
 """
 import re
 import sys, os
+
 from xml.dom import minidom, Node
 from globals import Globals
+
+try:
+    from coletores.lib.ccrypt import CCrypt
+except:
+    from ccrypt import CCrypt
 
 class IOConfig:
     """
@@ -24,28 +30,43 @@ class IOConfig:
         dele.        
     """
 
-    FILE = '%s/config/cacic.conf' % Globals.PATH
+    FILE = '%s/config/cacic.dat' % Globals.PATH
     
     def exists():
         """Retorna se um arquivo existe ou nao"""
         return (os.path.exists(IOConfig.FILE))
     
-    def getFile():
+    def getFile(file):
         """
             Retorna o conteudo do arquivo de configuracao
             caso nao exista gera uma excecao
         """
-        if not IOConfig.exists():
+        if not os.path.exists(file):
             raise Exception('Arquivo de configuração não encontrado.')
         else:
-            return open(IOConfig.FILE, 'r').read()
+            return open(file, 'r').read()
+        
+    def getDecryptedFile():
+        """
+            Retorna o conteudo do arquivo de configuracao
+            caso nao exista gera uma excecao
+        """
+        cipher = CCrypt()
+        return cipher.decrypt(IOConfig.FILE)
 
     def getRoot():
         """Retorna o node principal do XML"""
         if not IOConfig.exists():
             raise Exception('Arquivo de configuração não encontrado.')
         else:
-            xml = minidom.parse(IOConfig.FILE)
+            f = open(IOConfig.FILE)
+            xmlstr = f.read()
+            f.close()
+            
+            cipher = CCrypt()
+            xmlstr = cipher.decrypt(xmlstr)
+            
+            xml = minidom.parseString(xmlstr)
             root = xml.getElementsByTagName('config')[0]
             return root
         
@@ -78,6 +99,7 @@ class IOConfig:
     
     exists = staticmethod(exists)
     getFile = staticmethod(getFile)
+    getDecryptedFile = staticmethod(getDecryptedFile)
     getRoot = staticmethod(getRoot)
     getServer = staticmethod(getServer)
     getColetores = staticmethod(getColetores)
@@ -169,10 +191,13 @@ class Writer:
         Gerente Web, usuario e senha, etc.        
     """
     
-    def saveXML(xml):
+    def saveXML(xml, file = ''):
         """Salva o XML de configuracoes"""
-        if (IOConfig.exists()):
-            open(IOConfig.FILE, 'w').write(xml)
+        if file == '':
+            file = IOConfig.FILE
+        f = open(file, 'w')
+        f.write(xml)
+        f.close()
             
     
     def setNodeValue(node, value):
@@ -189,9 +214,14 @@ class Writer:
         old = re_att.findall(node)[0]        
         return node.replace(old, ('%s="%s"' % (attrib, value)))
 
-    def setServer(node, value):
+    def setServer(node, value, config = ''):
         """Altera o no especificado das informacoes do servidor"""
-        config = IOConfig.getFile()
+        configfile = ''
+        if config == '':
+            config = IOConfig.getDecryptedFile()
+        else:
+            configfile = config
+            config = IOConfig.getFile(config)
         re_sv = re.compile('<server(?:.|\n)*</server>')
         re_node = re.compile('<%s.*</%s>' % (node, node))
         sv = re_sv.findall(config)[0]        
@@ -200,7 +230,7 @@ class Writer:
         node = re_node.findall(sv)[0]        
         server = sv
         server = server.replace(node, Writer.setNodeValue(node, value))
-        Writer.saveXML(config.replace(sv, server))
+        Writer.saveXML(config.replace(sv, server), configfile)
         
     def setPycacicStatus(s, v):
         """Modifica o status do Pycacic"""

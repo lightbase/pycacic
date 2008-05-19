@@ -38,7 +38,7 @@ class Globals:
     
     def install():
         """Abre console para configuracao do PyCacic"""
-        from config.io import Writer
+        from io import Writer
         print "\n\t--- Bem-Vindo a Configuracao do PyCacic ---"
         print "\n\tapos preencher as informacoes abaixo o programa ira iniciar\n"
         addr = raw_input("End. do  Servidor ('ex: http://10.0.0.1'): ")
@@ -89,6 +89,5 @@ def isInstalled():
 
     
 Globals.PATH = getDir()
-Globals.INSTALLED = isInstalled()
 
 getArgs()
