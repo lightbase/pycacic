@@ -40,7 +40,7 @@ class ComputerException(Exception):
 		return self.message
 	
 class MotherBoard:
-	"""Classe MotherBoard, contém informações sobre a Placa Mae"""
+	"""Classe MotherBoard, contￃﾩm informaￃﾧￃﾵes sobre a Placa Mae"""
 	
 	def __init__(self):
 		self.fabricante = ''
@@ -55,7 +55,7 @@ class MotherBoard:
 		return self.fabricante
 
 class CPU:
-	"""Classe CPU, contém informações sobre a CPU"""
+	"""Classe CPU, contￃﾩm informaￃﾧￃﾵes sobre a CPU"""
 	
 	def __init__(self) :
 		self.id = 0
@@ -114,7 +114,7 @@ class CPU:
 	
 	
 class Video :
-	"""Classe contendo as informacoes de vídeo"""
+	"""Classe contendo as informacoes de vￃﾭdeo"""
 	
 	def __init__(self) :
 		self.res = ""
@@ -133,12 +133,12 @@ class Video :
 		self.ram = ram
 	
 	def getResolucao (self) :
-		""" retorna a resolução do video """
+		""" retorna a resoluￃﾧￃﾣo do video """
 		# returns double
 		return self.res
 	
 	def setResolucao (self, res) :
-		""" define a resolução do video """
+		""" define a resoluￃﾧￃﾣo do video """
 		# returns 
 		self.res = res
 		
@@ -202,7 +202,7 @@ class RAM :
 
 
 class Rede:
-	"""Classe responsável por conter as informações de rede"""
+	"""Classe responsￃﾡvel por conter as informaￃﾧￃﾵes de rede"""
 	
 	def __init__(self):
 		self.ip = ''
@@ -320,7 +320,7 @@ class Rede:
 		return ['', ''] 
 	
 	def __getDNSDomain__(self):
-		""" Pega o domínio """
+		""" Pega o domￃﾭnio """
 		dns = commands.getoutput("cat /etc/resolv.conf")
 		pos = dns.find("search ")
 		if pos != -1:
@@ -368,11 +368,11 @@ class Rede:
 		return self.ip
 	
 	def getDHCP(self):
-		""" retorna o endereço IP do servidor DHCP """
+		""" retorna o endereￃﾧo IP do servidor DHCP """
 		return self.dhcp
 	
 	def getMascara(self):
-		""" retorna a máscara de rede da máquina """
+		""" retorna a mￃﾡscara de rede da mￃﾡquina """
 		# returns string
 		return self.mascara
 	
@@ -382,7 +382,7 @@ class Rede:
 		return self.gateway
 	
 	def getMAC(self):
-		""" retorna o endereco mac da máquina """
+		""" retorna o endereco mac da mￃﾡquina """
 		# returns string
 		return self.mac
 	
@@ -397,13 +397,13 @@ class Rede:
 		return self.dns
 	
 	def getDNSDomain(self):
-		""" retorna o domínio do DNS """
+		""" retorna o domￃﾭnio do DNS """
 		#return string
 		return self.dnsdomain
 	
 	
 class Bios:
-	"""Classe responsável por conter as informações da Bios"""
+	"""Classe responsￃﾡvel por conter as informaￃﾧￃﾵes da Bios"""
 	
 	def __init__(self) :
 		self.data = DEFAULT_STRING_VALUE # string
@@ -442,7 +442,7 @@ class Bios:
 
 
 class HardDisk:
-	"""Classe responsável por conter as informações sobre o HD"""
+	"""Classe responsￃﾡvel por conter as informaￃﾧￃﾵes sobre o HD"""
 	
 	def __init__(self) :
 		self.tamanho = 0.0 # double
@@ -483,7 +483,7 @@ class HardDisk:
 		
 class PC_XML:
 	"""
-		Classe intermediária responsavel por executar o binario lshw,
+		Classe intermediￃﾡria responsavel por executar o binario lshw,
 		que ira gerar um xml, e entao tratar o xml setando os atributos
 		do Computador atraves do mesmo e por comandos bash.
 	"""	
@@ -495,6 +495,7 @@ class PC_XML:
 			self.rom = [] # list (rom drivers - CD, DVD)			
 			self.placaRede = [] # list
 			self.hardDisk = [] # list
+			self.partitions = [] # list
 			self.bios = Bios() # Bios
 			self.video = [] # list
 			self.audio = [] # list
@@ -625,7 +626,7 @@ class PC_XML:
 		        c.setFrequencia((int(filho.firstChild.nodeValue)/1000000))
 		if c.getDescricao() != "":
 			self.cpu.append(c)
-		# Caso exista um novo processador mas a descrição está vazia
+		# Caso exista um novo processador mas a descriￃﾧￃﾣo estￃﾡ vazia
 		# assuma que sao mais de um nucleo e replica as informacoes do
 		# ultimo adicionado. Compara tambem com o total de cpu encontrada pelo lshw
 		elif len(self.cpu) > 0 and len(self.cpu) < self.n_cpu:
@@ -796,8 +797,41 @@ class PC_XML:
 			elif filho.nodeName == 'size':
 				# convertendo de bytes para megas
 				hd.setTamanho(int(filho.firstChild.nodeValue) / 1024)
+			elif filho.nodeName == 'node' and filho.attributes['id'].nodeValue[0:6] == 'volume':
+				self.getPartitionInfo(filho)
 		self.hardDisk.append(hd)
-    
+		
+	def getPartitionInfo(self, no):
+		"""Pega as informacoes das particoes atraves do no do XML"""
+		p = Particao()
+		for filho in no.childNodes:
+			if filho.nodeName == 'description':
+				p.description = filho.firstChild.nodeValue
+			elif filho.nodeName == 'physid':
+				p.physid = int(filho.firstChild.nodeValue)
+			elif filho.nodeName == 'businfo':
+				p.businfo = filho.firstChild.nodeValue
+			elif filho.nodeName == 'logicalname' and p.name == '':
+				p.name = filho.firstChild.nodeValue
+			elif filho.nodeName == 'dev':
+				p.dev = filho.firstChild.nodeValue
+			elif filho.nodeName == 'version':
+				p.version = filho.firstChild.nodeValue
+			elif filho.nodeName == 'serial':
+				p.serial = filho.firstChild.nodeValue
+			elif filho.nodeName == 'capacity':
+				p.size = round(int(filho.firstChild.nodeValue)/1048576)
+				p.__setFreeSize__()
+			elif filho.nodeName == 'configuration':
+				for folha in filho.childNodes:
+					if folha.nodeName == 'setting' and folha.attributes['id'].nodeValue in ('filesystem', 'mount.fstype'):
+						p.filesystem = (folha.attributes['value'].nodeValue).upper()
+						self.partitions.append(p)
+						return
+			elif filho.nodeName == 'node' and filho.attributes['id'].nodeValue[0:13] == 'logicalvolume':
+				self.getPartitionInfo(filho)
+				return
+
 
 class SO_Info:
 	"""
@@ -965,27 +999,86 @@ class Pacotes:
 			return self.pkg_cmd[mng]
 		return ''
 	
-	def isInstalled(self, pkg_installed, os):
+	def isInstalled(self, os, package):
 		"""
 			Retorna true ou false verificando se o pacote passado por parametro
 			esta ou nao instalado
 		"""
 		mng = self.__getMng__(os)
-		output = commands.getoutput(self.__getMethod__(os) + pkg_installed)
 		if mng == 'dpkg':
-			if 'install' in output:
+			if not 'deinstall' in package and 'install' in package:
 				return 1 # True
 		else:
 			if output != '':
 				return 1 # True
-		return False
+		return 0
 			
 	def getAllInstalled(self, os):
 		"""Retorna uma string com todos os pacotes instalados"""
 		mng = self.__getMng__(os)
 		if mng == 'slack':
-			return  commands.getoutput(self.__getMethod__(os)[0:-6])
-		return commands.getoutput(self.__getMethod__(os))
+			ret = commands.getoutput(self.__getMethod__(os)[0:-6])
+		else:
+			ret = commands.getoutput(self.__getMethod__(os))
+		plist = ret.split("\n")
+		packages = []
+		for package in plist:
+			if self.isInstalled(os, package):
+				pos = package.find("\t")
+				packages.append(package[0:pos])
+		return packages
+		
+
+class Particao:
+	"""
+		Classe Particoes contem as informacoes da(s) 
+		particao(oes) do computador (montagem, tamanho, etc)		
+	"""
+	
+	def __init__(self):
+		self.size = 0
+		self.freesize = 0
+		self.name = ''
+		self.serial = ''
+		self.description = ''
+		self.filesystem = ''
+		self.physid = 0
+		self.businfo = ''
+		self.dev = ''
+		self.version = ''
+		
+	def getSize(self):
+		"""Retorna o tamanho em megas da particao"""
+		return self.size
+	
+	def __setFreeSize__(self):
+		desc = commands.getoutput("df -l %s" % self.getName()).split('\n')
+		if len(desc) > 1:
+			inf = desc[1].split()
+			if len(inf) > 3:
+				self.freesize = round(int(inf[3]) / 1024)
+				return
+		self.freesize = self.size
+	
+	def getFreeSize(self):
+		"""Retorna o tamanho livre em megas da particao"""
+		return self.freesize
+	
+	def getName(self):
+		"""Retorna o nome logico da particao, ex.: /dev/hda1"""
+		return self.name
+	
+	def getSerial(self):
+		"""Retorna uma string contendo o serial da particao"""
+		return self.serial
+	
+	def getDescription(self):
+		"""Retorna a descricao da particao"""
+		return self.description
+		
+	def getFileSystem(self):
+		"""Retorna o tipo do sistema de arquivo da particao, ex.: EXT3, NTFS"""
+		return self.filesystem
 		
 
 class Computador :
@@ -1002,6 +1095,7 @@ class Computador :
 		self.mouse = devices['mouse']
 		self.teclado = devices['teclado']
 		self.pacote = Pacotes()
+		self.jreversion = self.__get_jre_version__()
 		self.ram = ''
 		self.rom = ''
 		self.placaMae = ''
@@ -1023,13 +1117,14 @@ class Computador :
 		"""Inicia a coleta de informacoes do computador"""
 		try:
 			if not self.isRoot():
-				raise ComputerException('Para executar o programa é necessário estar como super usuário (root).')
+				raise ComputerException('Para executar o programa ￃﾩ necessￃﾡrio estar como super usuￃﾡrio (root).')
 			pc_xml = PC_XML()
 			self.ram = pc_xml.ram		
 			self.rom = pc_xml.rom
 			self.placaMae = pc_xml.placaMae
 			self.placaRede = pc_xml.placaRede
 			self.hardDisk = pc_xml.hardDisk
+			self.particoes = pc_xml.partitions
 			self.bios = pc_xml.bios
 			self.video = pc_xml.video
 			self.audio = pc_xml.audio
@@ -1038,6 +1133,15 @@ class Computador :
 		except ComputerException, e:
 			raise Exception('%s\n\nO programa foi abortado de forma prematura.\n' % e.message)
 			sys.exit()
+			
+	def __get_jre_version__(self):
+		"""Retorna o hostname da maquina atraves de socket"""
+		java = commands.getoutput('java -version')
+		pos = java.find("java version ")
+		if pos == 0:
+			pos2 = java.find('"', pos+14)
+			java = java[pos+14:pos2]
+		return java
 	
 	def __get_host_name__(self):
 		"""Retorna o hostname da maquina atraves de socket"""
@@ -1068,9 +1172,13 @@ class Computador :
 		return inputs	        
 	
 	def getSO (self) :
-		""" retorna string contendo sistema operacional """
+		"""Retorna string contendo sistema operacional """
 		# returns string
 		return self.so	
+	
+	def getJREVersion(self):
+		"""Retorna a versao do Java Runtime Environment """
+		return self.jreversion
 	
 	def getPacotes(self):
 		"""Retorna todos os pacotes instalados na maquina"""
@@ -1081,29 +1189,34 @@ class Computador :
 		return self.pacote.isInstalled(pacote, self.getSO())
 	
 	def getHostName(self) :
-		""" retorna host name """
+		"""Retorna host name """
 		# returns string
 		return self.hostName	
 		
 	def getPlacaMae(self) :
-		""" retorna objeto MotherBoard com as informacoes da placa mae """
+		"""Retorna objeto MotherBoard com as informacoes da placa mae """
 		# returns string 
 		return self.placaMae
 	
 	def getCPU(self) :
-		""" retorna lista de cpus do micro """
+		"""Retorna lista de cpus do micro """
 		# returns list
 		return self.cpu	
 	
 	def getRam(self) :
-		""" retorna objeto RAM com descricao das memorias ram do micro """
+		"""Retorna objeto RAM com descricao das memorias ram do micro """
 		# returns RAM
 		return self.ram	
 	
 	def getHardDisk(self) :
-		""" retorna lista de objetos HD """
+		"""Retorna lista de objetos HD """
 		# returns list
-		return self.hardDisk	
+		return self.hardDisk
+	
+	def getPartitions(self):
+		"""Retorna lista de objetos Particao """
+		# returns list
+		return self.particoes
 	
 	def getAudio(self) :
 		""" retorna lista de audio """
@@ -1111,39 +1224,39 @@ class Computador :
 		return self.audio
 	
 	def getVideo(self) :
-		""" retorna lista de placa de video """
+		"""Retorna lista de placa de video """
 		# returns list
 		return self.video
 	
 	def getRom(self) :
-		""" retorna lista de midias ROM """
+		"""Retorna lista de midias ROM """
 		# returns list
 		return self.rom
 	
 	def getPlacaRede(self) :
-		""" retorna lista de placas de redes """
+		"""Retorna lista de placas de redes """
 		# returns list
 		return self.placaRede
 	
 	def getIPAtivo(self, server):
-		""" retorna o endereco de IP que conecta no server especificado """
+		"""Retorna o endereco de IP que conecta no server especificado"""
 		ips = urlparse(server)[1]
 		if ips == "":
-			raise ComputerException("Endereço do Servidor inválido. Não foi possível detectar o ip ativo.")
+			raise ComputerException("Endereￃﾧo do Servidor invￃﾡlido. Nￃﾣo foi possￃﾭvel detectar o ip ativo.")
 		ips = socket.gethostbyname(ips)		
 		return Rede().getIPAtivo(ips)
 	
 	def getMACAtivo(self, ip):
-		""" retorna o endereco de IP que conecta no server especificado """			
+		"""Retorna o endereco de IP que conecta no server especificado"""			
 		return Rede().__getMac__(ip).replace(':','-')
 	
 	def getModem(self) :
-		""" retorna lista de modens """
+		"""Retorna lista de modens"""
 		# returns list
 		return self.modem
 	
 	def getBios(self) :
-		""" retorna um objeto do tipo Bios """
+		"""Rtorna um objeto do tipo Bios"""
 		# returns Bios
 		return self.bios
 	
