@@ -151,6 +151,7 @@ class Reader:
                     coletor['id'] = no.attributes['id'].nodeValue
                     coletor['page'] = no.attributes['page'].nodeValue
                     return coletor
+        return coletor
     
     def getPycacicStatus(id):
         """
