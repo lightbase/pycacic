@@ -105,6 +105,7 @@ class Cacic:
         xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
         print(" Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
         self.gc.readXML(xml)
+        """
         # verifica atualizacao
         if self.gc.hasNew():
             print ' Versao nova disponivel !!!'
@@ -114,6 +115,7 @@ class Cacic:
             #chama atualizador e sai
             os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
             self.quit()
+        """
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
