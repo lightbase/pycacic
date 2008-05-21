@@ -60,6 +60,11 @@ class Coletor:
         """ Retorna o nome da chave do UVC """
         raise Exception("Abstract method getUVCKey(), must override")
     
+    def getDatKeyPrefix(self):
+        """Retorna o prefixo do nome da chave no dat"""
+        s = self.getName().split('_')
+        return '%s%s_%s%s.' % (s[0][0].upper(), s[0][1:], s[1][0].upper(), s[1][1:])
+    
     def getEncryptedDict(self):
         """ Retorna o dicionario de dados da coleta encryptado """
         for key, value in self.dicionario.items():
@@ -76,10 +81,12 @@ class Coletor:
             com chave e valor separadas por uma string padrao
         """
         try:
+            if prefixo == '':
+                prefixo = self.getDatKeyPrefix()
             data = self.spd_key.join(["%s%s%s%s" % (prefixo, k, self.spd_value, chaves[k]) for k in chaves.keys()])
             Arquivo.saveFile(path, self.encripta(data))
-        except:
-            raise Exception('Erro ao gravar dat: %s' % path)
+        except Exception, e:
+            raise Exception('Erro ao gravar dat: %s - Motivo: %s' % path, e)
             
     def getUVCDat(self, path, chave):
         """
@@ -102,6 +109,11 @@ class Coletor:
         keys = dicionario.keys()
         keys.sort()
         return ';'.join(['%s' % dicionario[i] for i in keys if i != 'UVC'])
+    
+    def start(self):
+        """Inicia a coleta do coletor atual"""
+        self.setDicionario()
+        self.createDat(self.dicionario, self.PATH + self.OUTPUT_DAT)
         
     def encripta(self, text):
         """Encripta o texto passado por parametro"""
