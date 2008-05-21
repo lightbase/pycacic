@@ -20,6 +20,8 @@ from coletores.col_network import *
 from coletores.col_hard import *
 from coletores.col_soft import *
 from coletores.col_patr import *
+from coletores.col_vamb import *
+from coletores.col_undi import *
 
 from coletores.lib.url import *
 from coletores.lib.arquivo import *
@@ -201,9 +203,9 @@ class Ger_Cols:
                         pass
                     elif no.nodeName == 'cs_coleta_software':
                         self.addColeta(Col_Soft(self.computador), self.decode(no.firstChild.nodeValue))
+                        self.addColeta(Col_Vamb(self.computador), self.decode(no.firstChild.nodeValue))
                     elif no.nodeName == 'cs_coleta_unid_disc':
-                        #self.addColeta(None, self.decode(no.firstChild.nodeValue))
-                        pass
+                        self.addColeta(Col_Undi(self.computador), self.decode(no.firstChild.nodeValue))
                     # VERSOES
                     elif no.nodeName == 'TE_HASH_PYCACIC':
                         self.hash_disponivel = self.decode(no.firstChild.nodeValue)
@@ -297,7 +299,7 @@ class Ger_Cols:
         self.coletor.addChave('Configs.HOSTNAME', self.computador.getHostName())
         self.coletor.addChave('Configs.ID_SO', self.computador.getSO())
         self.coletor.addChave('Configs.Endereco_WS', self.cacic_ws)
-        self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT)
+        self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT, 'Coleta.')
 
     def toString(self):
         """Metodo toString da Classe"""
