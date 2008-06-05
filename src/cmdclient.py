@@ -8,3 +8,5 @@ udp_sock = socket(AF_INET, SOCK_DGRAM)
 udp_sock.sendto('col_hard' , addr)
 udp_sock.close()
 print "ENVIADO"
+
+    

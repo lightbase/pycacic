@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 
 import os
 import sys
@@ -7,27 +8,34 @@ import thread
 
 from socket import *
 from ger_cols import *
+
 from globals import Globals
+from lang.language import Language
+from logs.log import CLog
 
 import gc as garbage_collector
+
+# Languages
+_l = Language()
 
 class Cacic:
     
     VERSION = '0.0.1'
     
-    def __init__(self):       
+    def __init__(self):
         try:
             # somente executa se estiver como root
             if not self.isRoot():
-                raise Exception("Para executar o programa é necessário ser super-usuário (root).")
+                raise Exception(_l.get('need_root'))
             
             # Habilita o coletor de lixo do Python
-            garbage_collector.enable()                        
-            print "\n\tBem-Vindo ao PyCacic\n"
+            garbage_collector.enable()
+            CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
+            print _l.get('welcome')
             # flags do Gerente de Coletas
             self.gc_stopped = 0 # False
             self.gc_ok = 0 # False
-            self.isforcada = []
+            self.coletas_forcadas = []
             # Gerente de Coletas
             self.gc = Ger_Cols(self.VERSION)
             # configuracao do socket para comunicacao interna
@@ -45,34 +53,40 @@ class Cacic:
                     self.gc_stopped = 1 # True
                     # conecta ao servidor para pegar as informacoes
                     self.conecta()
+                    CLog.appendLine(_l.get('col_manager'), '%s %s' % (_l.get('contact_with'), _l.get('web_manager')))
                     # com o coletor parado (dormindo) dispara timeout para iniciar a coleta
                     # apos o intervalo de tempo definido pelo servidor
                     thread.start_new_thread(self.timeout, ())
                     # intervalo
                     self.interval = self.gc.getInterval()
-                    print(" `---- Coleta iniciara em %s minutos" % (self.interval/60))
+                    CLog.appendLine(_l.get('col_manager'),'%s %s %s' % (_l.get('collection_starts_in'), (self.interval/60), _l.get('minutes')))
                 # se esta habilitado a executar ou e uma coleta forcada
-                if self.gc_ok or len(self.isforcada) > 0:
+                if self.gc_ok or len(self.coletas_forcadas) > 0:
                     # muda estado para nao habilitado
                     self.gc_ok = 0 # False
                     # conecta ao servidor para pegar as informacoes
                     # pode ter ocorrido alguma mudanca desde a ultima
                     self.conecta()
+                    CLog.appendLine(_l.get('col_manager'), '%s %s' % (_l.get('contact_with'), _l.get('web_manager')))
                     # inicia coletas
-                    self.gc.coletas_forcadas = self.isforcada
-                    self.start()                    
+                    self.gc.coletas_forcadas = self.coletas_forcadas
+                    self.start()
                     # Executa o coletor de lixo
                     garbage_collector.collect()
                 time.sleep(2)
             # sai
             self.quit()
-        except socket.error, e:   
-            print 'PyCacic already is running.'
         except Exception, e:
-            print e        
-        # remover depois
-        import traceback
-        traceback.print_exc()
+            # remover depois
+            import traceback
+            traceback.print_exc()
+            
+            print "ERROR: %s", e
+            
+            error = "%s: %s", (_l.get('error'), e)
+            CLog.appendLine(_l.get('pycacic'), error)
+            print error
+        
     
     def isRoot(self):
         """Retorna se o usuario e root ou nao"""
@@ -82,14 +96,14 @@ class Cacic:
 
     def start(self):
         """Inicia as coletas"""
-        self.isforcada = []
-        print(" --- INICIO DAS COLETAS ---")
-        print 'Total Coletas: %s' % len(self.gc.coletores)
-        print('\tColetas a serem feitas: \n\t(%s)' % ', '.join(self.gc.coletores.keys()))
+        self.coletas_forcadas = []
+        CLog.appendLine(_l.get('col_manager'), _l.get('collection_started'))
+        CLog.appendLine(_l.get('col_manager'), '%s: %s' % (_l.get('collection_count'), len(self.gc.coletores)))
+        CLog.appendLine(_l.get('col_manager'), '%s: (%s)' % (_l.get('active_collections'), ', '.join([_l.get(col) for col in self.gc.coletores.keys()])))
         self.gc.startColeta()
         self.gc.createDat()
         self.gc.sendColetas()
-        print(" --- FIM DAS COLETAS ---")
+        CLog.appendLine(_l.get('col_manager'), _l.get('collection_finished'))
 
     def timeout(self):
         """
@@ -103,17 +117,17 @@ class Cacic:
     def conecta(self):
         """Conecta ao Gerente Web para pegar informacoes de configuracao"""
         xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
-        print(" Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
         self.gc.readXML(xml)
         """
         # verifica atualizacao
         if self.gc.hasNew():
-            print ' Versao nova disponivel !!!'
-            print ' `--- Iniciando atualizacao...'
+            CLog.appendLine('Cacic', 'Nova Versao Disponivel !!!')
+            CLog.appendLine('Cacic', 'Iniciando Atualização')
             self.gc.atualiza()
-            print ' `--- Novo pacote salvo'
             #chama atualizador e sai
+            CLog.appendLine('Cacic', 'Programa Atualizado Com Sucesso')
             os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
+            CLog.appendLine('Cacic', 'O Programa vai ser reiniciado em instantes.')
             self.quit()
         """
 
@@ -121,7 +135,7 @@ class Cacic:
         """Verifica comunicacao com a interface"""
         while 1:
             data, self.addr = self.sock.recvfrom(self.buf)
-            self.isforcada.append(data)
+            self.coletas_forcadas = data.split()
 
     def quit(self):
         """Sai do programa fechando conexao do socket"""
@@ -132,6 +146,6 @@ if __name__ == '__main__':
     ver =  sys.version_info
     version = int(''.join([ '%s' %sys.version_info[x] for x in range(3)]))
     if version < 230:
-        print "ERROR: Python 2.3 or greater required"
+        print _l.get('python_required')
         sys.exit(1)
     Cacic()

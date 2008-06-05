@@ -15,6 +15,12 @@ import os
 import sys
 import commands
 
+import time
+from time import strftime
+from threading import Thread
+
+from xml.dom import minidom, Node
+
 from coletores.coletor import *
 from coletores.col_network import *
 from coletores.col_hard import *
@@ -27,16 +33,13 @@ from coletores.lib.url import *
 from coletores.lib.arquivo import *
 from coletores.lib.computador import Computador
 
-import time
-from time import strftime
-from threading import Thread
-
-from xml.dom import minidom, Node
-
+from logs.log import CLog
+from lang.language import Language
 from config.io import *
 
 from globals import Globals
 
+_l = Language()
 
 class Ger_Cols:
     """
@@ -51,6 +54,7 @@ class Ger_Cols:
     """
     
     OUTPUT_DAT = '%s/cacic2.dat' % Globals.PATH
+    MD5SUM = '%s/config/MD5SUM' % Globals.PATH
 
     def __init__(self, version):
         # para controle de intervalo
@@ -65,7 +69,7 @@ class Ger_Cols:
         self.mac_invalidos = ''
         # configuracoes gerais
         self.versao_atual = version
-        self.hash_atual = open("/usr/share/pycacic/config/MD5SUM", "r").read()
+        self.hash_atual = open(self.MD5SUM, "r").read()
         self.hash_disponivel = ''
         self.pacote_disponivel = ''
         self.exibe_bandeja = 'N'
@@ -77,7 +81,8 @@ class Ger_Cols:
         server = Reader.getServer()
         self.cacic_server = server['address']
         self.cacic_ws = server['ws']
-        self.cacic_pass = server['password']
+        self.cacic_user = self.coletor.encripta(server['username'])
+        self.cacic_pass = self.coletor.encripta(server['password'])
         self.cacic_url = (server['address'] + server['ws'] + server['page'])
         # UPDATES
         self.update_auto = 'N'
@@ -89,6 +94,7 @@ class Ger_Cols:
         # coletas a serem realizadas
         self.coletores = {}
         self.coletas_enviar = {}
+        self.col_status = {}
         # lista com as coletas forcadas
         self.coletas_forcadas = []
         # se for True forca todas as coletas
@@ -98,7 +104,7 @@ class Ger_Cols:
         net = Rede()
         netmask = net.__getMask__(self.computador.ipAtivo)
         iprede = net.__getIPRede__(self.computador.ipAtivo, netmask);
-        self.defaults = {
+        """
             'agente_linux' : self.coletor.encripta('PyCacic'),
             'user'         : self.coletor.encripta(server['username']),
             'pwd'          : self.coletor.encripta(server['password']),
@@ -110,7 +116,19 @@ class Ger_Cols:
             'id_rede'      : self.coletor.encripta(iprede),
             'mac'          : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ipAtivo)),
             'padding_key'  : self.coletor.getPadding(),
-        }        
+            """
+        self.defaults = {
+            'cs_cipher'   : '1',
+            'AgenteLinux' : self.coletor.encripta('PyCacic'),
+            'agent'        : self.coletor.encripta(server['agent']),     
+            'id_so'        : self.coletor.encripta('-1'),
+            'te_so'        : self.coletor.encripta(self.computador.getSO()),
+            'te_nome_computador'     : self.coletor.encripta(self.computador.getHostName()),
+            'id_ip_estacao'           : self.coletor.encripta(self.computador.ipAtivo),
+            'id_ip_rede'      : self.coletor.encripta(iprede),
+            'te_node_address'          : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ipAtivo)),
+            'padding_key'  : self.coletor.getPadding(),
+        }
         self.dicionario = {
             'in_chkcacic'        : self.coletor.encripta(''),
             'in_teste'           : self.coletor.encripta(''),                
@@ -124,28 +142,6 @@ class Ger_Cols:
         }       
         self.separador = '=CacicIsFree='
         
-        
-    def start(self):
-        """Inicia o Gerente de Coletas em background"""
-        try:
-            xml = self.conecta(self.cacic_url, self.dicionario)
-            print("Contato com o Gerente Web: %s" % strftime("%H:%M:%S"))
-            self.readXML(xml)
-            # intervalo
-            interval = self.getInterval()
-            print(" `---- Coleta iniciara daqui a %s minutos" % (interval/60))
-            time.sleep(interval)
-            #self.atualiza()
-            print('Coletas a serem feitas: %s' % ', '.join(self.coletas))
-            self.startColeta()
-            self.createDat()
-            self.sendColetas()
-            print(" --- FIM ---")
-        except Exception, e:
-            import traceback
-            traceback.print_exc()
-            print(e)
-
     def getInterval(self):
         """Retorna o tempo em minutos do intervalo da coleta"""
         interval = self.intervalo_exec
@@ -161,7 +157,7 @@ class Ger_Cols:
         """
         # returns void
         try:
-            xml = self.url.enviaRecebeDados(dicionario, server, self.defaults)
+            xml = self.url.enviaRecebeDados(dicionario, server, self.cacic_user, self.cacic_pass, self.defaults)
             # adiciona node pai ao xml
             xml = xml[:xml.find('?>')+2] + '<cacic>' + xml[xml.find('?>')+2:] + '</cacic>'
             return xml 
@@ -178,7 +174,7 @@ class Ger_Cols:
         # returns void
         # se nao achar o status==OK, retorna
         if not self.url.isOK(xml):
-            raise Exception('Erro ao ler XML do servidor, status não disponível')
+            raise Exception('%s, %s.' % (_l.get('error_on_read_server_xml'), _l.get('error_not_available_status')))
         self.xml = minidom.parseString(xml)        
         root = self.xml.getElementsByTagName('CONFIGS')[0]
         # Coletores
@@ -187,7 +183,7 @@ class Ger_Cols:
         self.addColeta(Col_Network(self.computador), 'S')
         for no in root.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
-                if no.firstChild.nodeValue != '':                   
+                if no.firstChild.nodeValue != '':      
                     if no.nodeName == 'cs_auto_update':
                         self.update_auto = self.decode(no.firstChild.nodeValue)
                     # COLETAS
@@ -224,7 +220,7 @@ class Ger_Cols:
                     elif no.nodeName == 'nu_intervalo_renovacao_patrim':
                         self.intervalo_renovacao_patrim = self.decode(no.firstChild.nodeValue)
                     elif no.nodeName == 'te_senha_adm_agente':
-                        self.cacic_pass = self.decode(no.firstChild.nodeValue)
+                        Writer.setPycacic('password', self.decode(no.firstChild.nodeValue))
                     elif no.nodeName == 'te_enderecos_mac_invalidos':
                         self.mac_invalidos = (self.decode(no.firstChild.nodeValue)).replace('-',':')
                     elif no.nodeName == 'TE_SERV_CACIC':
@@ -265,7 +261,7 @@ class Ger_Cols:
             self.url.getFile(self.pacote_disponivel, '/tmp/%s' % self.pacote_disponivel)
             self.url.ftpDesconecta()
         except Exception, e:
-            raise Exception('Erro ao tentar atualizar: %s' % e.message)
+            raise Exception('%s: %s.' % (_l.get('error_on_try_update'), e.message))
 
     def startColeta(self):
         """ Inicia as Coletas"""
@@ -273,8 +269,9 @@ class Ger_Cols:
         self.coletas_enviar.clear()
         self.computador.coletar()
         for col in self.coletores.values():
+            CLog.appendLine('%s' % _l.get(col.getName()), 'Coleta iniciada')
             col.start()
-            self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))
+            self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))            
             if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):
                 page = Reader.getColetor(col.getName())['page']
                 dict = col.getEncryptedDict()
@@ -286,20 +283,26 @@ class Ger_Cols:
             no Gerente Web
         """
         for col in self.coletas_enviar.keys():
-            print(' - Enviando dados de %s' % col)
+            CLog.appendLine('%s' % _l.get(col), 'Enviando dados')
             server = '%s%s%s' % (self.cacic_server, self.cacic_ws, self.coletas_enviar[col]['page'])
             xml = self.conecta(server, self.coletas_enviar[col]['dict'])
             if self.url.isOK(xml):
-                print(' `---- Envio OK')
+                self.col_status[col] = 'Dados da Coleta Enviado Com Sucesso'
+                CLog.appendLine('%s' % _l.get(col), 'Dados da Coleta Enviado Com Sucesso')
             else:
-                print(' `---- Erro no Envio')
+                self.col_status[col] = _l.get('error_on_send_data')
+                CLog.appendLine('%s' % _l.get(col), _l.get('error_on_send_data'))
 
     def createDat(self):
-        """Cria o arquivo .dat do gerencte de coletas"""
+        """Cria o arquivo .dat do gerente de coletas"""
         self.coletor.addChave('Configs.HOSTNAME', self.computador.getHostName())
         self.coletor.addChave('Configs.ID_SO', self.computador.getSO())
         self.coletor.addChave('Configs.Endereco_WS', self.cacic_ws)
-        self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT, 'Coleta.')
+        coletas_realizadas = []
+        for col in self.coletores.values():
+            coletas_realizadas.append('#'.join([col.getName(), col.getChave('Inicio'), col.getChave('Fim')]))           
+        self.coletor.addChave('Coletas.Realizadas', '##'.join(coletas_realizadas))
+        self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT, '')
 
     def toString(self):
         """Metodo toString da Classe"""
