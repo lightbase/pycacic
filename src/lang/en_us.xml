@@ -1,33 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pycacic>
-	<about>
-		<version>0.1</version>
+	<header>
+		<code>en_US</code>
+		<name>English (US)</name>
+		<revision>1</revision>
+		<agentversion>0.0.1</agentversion>
 		<author>Dataprev - ES</author>
-		<date>15 january 2008</date>
-		<language type="en" location="USA">English</language>
-		<description>Pycacic translation for English</description>
-	</about>
-	<mode type="text" viewer="console">
-		<description>Translation for the text mode version</description>
-		<header>
-			<welcome>Welcome to PyCacic</welcome>
-			<version type="alpha">0.1</version>
-			<description>version 0.1 alpha (text mode)</description>
-		</header>
+		<date>15 January 2008</date>
+		<description> </description>
+	</header>
+	<body>
+		<names>
+			<string name="pycacic">PyCacic</string>
+			<string name="web_manager">Web Manager</string>			
+			<string name="col_manager">Collector Manager</string>
+			<string name="col_hard">Hardware Collector</string>
+			<string name="col_soft">Software Collector</string>
+			<string name="col_patr">?Patrimonio? Collector</string>
+			<string name="col_undi">Disk Units Collector</string>
+			<string name="col_vamb">Environment Variables Collector</string>
+			<string name="col_network">Network Collector</string>
+		</names>
+		<main>
+			<string name="welcome">Welcome to PyCacic</string>
+			<string name="need_root">You must superuser (root) to run the program</string>
+			<string name="program_started">Programam Started</string>
+			<string name="contact_with">Contact With</string>
+			<string name="collection_starts_in">Collection Starts in</string>
+			<string name="collections_started">Collections Started</string>
+			<string name="collections_finished">Collections Finished</string>
+			<string name="collection_count">Collections Count</string>
+			<string name="active_collections">Active Collections</string>
+			<string name="sending_data_col">Sending data collected by</string>
+			<string name="exit_confirm">Do you really want to exit?</string>
+		</main>
 		<menu>
-			<item id="0" href="col_hard">Hardware Collector</item>
-			<item id="1" href="col_soft">Software Collector</item>
-			<item id="2" href="col_patr">Coletor de Patrimonio</item>
-			<item id="3" href="exit">Exit</item>
+			<string name="action_log">Actions Log</string>
+			<string name="settings">Settings</string>
+			<string name="run_now">Run Now</string>
+			<string name="general_info">Informacoes Gerais</string>
+			<string name="patr_info">Informacoes Patrimoniais</string>
+			<string name="exit">Finalizar PyCacic</string>
 		</menu>
-		<messages>
-			<hitkeys>
-				<hitkey key="enter">Press enter key to continue</hitkey>
-				<hitkey key="spacebar">Press spacebar key to continue</hitkey>
-			</hitkeys>			
-		</messages>		
-	</mode>
-	<mode type="gui" viewer="gtk">
-		<description>Translation for the GUI mode version</description>
-	</mode>
+		<keymsgs>
+			<string name="hit_enter">Press [enter] to continue</string>
+			<string name="hit_space">Press [espace] to continue</string>
+			<string name="hit_any">Press any key to continue</string>
+		</keymsgs>
+		<units>
+			<string name="seconds">second(s)</string>
+			<string name="minutes">minute(s)</string>
+			<string name="hours">hour(s)</string>
+		</units>
+		<windows>
+			<string name="app_server">Application Server</string>
+			<string name="network_settings">TCP/IP Settings</string>
+			<string name="systems_monit_on">Sistemas Monitorados nessa Estação</string>
+			<string name="cols_on_this_date">Coletas Realizadas Nesta Data</string>
+		</windows>
+		<misc>
+			<string name="host_name">HostName</string>
+			<string name="host_ip_address">Host Ip Address</string>
+			<string name="net_ip_address">Net Ip Address</string>			
+			<string name="mac_address">MAC Address</string>
+			<string name="net_mask">Net Mask</string>
+			<string name="dns_domain_server">DNS Domain Server</string>
+			<string name="primary_dns_server">Primary DNS Server</string>
+			<string name="secondary_dns_server">Secondary DNS Server</string>
+			<string name="default_gateway">Default Gateway</string>
+			<string name="dhcp_server">DHCP Server</string>
+		</misc>
+		<errors>
+			<string name="error_python_required">ERROR: Python 2.3 or greater required</string>
+			<string name="error_on_read_server_xml">Error on read server XML</string>
+			<string name="error_not_available_status">not Available Status</string>
+			<string name="error_on_try_update">Error on try update</string>
+			<string name="error_on_send_data">Error on send data</string>
+			<string name="error_not_found_lshw">Error on run lshw, file not found</string>
+			<string name="error_on_open_xml">Error ao abrir arquivo XML</string>
+			<string name="error_invalid_format">invalid format</string>
+			<string name="error_not_implemented">Method not implemented</string>
+			<string name="error_abstract_method">Abstract method must be overridden</string>
+			<string name="error_on_open_file">Error on open file</string>
+			<string name="error_on_save_file">Error on save file</string>
+			<string name="error_invalid_server_address">Invalid Server Ip Address. Could not detect active Host Ip Address.</string>
+		</errors>		
+		<words>
+			<string name="action">Action</string>
+			<string name="date">Date</string>
+			<string name="end">End</string>
+			<string name="error">Error</string>
+			<string name="item">Item</string>
+			<string name="license">License</string>			
+			<string name="module">Module</string>
+			<string name="name">Name</string>						
+			<string name="start">Start</string>
+			<string name="status">Status</string>
+			<string name="value">Value</string>	
+			<string name="version">Version</string>			
+		</words>
+	</body>
 </pycacic>
