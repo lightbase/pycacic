@@ -23,10 +23,12 @@ import socket, fcntl, struct
 from urlparse import urlparse
 from xml.dom import minidom, Node
 
+from lang.language import Language
 from globals import Globals
 
 DEFAULT_STRING_VALUE = ''
 
+_l = Language()
 
 class ComputerException(Exception):
 	"""Classe ComputerException, para exibir mensagens de exceptions"""
@@ -40,7 +42,7 @@ class ComputerException(Exception):
 		return self.message
 	
 class MotherBoard:
-	"""Classe MotherBoard, contￃﾩm informaￃﾧￃﾵes sobre a Placa Mae"""
+	"""Classe MotherBoard, contém informações sobre a Placa Mae"""
 	
 	def __init__(self):
 		self.fabricante = ''
@@ -55,7 +57,7 @@ class MotherBoard:
 		return self.fabricante
 
 class CPU:
-	"""Classe CPU, contￃﾩm informaￃﾧￃﾵes sobre a CPU"""
+	"""Classe CPU, contém informações sobre a CPU"""
 	
 	def __init__(self) :
 		self.id = 0
@@ -114,7 +116,7 @@ class CPU:
 	
 	
 class Video :
-	"""Classe contendo as informacoes de vￃﾭdeo"""
+	"""Classe contendo as informacoes de vídeo"""
 	
 	def __init__(self) :
 		self.res = ""
@@ -133,12 +135,12 @@ class Video :
 		self.ram = ram
 	
 	def getResolucao (self) :
-		""" retorna a resoluￃﾧￃﾣo do video """
+		""" retorna a resolução do video """
 		# returns double
 		return self.res
 	
 	def setResolucao (self, res) :
-		""" define a resoluￃﾧￃﾣo do video """
+		""" define a resolução do video """
 		# returns 
 		self.res = res
 		
@@ -202,7 +204,7 @@ class RAM :
 
 
 class Rede:
-	"""Classe responsￃﾡvel por conter as informaￃﾧￃﾵes de rede"""
+	"""Classe responsável por conter as informações de rede"""
 	
 	def __init__(self):
 		self.ip = ''
@@ -320,7 +322,7 @@ class Rede:
 		return ['', ''] 
 	
 	def __getDNSDomain__(self):
-		""" Pega o domￃﾭnio """
+		""" Pega o domínio """
 		dns = commands.getoutput("cat /etc/resolv.conf")
 		pos = dns.find("search ")
 		if pos != -1:
@@ -342,7 +344,7 @@ class Rede:
 					return self.__getIpList__(lease[lease.find('dhcp-server'):])[0]
 		return ''			
 	
-	def getIPRede(self, ip):
+	def getIPRede(self):
 		""" retorna a descricao da placa de rede """
 		# returns string
 		return self.iprede
@@ -368,11 +370,11 @@ class Rede:
 		return self.ip
 	
 	def getDHCP(self):
-		""" retorna o endereￃﾧo IP do servidor DHCP """
+		""" retorna o endereço IP do servidor DHCP """
 		return self.dhcp
 	
 	def getMascara(self):
-		""" retorna a mￃﾡscara de rede da mￃﾡquina """
+		""" retorna a máscara de rede da máquina """
 		# returns string
 		return self.mascara
 	
@@ -382,7 +384,7 @@ class Rede:
 		return self.gateway
 	
 	def getMAC(self):
-		""" retorna o endereco mac da mￃﾡquina """
+		""" retorna o endereco mac da máquina """
 		# returns string
 		return self.mac
 	
@@ -397,13 +399,13 @@ class Rede:
 		return self.dns
 	
 	def getDNSDomain(self):
-		""" retorna o domￃﾭnio do DNS """
+		""" retorna o domínio do DNS """
 		#return string
 		return self.dnsdomain
 	
 	
 class Bios:
-	"""Classe responsￃﾡvel por conter as informaￃﾧￃﾵes da Bios"""
+	"""Classe responsável por conter as informações da Bios"""
 	
 	def __init__(self) :
 		self.data = DEFAULT_STRING_VALUE # string
@@ -442,7 +444,7 @@ class Bios:
 
 
 class HardDisk:
-	"""Classe responsￃﾡvel por conter as informaￃﾧￃﾵes sobre o HD"""
+	"""Classe responsável por conter as informações sobre o HD"""
 	
 	def __init__(self) :
 		self.tamanho = 0.0 # double
@@ -483,7 +485,7 @@ class HardDisk:
 		
 class PC_XML:
 	"""
-		Classe intermediￃﾡria responsavel por executar o binario lshw,
+		Classe intermediária responsavel por executar o binario lshw,
 		que ira gerar um xml, e entao tratar o xml setando os atributos
 		do Computador atraves do mesmo e por comandos bash.
 	"""	
@@ -521,7 +523,7 @@ class PC_XML:
 				os.chmod(lshw, 0755)
 			return commands.getoutput(lshw + " -xml")
 		else:
-			raise ComputerException('Erro ao executar o lshw, arquivo nao encontrado')
+			raise ComputerException(_l.get('error_not_found_lshw'))
 		
 	def readXML(self):
 		"""Le o arquivo xml (String) gerado"""
@@ -548,7 +550,8 @@ class PC_XML:
 			print e
 			import traceback
 			traceback.print_exc()
-			raise ComputerException('Erro ao abrir arquivo XML, formato inesperado')
+			raise ComputerException('%s, %s' % (_l.get('error_on_open_xml'), _l.get('error_invalid_forma')))	
+		
 		
 	def getPlacaMaeInfo(self, no):
 	    """Pega as informacoes da Placa Mae atraves do no do XML """
@@ -626,7 +629,7 @@ class PC_XML:
 		        c.setFrequencia((int(filho.firstChild.nodeValue)/1000000))
 		if c.getDescricao() != "":
 			self.cpu.append(c)
-		# Caso exista um novo processador mas a descriￃﾧￃﾣo estￃﾡ vazia
+		# Caso exista um novo processador mas a descrição está vazia
 		# assuma que sao mais de um nucleo e replica as informacoes do
 		# ultimo adicionado. Compara tambem com o total de cpu encontrada pelo lshw
 		elif len(self.cpu) > 0 and len(self.cpu) < self.n_cpu:
@@ -723,6 +726,8 @@ class PC_XML:
 	                    self.getSCSIInfo(filho)
 	                elif a == 'id' and valor[0:5] == 'cdrom':
 	                	self.getCDROMInfo(filho)
+	                elif a == 'id' and valor[0:4] == 'disk':
+	                	self.getHardDiskInfo(filho)
 
 	def getSCSIInfo(self, no):
 		"""Pega as informacoes de SCSI atraves do no do XML"""
@@ -1052,11 +1057,11 @@ class Particao:
 		return self.size
 	
 	def __setFreeSize__(self):
-		desc = commands.getoutput("df -l %s" % self.getName()).split('\n')
+		desc = commands.getoutput("df --block-size 1 -l %s" % self.getName()).split('\n')
 		if len(desc) > 1:
 			inf = desc[1].split()
 			if len(inf) > 3:
-				self.freesize = round(int(inf[3]) / 1024)
+				self.freesize = round(int(inf[3]) / 1000000)
 				return
 		self.freesize = self.size
 	
@@ -1117,9 +1122,9 @@ class Computador :
 		"""Inicia a coleta de informacoes do computador"""
 		try:
 			if not self.isRoot():
-				raise ComputerException('Para executar o programa ￃﾩ necessￃﾡrio estar como super usuￃﾡrio (root).')
+				raise ComputerException(_l.get('need_root'))
 			pc_xml = PC_XML()
-			self.ram = pc_xml.ram		
+			self.ram = pc_xml.ram
 			self.rom = pc_xml.rom
 			self.placaMae = pc_xml.placaMae
 			self.placaRede = pc_xml.placaRede
@@ -1242,7 +1247,7 @@ class Computador :
 		"""Retorna o endereco de IP que conecta no server especificado"""
 		ips = urlparse(server)[1]
 		if ips == "":
-			raise ComputerException("Endereￃﾧo do Servidor invￃﾡlido. Nￃﾣo foi possￃﾭvel detectar o ip ativo.")
+			raise ComputerException(_l.get('error_invalid_server_address'))
 		ips = socket.gethostbyname(ips)		
 		return Rede().getIPAtivo(ips)
 	

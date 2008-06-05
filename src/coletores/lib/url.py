@@ -29,7 +29,7 @@ class URL :
     def __init__(self) :
         self.ftp = ''
     
-    def enviaRecebeDados(self, dados, url, defaults):
+    def enviaRecebeDados(self, dados, url, user, pwd, defaults):
         """
             Envia os dados passados por parametro ao servidor por metodo POST
             e retorna o conteudo da pagina gerada
@@ -37,6 +37,7 @@ class URL :
             @param dados: dict
         """
         # returns string
+        """
         dados['cs_cipher']          = '1'
         dados['id_ip_estacao']      = defaults['ip']
         dados['id_ip_rede']         = defaults['id_rede']
@@ -46,13 +47,16 @@ class URL :
         dados['te_nome_computador'] = defaults['hostname']
         dados['padding_key']        = defaults['padding_key']
         dados['AgenteLinux']        = defaults['agente_linux']
+        """
+        for key, value in defaults.items():
+            dados[key] = value
         
         query = urllib.urlencode(dados)
         
-        base64string = base64.encodestring('%s:%s' % (defaults['user'], defaults['pwd']))[:-1]
+        base64string = base64.encodestring('%s:%s' % (user,pwd))[:-1]
         
         passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        passman.add_password(None, url, defaults['user'], defaults['pwd'])
+        passman.add_password(None, url, user, pwd)
         auth_handler = urllib2.HTTPBasicAuthHandler(passman)
         opener = urllib2.build_opener(auth_handler)
         urllib2.install_opener(opener)

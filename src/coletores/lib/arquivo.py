@@ -27,8 +27,8 @@ class Arquivo:
             file = open(path, 'w')
             file.write(content)
             file.close()
-        except:
-            raise ('Erro ao salvar arquivo: %s' % path)
+        except e:
+            raise ('Erro ao salvar arquivo: %s - Reason: %s' % path, e)
         
     def openFile(path):
         """Retorna uma String com o conteudo do arquivo especificado"""
