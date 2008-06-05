@@ -19,12 +19,12 @@ class Col_Undi(Coletor):
         return 'Coleta.Undi'
 
     def isReady(self, dat=None):
-        return self.getUVCDat(dat, self.getUVCKey()) != self.getChave('UVC')    
+        return self.getUVCDat(dat, self.getUVCKey()) != self.getChave('UVC')
 
     def setDicionario(self):
         """Monta o dicionario"""        
         self.dicionario.clear()
-        self.addChave('Inicio', '')
+        self.addChave('Inicio', strftime("%H:%M:%S"))
         parts = self.computer.getPartitions()
         """
             Drive <FIELD>
@@ -37,6 +37,6 @@ class Col_Undi(Coletor):
         """
         tripa = '<REG>'.join(['<FIELD>'.join([p.getName(), '2', p.getFileSystem(), p.getSerial(), str(p.getSize()), str(p.getFreeSize()), '']) for  p in parts ])
         self.addChave('UnidadesDiscos', tripa)
-        self.addChave('Fim', '')
+        self.addChave('Fim', strftime("%H:%M:%S"))
         self.addChave('UVC', self.getUVC(self.dicionario))
         

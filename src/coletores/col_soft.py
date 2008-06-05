@@ -19,13 +19,21 @@ class Col_Soft(Coletor):
         return 'Coleta.Software'
 
     def isReady(self, dat=None):
-        return 0
-    
-    def start(self):
-        self.setDicionario()
-        self.createDat(self.dicionario, self.PATH + self.OUTPUT_DAT, 'Col_Soft.')
+        return self.getUVCDat(dat, self.getUVCKey()) != self.getChave('UVC')
 
     def setDicionario(self):
         """Monta o dicionario"""
+        self.dicionario.clear()
+        self.addChave('Inicio', strftime("%H:%M:%S"))
+        self.addChave("te_versao_bde", "0")
+        self.addChave("te_versao_dao", "0")
+        self.addChave("te_versao_ado", "0")
+        self.addChave("te_versao_directx", "0")
+        self.addChave("te_versao_acrobat_reader", "0")
+        self.addChave("te_versao_ie", "0")
+        self.addChave("te_versao_mozilla", "0")
+        self.addChave("te_versao_jre", "0")
+        self.addChave("te_inventario_softwares", "#".join(self.computer.getPacotes()))
         self.addChave('UVC', self.getUVC(self.dicionario))
+        self.addChave('Fim', strftime("%H:%M:%S"))
     

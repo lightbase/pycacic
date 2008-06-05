@@ -19,6 +19,10 @@ class Col_Patr(Coletor):
         self.setDicionario()
 
     def setDicionario(self):
-        """Monta o dicionario"""      
+        """Monta o dicionario"""
+        self.dicionario.clear()
+        self.addChave('Inicio', strftime("%H:%M:%S"))
+        self.addChave('UVC', self.getUVC(self.dicionario))
+        self.addChave('Fim', strftime("%H:%M:%S"))
         return
     

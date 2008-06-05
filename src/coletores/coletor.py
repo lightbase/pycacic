@@ -11,10 +11,16 @@
     
 """
 
-import os;
+import os
+from time import strftime
+
 from lib.arquivo import *
 from lib.ccrypt import *
 from lib.computador import Computador
+
+from lang.language import Language
+
+_l = Language()
 
 class Coletor:
     """
@@ -31,8 +37,8 @@ class Coletor:
         self.dicionario = {}
         self.crpt = CCrypt()
         self.computer = computer
-        self.spd_key = '=CacicIsFree='
-        self.spd_value = '=PyCacic='
+        self.STRPKEY = '=CacicIsFree='
+        self.STRPVALUE = '=PyCacic='
     
     def addChave(self, chave, valor):
         """
@@ -54,11 +60,11 @@ class Coletor:
     
     def getName(self):
         """ Retorna o nome do coletor """
-        raise Exception("Abstract method getName(), must override")
+        raise Exception('%: Coletor.getName().' % _l.get('error_abstract_method'))
     
     def getUVCKey(self):
         """ Retorna o nome da chave do UVC """
-        raise Exception("Abstract method getUVCKey(), must override")
+        raise Exception('%: Coletor.getUVCKey().' % _l.get('error_abstract_method'))
     
     def getDatKeyPrefix(self):
         """Retorna o prefixo do nome da chave no dat"""
@@ -67,26 +73,44 @@ class Coletor:
     
     def getEncryptedDict(self):
         """ Retorna o dicionario de dados da coleta encryptado """
+        dicionario = {}
         for key, value in self.dicionario.items():
-            self.dicionario[key] = self.encripta(self.dicionario[key])
-        return self.dicionario
+            dicionario[key] = self.encripta(self.dicionario[key])
+        return dicionario
     
     def isReady(self, dat=None):
         """ Retorna True se o coletor está pronto/pretende enviar uma coleta, False caso contrário """
         return 1 # True
                     
-    def createDat(self, chaves, path, prefixo=''):
+    def createDat(self, chaves, path, prefixo=None):
         """
             Percorre o dicionario montando uma string
             com chave e valor separadas por uma string padrao
         """
         try:
-            if prefixo == '':
+            if prefixo == None:
                 prefixo = self.getDatKeyPrefix()
-            data = self.spd_key.join(["%s%s%s%s" % (prefixo, k, self.spd_value, chaves[k]) for k in chaves.keys()])
+            data = self.STRPKEY.join(["%s%s%s%s" % (prefixo, k, self.STRPVALUE, chaves[k]) for k in chaves.keys()])
             Arquivo.saveFile(path, self.encripta(data))
         except Exception, e:
-            raise Exception('Erro ao gravar dat: %s - Motivo: %s' % path, e)
+            raise Exception('%s (%s): %s' % (_l.get('error_on_save_file'), path, e))
+        
+    def getDatToDict(self, path, prefixo=None):
+        """Restaura o Dicionario do Coletor a partir do seu Arquivo .DAT temporario"""
+        try:
+            dic = {}
+            if prefixo == None:
+                prefixo = self.getDatKeyPrefix()
+            dat = Arquivo.openFile(path)
+            data = self.decripta(dat)
+            itens = data.split(self.STRPKEY)
+            for item in itens:
+                key_value = item.split(self.STRPVALUE)
+                if len(key_value) >= 2:
+                    dic[key_value[0].replace(prefixo, '')] = key_value[1] 
+            return dic
+        except Exception, e:
+            raise Exception('%s (%s): %s' % (_l.get('error_on_open_file'), path, e))
             
     def getUVCDat(self, path, chave):
         """
@@ -94,11 +118,11 @@ class Coletor:
             ultima coleta contida no arquivo .dat
         """
         data = Arquivo.openFile(path)
-        dat = self.decripta(data)       
-        for i in dat.split(self.spd_key):
-            item = i.split(self.spd_value)
+        dat = self.decripta(data)
+        for i in dat.split(self.STRPKEY):
+            item = i.split(self.STRPVALUE)
             if item[0] == chave:
-                return item[1] 
+                return item[1]
         return ''
 
     def getUVC(self, dicionario):
@@ -108,7 +132,7 @@ class Coletor:
         """
         keys = dicionario.keys()
         keys.sort()
-        return ';'.join(['%s' % dicionario[i] for i in keys if i != 'UVC'])
+        return ';'.join(['%s' % dicionario[i] for i in keys if not i in ('UVC', 'Fim', 'Inicio')])
     
     def start(self):
         """Inicia a coleta do coletor atual"""

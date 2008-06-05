@@ -26,6 +26,8 @@ class Col_Vamb(Coletor):
 
     def setDicionario(self):
         """Monta o dicionario"""
+        self.dicionario.clear()
+        self.addChave('Inicio', strftime("%H:%M:%S"))
         vars = commands.getoutput("set")
         varlist = vars.split("\n")
         lista = []
@@ -35,14 +37,16 @@ class Col_Vamb(Coletor):
             #key = re.escape(key)
             value = vv[pos+1:pos+1+100]
             #value = re.escape(value)
+            value = value.replace('=', '&equiv;')
             lista.append(key+"="+value)
-            value = "''"+value+"''"
+            #value = "''"+value+"''"
         self.addChave("te_variaveis_ambiente", self.escapeSQL("#".join(lista)))
         self.addChave('UVC', self.getUVC(self.dicionario))
+        self.addChave('Fim', strftime("%H:%M:%S"))
     
     def escapeSQL(self, sql):
         sql = sql.replace("'", "\\'")
         #sql = sql.replace("`", "\`")
-        #sql = sql.replace("=", '\=')
+        #sql = sql.replace("=", '\\=')
         #sql = sql.replace(";", "\;")
         return sql

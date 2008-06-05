@@ -15,7 +15,6 @@
 import re
 import sys
 import commands
-from time import strftime
 from coletor import *
 
 class Col_Hard(Coletor):
@@ -32,17 +31,17 @@ class Col_Hard(Coletor):
     
     def getUVCKey(self):
         return 'Coleta.Hardware'
-
-    def start(self):
-        self.setDicionario()
-        self.createDat(self.dicionario, self.PATH + self.OUTPUT_DAT, 'Col_Hard.')
+    
+    def isReady(self, dat):
+        return self.getUVCDat(dat, self.getUVCKey()) != self.getChave('UVC')
 
     def setDicionario(self):
         """Monta o dicionario"""
         self.dicionario.clear()
-        inicio = strftime("%H:%M:%S")
+        # INICIO
+        self.addChave('Inicio', strftime("%H:%M:%S"))
         # CPUs
-        # removido frequencia CPUs = '#CPU#'.join(['#FIELD#'.join(['te_cpu_desc###%s' % i.getDescricao(), 'te_cpu_fabricante###%s' % i.getFabricante(), 'te_cpu_serial###%s' % i.getSerial(), 'te_cpu_frequencia###%s' % i.getFrequencia()]) for i in self.computer.getCPU()])
+        # removido frequencia [old]=> CPUs = '#CPU#'.join(['#FIELD#'.join(['te_cpu_desc###%s' % i.getDescricao(), 'te_cpu_fabricante###%s' % i.getFabricante(), 'te_cpu_serial###%s' % i.getSerial(), 'te_cpu_frequencia###%s' % i.getFrequencia()]) for i in self.computer.getCPU()])
         CPUs = '#CPU#'.join(['#FIELD#'.join(['te_cpu_desc###%s' % i.getDescricao(), 'te_cpu_fabricante###%s' % i.getFabricante(), 'te_cpu_serial###%s' % i.getSerial()]) for i in self.computer.getCPU()])
         self.addChave('te_Tripa_CPU', CPUs)
         # Placas/Configuracoes de Redes
@@ -83,12 +82,8 @@ class Col_Hard(Coletor):
         self.addChave("te_modem_desc", self.getFirst(self.computer.getModem()))
         # Ultimo Valor Coletado
         self.addChave('UVC', self.getUVC(self.dicionario))
-        # INICIO-FIM
-        self.addChave('Inicio', inicio)
+        # FIM
         self.addChave('Fim', strftime("%H:%M:%S"))
-    
-    def isReady(self, dat):
-        return self.getUVCDat(dat, 'Coleta.Hardware') != self.getChave('UVC')
     
     def getFirst(self, list):
         """Retorna o primeiro item da lista"""

@@ -16,31 +16,28 @@ class Col_Network(Coletor):
     def __init__(self, computer):
         Coletor.__init__(self, computer)
         self.computer = computer
-
-    def isReady(self, dat=None):
-        # evita coletar network se estiver usando uma XML de outra maquina
-        return Globals.PC_XML == ""
-
+        
     def getName(self):
         return "col_network"
     
     def getUVCKey(self):
         return 'Coleta.Network'
-    
-    def start(self):
-        self.setDicionario()
-        self.createDat(self.dicionario, self.PATH + self.OUTPUT_DAT, 'Col_Network.')
+
+    def isReady(self, dat=None):
+        # evita coletar network se estiver usando uma XML de outra maquina
+        return Globals.PC_XML == ""
 
     def setDicionario(self):
-        """Monta o dicionario"""      
-        net = None;  
-        for nw in self.computer.getPlacaRede():
-            if nw.getIP() == self.computer.ipAtivo:
-                net = nw
-                break
+        """Monta o dicionario"""
         self.dicionario.clear()
-        if net != None:
-            self.addChave("te_ip", self.computer.ipAtivo)        
+        self.addChave('Inicio', strftime("%H:%M:%S"))
+        net = None
+        if self.computer.ipAtivo in [nw.getIP() for nw in self.computer.getPlacaRede()]:
+            net = nw        
+        if net != None:           
+            self.addChave("te_ip", self.computer.ipAtivo)
+            self.addChave("te_ip_rede", net.getIPRede())
+            self.addChave("te_mac", net.getMAC())
             self.addChave('te_dns_primario', net.getDNS()[0])
             self.addChave('te_dns_secundario', net.getDNS()[1])
             self.addChave('te_dominio_dns', net.getDNSDomain())
@@ -49,4 +46,6 @@ class Col_Network(Coletor):
             self.addChave('te_gateway', net.getGateway())
             self.addChave("te_serv_dhcp", net.getDHCP())
         self.addChave('UVC', self.getUVC(self.dicionario))
+        self.addChave('Fim', strftime("%H:%M:%S"))
+        
     
