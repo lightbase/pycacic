@@ -24,14 +24,14 @@
 		<main>
 			<string name="welcome">Welcome to PyCacic</string>
 			<string name="need_root">You must superuser (root) to run the program</string>
-			<string name="program_started">Programam Started</string>
+			<string name="program_started">Program Started</string>
 			<string name="contact_with">Contact With</string>
 			<string name="collection_starts_in">Collection Starts in</string>
 			<string name="collections_started">Collections Started</string>
 			<string name="collections_finished">Collections Finished</string>
 			<string name="collection_count">Collections Count</string>
 			<string name="active_collections">Active Collections</string>
-			<string name="sending_data_col">Sending data collected by</string>
+			<string name="sending_data">Sending data</string>
 			<string name="exit_confirm">Do you really want to exit?</string>
 		</main>
 		<menu>

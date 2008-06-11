@@ -1,7 +1,22 @@
-# -*- coding: UTF-8 -*-
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 """
+
+    Copyright 2000, 2001, 2002, 2003, 2004, 2005 Dataprev - Empresa de Tecnologia e Informações da Previdência Social, Brasil
+    
+    Este arquivo é parte do programa CACIC - Configurador Automático e Coletor de Informações Computacionais
+    
+    O CACIC é um software livre; você pode redistribui-lo e/ou modifica-lo dentro dos termos da Licença Pública Geral GNU como 
+    publicada pela Fundação do Software Livre (FSF); na versão 2 da Licença, ou (na sua opnião) qualquer versão.
+    
+    Este programa é distribuido na esperança que possa ser  util, mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
+    MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a Licença Pública Geral GNU para maiores detalhes.
+    
+    Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
+    Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+
     GUI
     
     Modulo de Interface Gráfica do PyCacic.
@@ -27,6 +42,8 @@ from socket import *
 
 from coletores.coletor import Coletor
 from coletores.col_network import Col_Network
+
+from ger_cols import Ger_Cols
 
 from config.io import Reader
 
@@ -138,9 +155,8 @@ class GUI:
     def socketSend(self):
         host, port, buf, addr = Globals.getSocketAttr()
         udp_sock = socket(AF_INET, SOCK_DGRAM)
-        udp_sock.sendto('col_hard col_unid col_soft col_vamp col_network' , addr)
+        udp_sock.sendto('col_hard col_undi col_soft col_vamp col_network' , addr)
         udp_sock.close()
-        print "ENVIADO"
 
     def quit(self):
         """Fecha o programa"""
@@ -190,8 +206,7 @@ class GUI:
         self.showWindow(widget, login)
         
     def showExecAgora(self, widget):
-        login = Login(self.socketSend)
-        self.showWindow(widget, login)
+        self.socketSend()
         
     def showInfoPatr(self, widget):
         login = Login('')
@@ -243,10 +258,15 @@ class LogAtividades(GUI):
         # TreeView
         self.tv_log = self.xml.get_widget('tv_log')
         self.tv_log_model = gtk.ListStore(str, str, str)
+        self.tv_log_model.clear()
+        # linha atual
+        self.current_line = 0
+        # TreeViews
         self.setTreeViews()
         self.setTreeViewsValues()
         # callback
         gobject.timeout_add(10000, self.setTreeViewsValues)
+        
         
     def setTreeViews(self):
         self.tv_log.set_model(self.tv_log_model)
@@ -263,13 +283,15 @@ class LogAtividades(GUI):
         self.tv_log.append_column(coluna2)
         self.tv_log.append_column(coluna3)
         
-    def setTreeViewsValues(self):
-        self.tv_log_model.clear()
+    def setTreeViewsValues(self):    
         f = CLog.getCurrentFile()
-        for lines in f.split('\n'):
+        for lines in f.split('\n')[self.current_line:]:
             values = lines.split(CLog.STRP)
             if len(values) == 3:
                 self.tv_log_model.append(values)
+                self.current_line += 1        
+        if self.current_line > 0:
+            self.tv_log.scroll_to_cell(self.current_line - 1)
         return 1
                         
         
@@ -283,7 +305,6 @@ class InfoGeral(GUI):
     def __init__(self):
         GUI.__init__(self)
         self.col = Coletor(None)
-        self.cn = Col_Network(None)
         
     def show(self):
         self.visible = 1
@@ -346,28 +367,25 @@ class InfoGeral(GUI):
         
     def setTreeViewsValues(self):        
         itens = {
-             _l.get('host_name')            :  'te_nome_host',
-             _l.get('host_ip_address')      :  'te_ip',
-             _l.get('net_ip_address')       :  'te_ip_rede',
-             _l.get('mac_address')          :  'te_mac',
-             _l.get('net_mask')             :  'te_mascara',
-             _l.get('dns_domain_server')    :  'te_dominio_dns',
-             _l.get('primary_dns_server')   :  'te_dns_primario',
-             _l.get('secondary_dns_server') :  'te_dns_secundario',
-             _l.get('default_gateway')      :  'te_gateway',
-             _l.get('dhcp_server')          :  'te_serv_dhcp',
+             _l.get('host_name')            :  'TcpIp.TE_NOME_HOST',
+             _l.get('host_ip_address')      :  'TcpIp.TE_IP',
+             _l.get('net_ip_address')       :  'TcpIp.ID_IP_REDE',
+             _l.get('mac_address')          :  'TcpIp.TE_NODE_ADDRESS',
+             _l.get('net_mask')             :  'TcpIp.TE_MASCARA',
+             _l.get('dns_domain_server')    :  'TcpIp.te_dominio_dns',
+             _l.get('primary_dns_server')   :  'TcpIp.te_dns_primario',
+             _l.get('secondary_dns_server') :  'TcpIp.te_dns_secundario',
+             _l.get('default_gateway')      :  'TcpIp.te_gateway',
+             _l.get('dhcp_server')          :  'TcpIp.te_serv_dhcp',
         }
-        # TCP/IP INFO
-        network = self.cn.getDatToDict('/tmp/%s' % self.cn.OUTPUT_DAT)
+        # CACIC2.DAT
+        cacic_dat = self.col.getDatToDict(Ger_Cols.OUTPUT_DAT, '')
         self.tv_tcp_model.clear()
         for i in itens.keys():
             try:
-                self.tv_tcp_model.append([i, network[itens[i]]])
+                self.tv_tcp_model.append([i, cacic_dat[itens[i]]])
             except:
-                pass
-        # COLLECTIONS INFO
-        coletores = self.col.getDatToDict('%s/cacic2.dat' % Globals.PATH, '')
-        #print coletores['Coletas.Realizadas'] 
+                pass        
 
 
 if __name__ == '__main__':

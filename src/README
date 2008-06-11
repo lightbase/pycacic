@@ -1,24 +1,51 @@
-################################################################
-#    ______  ___    ___   ___  _____      ____   __   ____     #
-#    |  _  \ \  \  /  / /  __| |    \    / ___| |  | /  __|    #
-#    | |_/  | \  \/  / / /     | |\ \   | /     |  | |  /      #
-#    |  ___/   \   /  | |  _  |   _  \  | |   _ |  | | |  _    #
-#    |  |      /  /   | \_/ | |  | \  \ |  \_/ ||  | | \_/ |   #
-#    |__|     /__/    \____/ |__|   \__\ \____/ |__|  \____/   #
-#                                                              #
-#                                    VERSAO DESENVOLVIMENTO    #
-#                                                              #
-################################################################
+###############################################################################
+#           ______  ___    ___   ___  _____      ____   __   ____             #
+#           |  _  \ \  \  /  / /  __| |    \    / ___| |  | /  __|            #
+#           | |_/  | \  \/  / / /     | |\ \   | /     |  | |  /              #
+#           |  ___/   \   /  | |  _  |   _  \  | |   _ |  | | |  _            #
+#           |  |      /  /   | \_/ | |  | \  \ |  \_/ ||  | | \_/ |           #
+#           |__|     /__/    \____/ |__|   \__\ \____/ |__|  \____/           #
+#                                                                             #
+#                                                       versão 0.0.1          #
+#                                                                             #
+###############################################################################
 
- Primeiramente deve-se alterar, configurar, o arquivo config/cacic.conf 
- informando o endereco, usuario e senha do Gerente Web.
+ 1. SOBRE
  
- Apos executar, como super-usuario, o arquivo cacic.py que ficara rodando em background.
- Para utilizar a interface deve executar o arquivo gui.py (como usuario normal).
- E necessario ter instalado o GTK+, PyGTK e o Glade. Caso execute corretamente ira
- aparecer um icone no systray. Ao clicar nesse icone abre a janela com a possibilidade
- de forcar uma coleta.
+
+
+ 2. INSTALAÇÃO
+
+ Primeiramente executar o arquivo install.sh, como super usuário (root), e irá 
+ iniciar a instalação, caso o pacote não contenha uma pré-configuração algumas
+ informações (como ip do gerente web, usuário e senha) serão pedidas. Ao término
+ deste procedimento o PyCacic já estará rodando na máquina do usuário.
  
- obs: Ao clicar em "Forcar Coleta" observe no terminal que esta rodando o cacic.py se apareceu
- a mensagem de "coleta forcada".
+ Para utilizar a interface deve executar o arquivo "/usr/share/pycacic/gui.py" ou
+ no menu "Ferramentas de Sistema" > "PyCacic", como usuario normal.
+ É necessario ter instalado o GTK+, PyGTK e o Glade. Caso execute corretamente irá
+ aparecer um icone no systray, clicando com o botão direito no mesmo aparecerão
+ ações pertinentes ao programa.
+ 
+ obs: Ao clicar em "Executar Agora" observe na janela "Log de Atividades" as
+ mensagens geradas pelo programa (coletas, erros, etc.).
+ 
+ 
+ 3. EQUIPE
+ 
+ A equipe de desenvolvimento do PyCacic é composta pelos funcionários e estagiários
+ da Dataprev-ES (Unidade Regional do Espírito Santo). Sendo os integrantes:
+ 
+ 	ANDERSON ARARIPE PETERLE
+ 	ANDERSON ROBERTO PEREIRA
+	JORGE ANTONIO MACEDO DE MELLO
+	LEONARDO POPIK BASTOS
+	ROGERIO ALENCAR LINO FILHO
+	SYLVIO ROBERTO COUTINHO DA SILVA
+	ULYSSES RANGEL RIBEIRO 
+ 
+ Contando também com a participação e contribuíção da Comunidade do Cacic no Portal 
+ do Software Público Brasileiro:
+ 
+ 	http://www.softwarepublico.gov.br/ver-comunidade?community_id=3585
  

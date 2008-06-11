@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="pycacic" default="gzip" basedir=".">
+    <description>
+        This script will build the PyCacic Agent.
+        
+        This program is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 2, or (at your option)
+        any later version.
+        
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+        
+        You should have received a copy of the GNU General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+        02111-1307, USA.
+        
+        http://www.gnu.org/copyleft/gpl.html      
+        
+    </description>
+    
+    <property name="src" location="src"/>
+	<property name="dist" location="dist"/>
+	<property name="build" location="build"/>
+	<property name="build.pycacic" location="build/pycacic"/>
+	
+    <target name="init" description="Create/Cleans the output directories.">
+    	<delete dir="${build}"/>
+    	<tstamp />
+        <mkdir dir="${build}"/>
+    </target>
+    
+    <target name="prebuild" depends="init" description="Copies source files to build directory">
+    	<copy todir="${build.pycacic}/pycacic">
+			<fileset dir="${src}" />
+		</copy>
+    </target>
+	
+	<target name="build"  depends="prebuild" description="Removes/replaces temporary files generated during PyCacic Agent execution">
+		<copy overwrite="true" todir="${build}">
+			<fileset dir="${dist}"  /> <!--includes="**/*"-->
+		</copy>
+		<copy overwrite="true" todir="${build}">
+			<fileset file="${src}/coletores/lib/ccrypt.py"/>
+		</copy>
+		<copy overwrite="true" todir="${build}">
+			<fileset file="${src}/config/io.py"/>
+		</copy>
+		<copy overwrite="true" todir="${build}">
+			<fileset file="${src}/globals.py"/>
+		</copy>
+		<delete file="{build.pycacic}/cacic2.dat"/>
+	</target>
+    
+    <target name="tar" depends="build" description="Creates the tar file">
+		<tar basedir="${build.pycacic}" excludes="**/*.pyc, **/*.pyo" destfile="${build}/cacic.tar" />
+	</target>
+	
+	<target name="tar2" depends="tar" description="Creates the tar file">
+		<tar destfile="${build}/pycacic.tar">
+			<tarfileset dir="${build}" prefix="/pycacic"  preserveLeadingSlashes="false">
+			    <include name="cacic.tar"/>
+				<include name="setservice.py"/>
+				<include name="ccrypt.py"/>
+				<include name="io.py"/>
+				<include name="globals.py"/>
+			</tarfileset>
+			<tarfileset dir="${build}" prefix="/pycacic" mode="0755" preserveLeadingSlashes="false">
+				<include name="install.sh"/>
+			</tarfileset>
+		</tar>
+	</target>
+	
+	<target name="gzip" depends="tar2" description="Creates the tar.gz file">
+		<gzip src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1_${DSTAMP}${TSTAMP}.tgz" />
+	</target>
+	
+	<target name="bzip2" depends="tar2" description="Creates the tar.bz2 file">
+		<bzip2 src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1_${DSTAMP}${TSTAMP}.tar.bz2" />
+	</target>
+</project>

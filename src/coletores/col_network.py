@@ -1,3 +1,31 @@
+# -*- coding: UTF-8 -*-
+
+"""
+
+    Copyright 2000, 2001, 2002, 2003, 2004, 2005 Dataprev - Empresa de Tecnologia e Informações da Previdência Social, Brasil
+    
+    Este arquivo é parte do programa CACIC - Configurador Automático e Coletor de Informações Computacionais
+    
+    O CACIC é um software livre; você pode redistribui-lo e/ou modifica-lo dentro dos termos da Licença Pública Geral GNU como 
+    publicada pela Fundação do Software Livre (FSF); na versão 2 da Licença, ou (na sua opnião) qualquer versão.
+    
+    Este programa é distribuido na esperança que possa ser  util, mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
+    MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a Licença Pública Geral GNU para maiores detalhes.
+    
+    Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
+    Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+
+    Modulo col_network
+    
+    Modulo com finalidade de coletar as informacoes
+    de rede (TCP/IP) e passar para o gerente de coletas (Ger_Cols)
+    e o mesmo repassar ao servidor
+    
+    @author: Dataprev - ES
+    
+"""
+
 
 import socket
 import struct
@@ -24,16 +52,17 @@ class Col_Network(Coletor):
         return 'Coleta.Network'
 
     def isReady(self, dat=None):
-        # evita coletar network se estiver usando uma XML de outra maquina
-        return Globals.PC_XML == ""
+        return self.getUVCDat(dat, self.getUVCKey()) != self.getChave('UVC')
 
     def setDicionario(self):
         """Monta o dicionario"""
         self.dicionario.clear()
         self.addChave('Inicio', strftime("%H:%M:%S"))
-        net = None
-        if self.computer.ipAtivo in [nw.getIP() for nw in self.computer.getPlacaRede()]:
-            net = nw        
+        net = None        
+        for nw in self.computer.getPlacaRede():
+            if self.computer.ipAtivo == nw.getIP():
+                net = nw
+                break
         if net != None:           
             self.addChave("te_ip", self.computer.ipAtivo)
             self.addChave("te_ip_rede", net.getIPRede())

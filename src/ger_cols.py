@@ -2,6 +2,20 @@
 
 """
 
+    Copyright 2000, 2001, 2002, 2003, 2004, 2005 Dataprev - Empresa de Tecnologia e Informações da Previdência Social, Brasil
+    
+    Este arquivo é parte do programa CACIC - Configurador Automático e Coletor de Informações Computacionais
+    
+    O CACIC é um software livre; você pode redistribui-lo e/ou modifica-lo dentro dos termos da Licença Pública Geral GNU como 
+    publicada pela Fundação do Software Livre (FSF); na versão 2 da Licença, ou (na sua opnião) qualquer versão.
+    
+    Este programa é distribuido na esperança que possa ser  util, mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
+    MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a Licença Pública Geral GNU para maiores detalhes.
+    
+    Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
+    Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+
     Modulo ger_cols
     
     Modulo com finalidade de controlar a comunicacao
@@ -69,6 +83,7 @@ class Ger_Cols:
         self.mac_invalidos = ''
         # configuracoes gerais
         self.versao_atual = version
+        self.password = ''
         self.hash_atual = open(self.MD5SUM, "r").read()
         self.hash_disponivel = ''
         self.pacote_disponivel = ''
@@ -104,19 +119,6 @@ class Ger_Cols:
         net = Rede()
         netmask = net.__getMask__(self.computador.ipAtivo)
         iprede = net.__getIPRede__(self.computador.ipAtivo, netmask);
-        """
-            'agente_linux' : self.coletor.encripta('PyCacic'),
-            'user'         : self.coletor.encripta(server['username']),
-            'pwd'          : self.coletor.encripta(server['password']),
-            'agent'        : self.coletor.encripta(server['agent']),     
-            'id_so'        : self.coletor.encripta('-1'),
-            'te_so'        : self.coletor.encripta(self.computador.getSO()),
-            'hostname'     : self.coletor.encripta(self.computador.getHostName()),
-            'ip'           : self.coletor.encripta(self.computador.ipAtivo),
-            'id_rede'      : self.coletor.encripta(iprede),
-            'mac'          : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ipAtivo)),
-            'padding_key'  : self.coletor.getPadding(),
-            """
         self.defaults = {
             'cs_cipher'   : '1',
             'AgenteLinux' : self.coletor.encripta('PyCacic'),
@@ -220,7 +222,8 @@ class Ger_Cols:
                     elif no.nodeName == 'nu_intervalo_renovacao_patrim':
                         self.intervalo_renovacao_patrim = self.decode(no.firstChild.nodeValue)
                     elif no.nodeName == 'te_senha_adm_agente':
-                        Writer.setPycacic('password', self.decode(no.firstChild.nodeValue))
+                        self.password = self.decode(no.firstChild.nodeValue)
+                        Writer.setPycacic('password', self.password)
                     elif no.nodeName == 'te_enderecos_mac_invalidos':
                         self.mac_invalidos = (self.decode(no.firstChild.nodeValue)).replace('-',':')
                     elif no.nodeName == 'TE_SERV_CACIC':
@@ -271,6 +274,7 @@ class Ger_Cols:
         for col in self.coletores.values():
             CLog.appendLine('%s' % _l.get(col.getName()), 'Coleta iniciada')
             col.start()
+            # adiciona o UVC ao dicionario principal
             self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))            
             if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):
                 page = Reader.getColetor(col.getName())['page']
@@ -283,7 +287,7 @@ class Ger_Cols:
             no Gerente Web
         """
         for col in self.coletas_enviar.keys():
-            CLog.appendLine('%s' % _l.get(col), 'Enviando dados')
+            CLog.appendLine('%s' % _l.get(col), _l.get('sending_data') )
             server = '%s%s%s' % (self.cacic_server, self.cacic_ws, self.coletas_enviar[col]['page'])
             xml = self.conecta(server, self.coletas_enviar[col]['dict'])
             if self.url.isOK(xml):
@@ -294,15 +298,126 @@ class Ger_Cols:
                 CLog.appendLine('%s' % _l.get(col), _l.get('error_on_send_data'))
 
     def createDat(self):
-        """Cria o arquivo .dat do gerente de coletas"""
+        """Cria o arquivo .dat do gerente de coletas"""              
+        # GERAL
+        self.coletor.addChave('Configs.CS_CIPHER', '1')
+        self.coletor.addChave('Configs.CS_COMPRESS', '3')
+        self.coletor.addChave('Configs.NU_EXEC_APOS', self.exec_apos)
+        self.coletor.addChave('Configs.NU_INTERVALO_EXEC', self.intervalo_exec)
+        self.coletor.addChave('Configs.NU_INTERVALO_RENOVACAO_PATRIM', self.intervalo_renovacao_patrim)
+        # LOCAL 
         self.coletor.addChave('Configs.HOSTNAME', self.computador.getHostName())
         self.coletor.addChave('Configs.ID_SO', self.computador.getSO())
-        self.coletor.addChave('Configs.Endereco_WS', self.cacic_ws)
-        coletas_realizadas = []
-        for col in self.coletores.values():
-            coletas_realizadas.append('#'.join([col.getName(), col.getChave('Inicio'), col.getChave('Fim')]))           
-        self.coletor.addChave('Coletas.Realizadas', '##'.join(coletas_realizadas))
-        self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT, '')
+        self.coletor.addChave('Configs.TE_SENHA_ADM_AGENTE', self.password)
+        self.coletor.addChave('Configs.te_palavra_chave', '')
+        # PATRIMONIO
+        self.coletor.addChave('Patrimonio.ultima_rede_obtida', '10.71.0.0')
+        self.coletor.addChave('Patrimonio.dt_ultima_renovacao', '')
+        # COLETAS
+        self.coletor.addChave('Configs.Endereco_WS', self.cacic_ws)        
+        self.coletor.addChave('Configs.EnderecoServidor', self.cacic_url)
+        self.coletor.addChave('Configs.IN_EXIBE_BANDEJA', self.exibe_bandeja)
+        self.coletor.addChave('Configs.IN_EXIBE_ERROS_CRITICOS', self.exibe_erros_criticos)
+        self.coletor.addChave('Configs.IN_COLETA_FORCADA_ANVI', 'N')
+        self.coletor.addChave('Configs.IN_COLETA_FORCADA_COMP', 'N')
+        self.coletor.addChave('Configs.IN_COLETA_FORCADA_HARD', 'N')
+        self.coletor.addChave('Configs.IN_COLETA_FORCADA_MONI', 'N')
+        self.coletor.addChave('Configs.IN_COLETA_FORCADA_SOFT', 'N')
+        self.coletor.addChave('Configs.IN_COLETA_FORCADA_UNDI', 'N')               
+        # COLETAS
+        self.coletor.addChave('Configs.DT_HR_ULTIMA_COLETA', '20080606135448')        
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA', '')
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_COMP', '')
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_HARD', '')
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_MONI', '20080604171031')
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_PATR', '')
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_SOFT', '')
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_UNDI', '') 
+        self.coletor.addChave('Coletas.HOJE', '20080606#Informações sobre Anti-Vírus OfficeScan,10:04:22,10:04:22,0#Informações sobre Compartilhamentos,10:04:22,10:04:22,0#Informações sobre Hardware,10:04:22,10:04:23,0#Informações sobre Sistemas Monitorados,10:04:24,10:07:23,0#Informações sobre Softwares,10:07:24,10:07:25,1#Informações sobre Unidades de Disco,10:07:26,10:07:32,1#Informações sobre Anti-Vírus OfficeScan,13:54:20,13:54:20,0#Informações sobre Compartilhamentos,13:54:20,13:54:20,0#Informações sobre Hardware,13:54:20,13:54:21,0#Informações sobre Sistemas Monitorados,13:54:22,13:54:32,1#Informações sobre Softwares,13:54:39,13:54:39,0#Informações sobre Unidades de Disco,13:54:41,13:54:46,1')
+        
+        '20080606#'
+        """Informações sobre Hardware,
+            10:04:22,
+            10:04:23,
+            0#
+        """
+        """Informações sobre Sistemas Monitorados,
+            10:04:24,
+            10:07:23,
+            0#
+        """
+        """Informações sobre Softwares,
+            10:07:24,
+            10:07:25,
+            1#
+        """
+        """Informações sobre Unidades de Disco,
+            10:07:26,
+            10:07:32,
+            1#
+        """
+        """Informações sobre Hardware,
+            13:54:20,
+            13:54:21,
+            0#
+        """
+        """Informações sobre Sistemas Monitorados,
+            13:54:22,
+            13:54:32,
+            1#
+        """
+        """Informações sobre Softwares,
+            13:54:39,
+            13:54:39,
+            0#
+        """
+        """Informações sobre Unidades de Disco,
+            13:54:41,
+            13:54:46,
+            1
+        """
+        # COLETORES
+        self.coletor.addChave('Configs.CS_COLETA_HARDWARE', 'S')
+        self.coletor.addChave('Configs.CS_COLETA_SOFTWARE', 'S')
+        self.coletor.addChave('Configs.CS_COLETA_MONITORADO', 'S')
+        self.coletor.addChave('Configs.CS_COLETA_COMPARTILHAMENTOS', 'S')
+        self.coletor.addChave('Configs.CS_COLETA_UNID_DISC', 'S')
+        self.coletor.addChave('Configs.CS_COLETA_PATRIMONIO', '')
+        # PACOTE
+        self.coletor.addChave('Configs.TE_HASH_PYCACIC', self.hash_atual)
+        self.coletor.addChave('Configs.TE_PACOTE_PYCACIC_DISPONIVEL', self.pacote_disponivel)   
+        # UPDATES
+        self.coletor.addChave('Configs.ID_FTP', '')
+        self.coletor.addChave('Configs.TE_FILA_FTP', '0')
+        self.coletor.addChave('Configs.CS_AUTO_UPDATE', self.update_auto)
+        self.coletor.addChave('Configs.TE_SERV_UPDATES', self.update_server)
+        self.coletor.addChave('Configs.NM_USUARIO_LOGIN_SERV_UPDATES', self.update_user)
+        self.coletor.addChave('Configs.TE_SENHA_LOGIN_SERV_UPDATES', self.update_pass)
+        self.coletor.addChave('Configs.TE_PATH_SERV_UPDATES', self.update_path)
+        self.coletor.addChave('Configs.NU_PORTA_SERV_UPDATES', self.update_port)        
+        # TCP_IP
+        net = None
+        for nw in self.computador.getPlacaRede():
+            if self.computador.ipAtivo == nw.getIP():
+                net = nw
+                break
+        if net != None:
+            self.coletor.addChave('TcpIp.TE_NODE_ADDRESS', net.getMAC())
+            self.coletor.addChave('TcpIp.ID_IP_REDE', net.getIPRede())
+            self.coletor.addChave('TcpIp.TE_IP', net.getIP())
+            self.coletor.addChave('TcpIp.TE_MASCARA', net.getMascara())
+            self.coletor.addChave('TcpIp.te_gateway', net.getGateway())
+            self.coletor.addChave('TcpIp.te_serv_dhcp', net.getDHCP())
+            self.coletor.addChave('TcpIp.te_dns_primario', net.getDNS()[0])
+            self.coletor.addChave('TcpIp.te_dns_secundario', net.getDNS()[1])
+            self.coletor.addChave('TcpIp.te_dominio_dns', net.getDNSDomain())
+        self.coletor.addChave('TcpIp.TE_NOME_HOST', self.computador.getHostName())
+        self.coletor.addChave('TcpIp.TE_NOME_COMPUTADOR', self.computador.getHostName())
+        self.coletor.addChave('TcpIp.TE_WORKGROUP', self.computador.getHostName())
+        self.coletor.addChave('TcpIp.TE_ENDERECOS_MAC_INVALIDOS', self.mac_invalidos)
+        # cria o dat
+        self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT, '')      
+        
 
     def toString(self):
         """Metodo toString da Classe"""

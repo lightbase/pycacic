@@ -27,11 +27,11 @@
 			<string name="program_started">Iniciado Programa</string>
 			<string name="contact_with">Contato com</string>
 			<string name="collection_starts_in">Coleta iniciará em</string>
-			<string name="collection_started">Coletas Iniciadas</string>
-			<string name="collection_finished">Coletas Concluídas</string>
+			<string name="collections_started">Coletas Iniciadas</string>
+			<string name="collections_finished">Coletas Concluídas</string>
 			<string name="collection_count">Total de Coletas</string>
 			<string name="active_collections">Coletas ativas</string>
-			<string name="sending_data_col">Enviando dados coletados por</string>
+			<string name="sending_data">Enviando dados coletados por</string>
 			<string name="exit_confirm">Deseja realmente sair?</string>
 		</main>
 		<menu>
@@ -80,7 +80,7 @@
 			<string name="error_on_open_xml">Erro ao abrir arquivo XML</string>
 			<string name="error_invalid_format">formato inesperado</string>
 			<string name="error_not_implemented">Método não implementado</string>
-			<string name="error_abstract_method">Método abstrato precisa ser sobrescreito</string>
+			<string name="error_abstract_method">Método abstrato precisa ser sobrescrito</string>
 			<string name="error_on_open_file">Erro ao abrir arquivo</string>
 			<string name="error_on_save_file">Erro ao salvar arquivo</string>
 			<string name="error_invalid_server_address">Endereço do Servidor inválido. Não foi possível detectar o ip ativo.</string>

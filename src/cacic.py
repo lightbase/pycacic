@@ -1,5 +1,21 @@
-# -*- coding: UTF-8 -*-
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+"""
+    Copyright 2000, 2001, 2002, 2003, 2004, 2005 Dataprev - Empresa de Tecnologia e Informações da Previdência Social, Brasil
+    
+    Este arquivo é parte do programa CACIC - Configurador Automático e Coletor de Informações Computacionais
+    
+    O CACIC é um software livre; você pode redistribui-lo e/ou modifica-lo dentro dos termos da Licença Pública Geral GNU como 
+    publicada pela Fundação do Software Livre (FSF); na versão 2 da Licença, ou (na sua opnião) qualquer versão.
+    
+    Este programa é distribuido na esperança que possa ser  util, mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
+    MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a Licença Pública Geral GNU para maiores detalhes.
+    
+    Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
+    Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+"""
 
 import os
 import sys
@@ -76,16 +92,13 @@ class Cacic:
                 time.sleep(2)
             # sai
             self.quit()
-        except Exception, e:
+        except Exception, e:           
+            error = "%s: %s" % (_l.get('error'), e)
+            print error
+            CLog.appendLine(_l.get('pycacic'), error)            
             # remover depois
             import traceback
             traceback.print_exc()
-            
-            print "ERROR: %s", e
-            
-            error = "%s: %s", (_l.get('error'), e)
-            CLog.appendLine(_l.get('pycacic'), error)
-            print error
         
     
     def isRoot(self):
@@ -97,13 +110,13 @@ class Cacic:
     def start(self):
         """Inicia as coletas"""
         self.coletas_forcadas = []
-        CLog.appendLine(_l.get('col_manager'), _l.get('collection_started'))
+        CLog.appendLine(_l.get('col_manager'), _l.get('collections_started'))
         CLog.appendLine(_l.get('col_manager'), '%s: %s' % (_l.get('collection_count'), len(self.gc.coletores)))
         CLog.appendLine(_l.get('col_manager'), '%s: (%s)' % (_l.get('active_collections'), ', '.join([_l.get(col) for col in self.gc.coletores.keys()])))
         self.gc.startColeta()
         self.gc.createDat()
         self.gc.sendColetas()
-        CLog.appendLine(_l.get('col_manager'), _l.get('collection_finished'))
+        CLog.appendLine(_l.get('col_manager'), _l.get('collections_finished'))
 
     def timeout(self):
         """

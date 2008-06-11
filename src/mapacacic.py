@@ -1,4 +1,21 @@
-#coding: utf-8
+# -*- coding: UTF-8 -*-
+
+"""
+
+    Copyright 2000, 2001, 2002, 2003, 2004, 2005 Dataprev - Empresa de Tecnologia e Informações da Previdência Social, Brasil
+    
+    Este arquivo é parte do programa CACIC - Configurador Automático e Coletor de Informações Computacionais
+    
+    O CACIC é um software livre; você pode redistribui-lo e/ou modifica-lo dentro dos termos da Licença Pública Geral GNU como 
+    publicada pela Fundação do Software Livre (FSF); na versão 2 da Licença, ou (na sua opnião) qualquer versão.
+    
+    Este programa é distribuido na esperança que possa ser  util, mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
+    MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a Licença Pública Geral GNU para maiores detalhes.
+    
+    Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
+    Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+"""
 
 import curses
 import curses.textpad
@@ -70,13 +87,37 @@ def main(stdscr):
                 
 def parseCurrentValues():
     global mp
-    dict['text3'] = mp.getCurrentValues()['TE_LOC_COMPL']
-    dict['text4'] = mp.getCurrentValues()['TE_INFO1']
-    dict['text5'] = mp.getCurrentValues()['TE_INFO2']
-    dict['text6'] = mp.getCurrentValues()['TE_INFO3']
-    dict['text7'] = mp.getCurrentValues()['TE_INFO4']
-    dict['text8'] = mp.getCurrentValues()['TE_INFO5']
-    dict['text9'] = mp.getCurrentValues()['TE_INFO6']
+    currentDict = mp.getCurrentValues()
+    # seta valores ativos
+    try:
+        if currentDict.has_key('ID1a') and currentDict['ID1a'] != '':
+            for entidade in mp.labels['1'].getValues():
+                if entidade.hasItem(currentDict['ID1a']):
+                    dict['text1'] = entidade.getText()
+                    dict['nivel1'] = entidade
+                    dict['1'] = entidade.getId()
+                    
+                    ldn = entidade.getSubItem(currentDict['ID1a'])
+                    dict['text1a'] = ldn.getText()
+                    dict['nivel1a'] = ldn
+                    dict['1a'] = ldn.getId()
+                    
+                    orgao = ldn.getSubItem(currentDict['ID2'])
+                    dict['text2'] = orgao.getText()
+                    dict['nivel2'] = orgao
+                    dict['2'] = orgao.getId()
+    except:
+        import traceback
+        
+        showError(traceback.format_exc())
+        showError("Alguns valores recebidos estavam desatualizados e foram descartados")
+    dict['text3'] = currentDict['TE_LOC_COMPL']
+    dict['text4'] = currentDict['TE_INFO1']
+    dict['text5'] = currentDict['TE_INFO2']
+    dict['text6'] = currentDict['TE_INFO3']
+    dict['text7'] = currentDict['TE_INFO4']
+    dict['text8'] = currentDict['TE_INFO5']
+    dict['text9'] = currentDict['TE_INFO6']
         
 def showStatusCurses(screen, text):
      st = screen.subwin(4, 30, 7, 25)
@@ -246,11 +287,16 @@ def selectValor(selected):
     for k, v in mp.labels.items():
         text = normalize(v.getText())
         if text == selected:
+            
             if k == '1':
                 sub = mp.labels['1'].values
                 for k1, v1 in sub.items():
-                    list.append((str(k1), normalize(v1.getText()), "off" ))
-                
+                    if dict.has_key('nivel1') and dict['nivel1'].getId() == v1.getId():
+                        list.append((str(k1), normalize(v1.getText()), "on" ))
+                    else:
+                        list.append((str(k1), normalize(v1.getText()), "off" ))
+                        
+                    
                 nivel1 = dialog.radiolist("Selecione: ", 0, 40, 15, selected.capitalize(), list)
                 if nivel1 != 0 and nivel1 != '':
                     dict['nivel1'] = sub[nivel1]
@@ -261,7 +307,10 @@ def selectValor(selected):
                 else:
                     sub = dict['nivel1'].subitems
                     for k1, v1 in sub.items():
-                        list.append((str(k1), normalize(v1.getText()), "off" ))
+                        if dict.has_key('nivel1a') and dict['nivel1a'].getId() == v1.getId():
+                            list.append((str(k1), normalize(v1.getText()), "on" ))
+                        else:
+                            list.append((str(k1), normalize(v1.getText()), "off" ))
                     
                     nivel1a = dialog.radiolist("Selecione: ", 0, 40, 15, selected.capitalize(), list)
                     if nivel1a != 0 and nivel1a != '':
@@ -277,7 +326,10 @@ def selectValor(selected):
                 else:
                     sub = dict['nivel1a'].subitems
                     for k1, v1 in sub.items():
-                        list.append((str(k1), normalize(v1.getText()), "off" ))
+                        if dict.has_key('nivel2') and dict['nivel2'].getId() == v1.getId():
+                            list.append((str(k1), normalize(v1.getText()), "on" ))
+                        else:
+                            list.append((str(k1), normalize(v1.getText()), "off" ))
                     
                     nivel2 = dialog.radiolist("Selecione: ", 0, 40, 15, selected.capitalize(), list)
                     if nivel2 != 0 and nivel2 != '':
@@ -412,12 +464,21 @@ if __name__=='__main__':
         # (like the cursor keys) will be interpreted and
         # a special value like curses.KEY_LEFT will be returned
         stdscr.keypad(1)
-        main(stdscr)                    # Enter the main loop
-        # Set everything back to normal
-        stdscr.keypad(0)
-        curses.echo();
-        curses.nocbreak()
-        curses.endwin()                 # Terminate curses
+        if os.system('dialog') == 0:
+            main(stdscr) # Enter the main loop
+            # Set everything back to normal
+            stdscr.keypad(0)
+            curses.echo();
+            curses.nocbreak()
+            curses.endwin()  
+        else:
+            # Set everything back to normal
+            stdscr.keypad(0)
+            curses.echo();
+            curses.nocbreak()
+            curses.endwin()  
+            print "FATAL: Módulo 'dialog' requerido mas não está disponível."
+                       # Terminate curses
     except:
         # In the event of an error, restore the terminal
         # to a sane state.

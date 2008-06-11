@@ -2,6 +2,20 @@
 
 """
 
+    Copyright 2000, 2001, 2002, 2003, 2004, 2005 Dataprev - Empresa de Tecnologia e Informações da Previdência Social, Brasil
+    
+    Este arquivo é parte do programa CACIC - Configurador Automático e Coletor de Informações Computacionais
+    
+    O CACIC é um software livre; você pode redistribui-lo e/ou modifica-lo dentro dos termos da Licença Pública Geral GNU como 
+    publicada pela Fundação do Software Livre (FSF); na versão 2 da Licença, ou (na sua opnião) qualquer versão.
+    
+    Este programa é distribuido na esperança que possa ser  util, mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
+    MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a Licença Pública Geral GNU para maiores detalhes.
+    
+    Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
+    Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    
+
     Modulo globals
     
     Modulo contendo variáveis globais do sistema
@@ -39,6 +53,7 @@ class Globals:
     def install():
         """Abre console para configuracao do PyCacic"""
         from io import Writer
+        from lang.language import Language
         print "\n\t--- Bem-Vindo a Configuracao do PyCacic ---"
         print "\n\tapos preencher as informacoes abaixo o programa ira iniciar\n"
         addr = raw_input("End. do  Servidor ('ex: http://10.0.0.1'): ")
@@ -62,7 +77,9 @@ class Globals:
         if addr[len(addr)-1] == '/': addr = addr[:-1]
         Writer.setServer('address', addr)
         Writer.setServer('username', user)
-        Writer.setServer('password', pwd)            
+        Writer.setServer('password', pwd)
+        # salva idioma padrao
+        Writer.setPycacic('locale', Language().getSOLang())
         print "\t--- Configuracao concluida com sucesso ---\n\n"
         
     getSocketAttr = staticmethod(getSocketAttr)
