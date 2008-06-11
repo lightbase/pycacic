@@ -164,7 +164,7 @@ class Ger_Cols:
             xml = xml[:xml.find('?>')+2] + '<cacic>' + xml[xml.find('?>')+2:] + '</cacic>'
             return xml 
         except Exception, e:
-            raise Exception(e)
+            raise GCException(e)
     
     def addColeta(self, col, valor):
         """Adiciona o coletor na lista, se o seu valor for 'S'"""
@@ -176,7 +176,7 @@ class Ger_Cols:
         # returns void
         # se nao achar o status==OK, retorna
         if not self.url.isOK(xml):
-            raise Exception('%s, %s.' % (_l.get('error_on_read_server_xml'), _l.get('error_not_available_status')))
+            raise GCException(_l.get('error_on_read_server_xml') + ", " + _l.get('error_not_available_status'))
         self.xml = minidom.parseString(xml)        
         root = self.xml.getElementsByTagName('CONFIGS')[0]
         # Coletores
@@ -264,7 +264,7 @@ class Ger_Cols:
             self.url.getFile(self.pacote_disponivel, '/tmp/%s' % self.pacote_disponivel)
             self.url.ftpDesconecta()
         except Exception, e:
-            raise Exception('%s: %s.' % (_l.get('error_on_try_update'), e.message))
+            raise GCException('%s: %s.' % (_l.get('error_on_try_update'), e.message))
 
     def startColeta(self):
         """ Inicia as Coletas"""
@@ -440,3 +440,18 @@ class Ger_Cols:
         """Metodo toString da Classe"""
         return self.toString()
   
+  
+  
+class GCException(Exception):
+    """Classe GCException, para exibir mensagens de exceptions"""
+    
+    def __init__(self, msg):
+        Exception.__init__(self)
+        self.message = msg
+        
+    def getMessage(self):
+        """Retorna a mensagem de Erro"""
+        return self.message
+    
+    
+    

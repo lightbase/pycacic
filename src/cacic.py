@@ -92,9 +92,14 @@ class Cacic:
                 time.sleep(2)
             # sai
             self.quit()
-        except Exception, e:           
+        except GCException, e:
             error = "%s: %s" % (_l.get('error'), e)
-            print error
+            CLog.appendLine(_l.get('pycacic'), error)
+            # remover depois
+            import traceback
+            traceback.print_exc()
+        except Exception, e:
+            error = "%s: %s" % (_l.get('error'), e)
             CLog.appendLine(_l.get('pycacic'), error)            
             # remover depois
             import traceback
