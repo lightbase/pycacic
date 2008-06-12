@@ -845,7 +845,9 @@ class PC_XML:
 				for folha in filho.childNodes:
 					if folha.nodeName == 'setting' and folha.attributes['id'].nodeValue in ('filesystem', 'mount.fstype'):
 						p.filesystem = (folha.attributes['value'].nodeValue).upper()
-						self.partitions.append(p)
+                        if not p.getName() in [ aux.getName() for aux in self.partitions ]:
+                            self.partitions.append(p)
+                            return
 			elif filho.nodeName == 'node' and filho.attributes['id'].nodeValue[0:13] == 'logicalvolume':
 				self.getPartitionInfo(filho)
 
@@ -1103,6 +1105,7 @@ class Computador :
 		Classe Computador contem as informacoes de 
 		hardware e configuracoes da maquina
 	"""
+    
 	def __init__(self):
 		devices = self.__get_input_devices__()
 		self.ipAtivo = ''
@@ -1117,12 +1120,13 @@ class Computador :
 		self.rom = ''
 		self.placaMae = ''
 		self.placaRede = ''
-		self.hardDisk = ''
-		self.bios = ''
-		self.video = ''
-		self.audio = ''
-		self.cpu = ''
-		self.modem = ''
+		self.hardDisk = []
+        self.particoes = []
+        self.bios = ''
+        self.video = []
+        self.audio = []
+        self.cpu = []
+        self.modem = ''
 		
 	def isRoot(self):
 		"""Retorna se o usuario e root ou nao"""

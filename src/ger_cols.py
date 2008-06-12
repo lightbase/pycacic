@@ -273,13 +273,11 @@ class Ger_Cols:
         self.computador.coletar()
         for col in self.coletores.values():
             CLog.appendLine('%s' % _l.get(col.getName()), 'Coleta iniciada')
-            col.start()
-            # adiciona o UVC ao dicionario principal
-            self.coletor.addChave(col.getUVCKey(), col.getChave('UVC'))            
+            col.start()            
             if self.all_forcada or (col.getName() in self.coletas_forcadas) or col.isReady(self.OUTPUT_DAT):
                 page = Reader.getColetor(col.getName())['page']
                 dict = col.getEncryptedDict()
-                self.coletas_enviar[col.getName()] = {'page': page, 'dict' : dict }
+                self.coletas_enviar[col.getName()] = {'page': page, 'dict' : dict, 'UVC' : col.getChave('UVC'), 'UVCKEY' : col.getUVCKey() }
 
     def sendColetas(self):
         """
@@ -291,10 +289,14 @@ class Ger_Cols:
             server = '%s%s%s' % (self.cacic_server, self.cacic_ws, self.coletas_enviar[col]['page'])
             xml = self.conecta(server, self.coletas_enviar[col]['dict'])
             if self.url.isOK(xml):
+                # adiciona o UVC ao dicionario principal
+                self.coletor.addChave(self.coletas_enviar[col]['UVCKEY'], self.coletas_enviar[col]['UVC'])
                 self.col_status[col] = 'Dados da Coleta Enviado Com Sucesso'
+                # adiciona linha ao log
                 CLog.appendLine('%s' % _l.get(col), 'Dados da Coleta Enviado Com Sucesso')
             else:
                 self.col_status[col] = _l.get('error_on_send_data')
+                # adiciona linha ao log
                 CLog.appendLine('%s' % _l.get(col), _l.get('error_on_send_data'))
 
     def createDat(self):
@@ -438,8 +440,7 @@ class Ger_Cols:
 
     def __tostring(self):
         """Metodo toString da Classe"""
-        return self.toString()
-  
+        return self.toString()  
   
   
 class GCException(Exception):
