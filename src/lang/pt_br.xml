@@ -31,7 +31,7 @@
 			<string name="collections_finished">Coletas Concluídas</string>
 			<string name="collection_count">Total de Coletas</string>
 			<string name="active_collections">Coletas ativas</string>
-			<string name="sending_data">Enviando dados coletados por</string>
+			<string name="sending_data">Enviando dados coletados</string>
 			<string name="exit_confirm">Deseja realmente sair?</string>
 		</main>
 		<menu>
