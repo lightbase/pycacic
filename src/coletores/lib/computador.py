@@ -847,7 +847,6 @@ class PC_XML:
 						p.filesystem = (folha.attributes['value'].nodeValue).upper()
                         if not p.getName() in [ aux.getName() for aux in self.partitions ]:
                             self.partitions.append(p)
-                            return
 			elif filho.nodeName == 'node' and filho.attributes['id'].nodeValue[0:13] == 'logicalvolume':
 				self.getPartitionInfo(filho)
 
@@ -1101,26 +1100,26 @@ class Particao:
 		
 
 class Computador :
-	"""
-		Classe Computador contem as informacoes de 
-		hardware e configuracoes da maquina
-	"""
+    """
+    	Classe Computador contem as informacoes de 
+    	hardware e configuracoes da maquina
+    """
     
-	def __init__(self):
-		devices = self.__get_input_devices__()
-		self.ipAtivo = ''
-		self.hostName = self.__get_host_name__()
-		self.ultimoLogin = self.__get_last_login__() 
-		self.so = SO_Info.getSO()
-		self.mouse = devices['mouse']
-		self.teclado = devices['teclado']
-		self.pacote = Pacotes()
-		self.jreversion = self.__get_jre_version__()
-		self.ram = ''
-		self.rom = ''
-		self.placaMae = ''
-		self.placaRede = ''
-		self.hardDisk = []
+    def __init__(self):        
+        devices = self.__get_input_devices__()
+        self.ipAtivo = ''
+        self.hostName = self.__get_host_name__()
+        self.ultimoLogin = self.__get_last_login__() 
+        self.so = SO_Info.getSO()
+        self.mouse = devices['mouse']
+        self.teclado = devices['teclado']
+        self.pacote = Pacotes()
+        self.jreversion = self.__get_jre_version__()
+        self.ram = ''
+        self.rom = ''
+        self.placaMae = ''
+        self.placaRede = ''
+        self.hardDisk = []
         self.particoes = []
         self.bios = ''
         self.video = []
@@ -1128,219 +1127,219 @@ class Computador :
         self.cpu = []
         self.modem = ''
 		
-	def isRoot(self):
-		"""Retorna se o usuario e root ou nao"""
-		if os.getuid() != 0:
-			return 0 # False
-		return 1 # True
-
-	def coletar(self):
-		"""Inicia a coleta de informacoes do computador"""
-		try:
-			if not self.isRoot():
-				raise ComputerException(_l.get('need_root'))
-			pc_xml = PC_XML()
-			self.ram = pc_xml.ram
-			self.rom = pc_xml.rom
-			self.placaMae = pc_xml.placaMae
-			self.placaRede = pc_xml.placaRede
-			self.hardDisk = pc_xml.hardDisk
-			self.particoes = pc_xml.partitions
-			self.bios = pc_xml.bios
-			self.video = pc_xml.video
-			self.audio = pc_xml.audio
-			self.cpu = pc_xml.cpu
-			self.modem = pc_xml.modem
-		except ComputerException, e:
-			raise Exception('%s\n\nO programa foi abortado de forma prematura.\n' % e.message)
-			sys.exit()
-			
-	def __get_jre_version__(self):
-		"""Retorna o hostname da maquina atraves de socket"""
-		java = commands.getoutput('java -version')
-		pos = java.find("java version ")
-		if pos == 0:
-			pos2 = java.find('"', pos+14)
-			java = java[pos+14:pos2]
-		return java
-	
-	def __get_host_name__(self):
-		"""Retorna o hostname da maquina atraves de socket"""
-		return socket.gethostname()	
-	
-	def __get_last_login__(self):
-		"""Retorna o ultimo login atras de bash"""
-		last = commands.getoutput('last -n 1')
-		return last[:last.find(' ')]
-
-	def __get_input_devices__(self):
-		"""Retorna a descricao de mouse e teclado"""
-		inputs = {'teclado': '', 'mouse': ''}
-		s = commands.getoutput("cat /proc/bus/input/devices")
-		fim = 0
-		pesqBus = s.find("Bus=0011")
-		if(pesqBus > 0):
-			primeiro = (s.find("Name=",pesqBus))+6
-			fim = (s.find("P:",primeiro))-2
-			if(primeiro > 0 and fim > 0):
-				inputs['teclado'] = s[primeiro:fim]
-		pesqBus = s.find("Bus=0011",fim)
-		if(pesqBus > 0):
-			primeiro = (s.find("Name=",pesqBus))+6
-			fim = (s.find("P:",primeiro))-2
-			if(primeiro > 0 and fim > 0):
-				inputs['mouse'] = s[primeiro:fim]
-		return inputs	        
-	
-	def getSO (self) :
-		"""Retorna string contendo sistema operacional """
-		# returns string
-		return self.so	
-	
-	def getJREVersion(self):
-		"""Retorna a versao do Java Runtime Environment """
-		return self.jreversion
-	
-	def getPacotes(self):
-		"""Retorna todos os pacotes instalados na maquina"""
-		return self.pacote.getAllInstalled(self.getSO())
-
-	def isInstalado(self, pacote):
-		"""Retorna True ou False se o pacote esta ou nao instalado"""
-		return self.pacote.isInstalled(pacote, self.getSO())
-	
-	def getHostName(self) :
-		"""Retorna host name """
-		# returns string
-		return self.hostName	
-		
-	def getPlacaMae(self) :
-		"""Retorna objeto MotherBoard com as informacoes da placa mae """
-		# returns string 
-		return self.placaMae
-	
-	def getCPU(self) :
-		"""Retorna lista de cpus do micro """
-		# returns list
-		return self.cpu	
-	
-	def getRam(self) :
-		"""Retorna objeto RAM com descricao das memorias ram do micro """
-		# returns RAM
-		return self.ram	
-	
-	def getHardDisk(self) :
-		"""Retorna lista de objetos HD """
-		# returns list
-		return self.hardDisk
-	
-	def getPartitions(self):
-		"""Retorna lista de objetos Particao """
-		# returns list
-		return self.particoes
-	
-	def getAudio(self) :
-		""" retorna lista de audio """
-		# returns list
-		return self.audio
-	
-	def getVideo(self) :
-		"""Retorna lista de placa de video """
-		# returns list
-		return self.video
-	
-	def getRom(self) :
-		"""Retorna lista de midias ROM """
-		# returns list
-		return self.rom
-	
-	def getPlacaRede(self) :
-		"""Retorna lista de placas de redes """
-		# returns list
-		return self.placaRede
-	
-	def getIPAtivo(self, server):
-		"""Retorna o endereco de IP que conecta no server especificado"""
-		ips = urlparse(server)[1]
-		if ips == "":
-			raise ComputerException(_l.get('error_invalid_server_address'))
-		ips = socket.gethostbyname(ips)		
-		return Rede().getIPAtivo(ips)
-	
-	def getMACAtivo(self, ip):
-		"""Retorna o endereco de IP que conecta no server especificado"""			
-		return Rede().__getMac__(ip).replace(':','-')
-	
-	def getModem(self) :
-		"""Retorna lista de modens"""
-		# returns list
-		return self.modem
-	
-	def getBios(self) :
-		"""Rtorna um objeto do tipo Bios"""
-		# returns Bios
-		return self.bios
-	
-	def getTeclado(self):
-		"""Retorna a descricao do Teclado"""
-		return self.teclado
-	
-	def getMouse(self):
-		"""Retorna a descricao do mouse"""
-		return self.mouse
-		
-	def __toString(self):
-		"""Metodo toString da Classe"""
-		desc = "Computador \n"
-		desc += "\tSistema Operacional: %s \n" % self.getSO()
-		desc += "\tHostname: %s \n" % self.getHostName()
-		desc += "Placa Mae \n"
-		desc += "\tDescricao: %s \n" % self.getPlacaMae()
-		desc += "Bios \n"
-		desc += "\tDescricao: %s \n" % self.bios.getDescricao()
-		desc += "\tData: %s \n" % self.bios.getData()
-		for c in self.cpu:
-			desc += "CPU \n"
-			desc += "\tId: %s \n" % c.getId()
-			desc += "\tFrequencia: %s \n" % c.getFrequencia()
-			desc += "\tDescricao: %s \n" % c.getDescricao()
-			desc += "\tSerial: %s \n" % c.getSerial()
-		for hd in self.hardDisk:
-			desc += "HD \n"
-			desc += "\tTamanho: %s Mb \n" % hd.getTamanho()
-			desc += "\tDescricao: %s \n" % hd.getDescricao()
-			desc += "\tFabricante: %s \n" % hd.getFabricante()
-		desc += "Teclado \n"
-		desc += "\tDescricao: %s \n" % self.getTeclado()
-		desc += "Mouse \n"
-		desc += "\tDescricao: %s \n" % self.getMouse()
-		for v in self.video:
-			desc += "Video \n"
-			desc += "\tRam: %s Mb \n" % v.getRam()
-			desc += "\tCores: %s \n" % v.getCores()
-			desc += "\tDescricao: %s \n" % v.getDescricao()
-		for a in self.audio:
-			desc += "Audio \n"
-			desc += "\tDescricao: %s \n" % a
-		for m in self.modem:
-			desc += "Modem \n"
-			desc += "\tDescricao: %s \n" % m
-		desc += "Ram \n"
-		desc += "\tTamanho: %s Mb \n" % self.ram.getTamanho()
-		desc += "\tDescricao: %s \n" % self.ram.getDescricao()
-		for r in self.rom:
-			desc += "Rom \n"
-			desc += "\tDescricao: %s \n" % r
-		for pr in self.placaRede:
-			desc += "Placa de Rede \n"
-			desc += "\tFabricante: %s \n" % pr.getFabricante()
-			desc += "\tDescricao: %s \n" % pr.getDescricao()
-			desc += "\tEndereco IP: %s \n" % pr.getIP()
-			desc += "\tMascara de Rede: %s \n" % pr.getMascara()
-			desc += "\tEndereco Mac: %s \n" % pr.getMAC()
-			desc += "\tLogicalname Mac: %s \n" % pr.getLogicalName()
-		return desc 
-	
-	def toString(self):
-		"""Metodo toString da Classe"""
-		return self.__toString()
+    def isRoot(self):
+    	"""Retorna se o usuario e root ou nao"""
+    	if os.getuid() != 0:
+    		return 0 # False
+    	return 1 # True
+    
+    def coletar(self):
+    	"""Inicia a coleta de informacoes do computador"""
+    	try:
+    		if not self.isRoot():
+    			raise ComputerException(_l.get('need_root'))
+    		pc_xml = PC_XML()
+    		self.ram = pc_xml.ram
+    		self.rom = pc_xml.rom
+    		self.placaMae = pc_xml.placaMae
+    		self.placaRede = pc_xml.placaRede
+    		self.hardDisk = pc_xml.hardDisk
+    		self.particoes = pc_xml.partitions
+    		self.bios = pc_xml.bios
+    		self.video = pc_xml.video
+    		self.audio = pc_xml.audio
+    		self.cpu = pc_xml.cpu
+    		self.modem = pc_xml.modem
+    	except ComputerException, e:
+    		raise Exception('%s\n\nO programa foi abortado de forma prematura.\n' % e.message)
+    		sys.exit()
+    		
+    def __get_jre_version__(self):
+    	"""Retorna o hostname da maquina atraves de socket"""
+    	java = commands.getoutput('java -version')
+    	pos = java.find("java version ")
+    	if pos == 0:
+    		pos2 = java.find('"', pos+14)
+    		java = java[pos+14:pos2]
+    	return java
+    
+    def __get_host_name__(self):
+    	"""Retorna o hostname da maquina atraves de socket"""
+    	return socket.gethostname()	
+    
+    def __get_last_login__(self):
+    	"""Retorna o ultimo login atras de bash"""
+    	last = commands.getoutput('last -n 1')
+    	return last[:last.find(' ')]
+    
+    def __get_input_devices__(self):
+    	"""Retorna a descricao de mouse e teclado"""
+    	inputs = {'teclado': '', 'mouse': ''}
+    	s = commands.getoutput("cat /proc/bus/input/devices")
+    	fim = 0
+    	pesqBus = s.find("Bus=0011")
+    	if(pesqBus > 0):
+    		primeiro = (s.find("Name=",pesqBus))+6
+    		fim = (s.find("P:",primeiro))-2
+    		if(primeiro > 0 and fim > 0):
+    			inputs['teclado'] = s[primeiro:fim]
+    	pesqBus = s.find("Bus=0011",fim)
+    	if(pesqBus > 0):
+    		primeiro = (s.find("Name=",pesqBus))+6
+    		fim = (s.find("P:",primeiro))-2
+    		if(primeiro > 0 and fim > 0):
+    			inputs['mouse'] = s[primeiro:fim]
+    	return inputs	        
+    
+    def getSO (self) :
+    	"""Retorna string contendo sistema operacional """
+    	# returns string
+    	return self.so	
+    
+    def getJREVersion(self):
+    	"""Retorna a versao do Java Runtime Environment """
+    	return self.jreversion
+    
+    def getPacotes(self):
+    	"""Retorna todos os pacotes instalados na maquina"""
+    	return self.pacote.getAllInstalled(self.getSO())
+    
+    def isInstalado(self, pacote):
+    	"""Retorna True ou False se o pacote esta ou nao instalado"""
+    	return self.pacote.isInstalled(pacote, self.getSO())
+    
+    def getHostName(self) :
+    	"""Retorna host name """
+    	# returns string
+    	return self.hostName	
+    	
+    def getPlacaMae(self) :
+    	"""Retorna objeto MotherBoard com as informacoes da placa mae """
+    	# returns string 
+    	return self.placaMae
+    
+    def getCPU(self) :
+    	"""Retorna lista de cpus do micro """
+    	# returns list
+    	return self.cpu	
+    
+    def getRam(self) :
+    	"""Retorna objeto RAM com descricao das memorias ram do micro """
+    	# returns RAM
+    	return self.ram	
+    
+    def getHardDisk(self) :
+    	"""Retorna lista de objetos HD """
+    	# returns list
+    	return self.hardDisk
+    
+    def getPartitions(self):
+    	"""Retorna lista de objetos Particao """
+    	# returns list
+    	return self.particoes
+    
+    def getAudio(self) :
+    	""" retorna lista de audio """
+    	# returns list
+    	return self.audio
+    
+    def getVideo(self) :
+    	"""Retorna lista de placa de video """
+    	# returns list
+    	return self.video
+    
+    def getRom(self) :
+    	"""Retorna lista de midias ROM """
+    	# returns list
+    	return self.rom
+    
+    def getPlacaRede(self) :
+    	"""Retorna lista de placas de redes """
+    	# returns list
+    	return self.placaRede
+    
+    def getIPAtivo(self, server):
+    	"""Retorna o endereco de IP que conecta no server especificado"""
+    	ips = urlparse(server)[1]
+    	if ips == "":
+    		raise ComputerException(_l.get('error_invalid_server_address'))
+    	ips = socket.gethostbyname(ips)		
+    	return Rede().getIPAtivo(ips)
+    
+    def getMACAtivo(self, ip):
+    	"""Retorna o endereco de IP que conecta no server especificado"""			
+    	return Rede().__getMac__(ip).replace(':','-')
+    
+    def getModem(self) :
+    	"""Retorna lista de modens"""
+    	# returns list
+    	return self.modem
+    
+    def getBios(self) :
+    	"""Rtorna um objeto do tipo Bios"""
+    	# returns Bios
+    	return self.bios
+    
+    def getTeclado(self):
+    	"""Retorna a descricao do Teclado"""
+    	return self.teclado
+    
+    def getMouse(self):
+    	"""Retorna a descricao do mouse"""
+    	return self.mouse
+    	
+    def __toString(self):
+    	"""Metodo toString da Classe"""
+    	desc = "Computador \n"
+    	desc += "\tSistema Operacional: %s \n" % self.getSO()
+    	desc += "\tHostname: %s \n" % self.getHostName()
+    	desc += "Placa Mae \n"
+    	desc += "\tDescricao: %s \n" % self.getPlacaMae()
+    	desc += "Bios \n"
+    	desc += "\tDescricao: %s \n" % self.bios.getDescricao()
+    	desc += "\tData: %s \n" % self.bios.getData()
+    	for c in self.cpu:
+    		desc += "CPU \n"
+    		desc += "\tId: %s \n" % c.getId()
+    		desc += "\tFrequencia: %s \n" % c.getFrequencia()
+    		desc += "\tDescricao: %s \n" % c.getDescricao()
+    		desc += "\tSerial: %s \n" % c.getSerial()
+    	for hd in self.hardDisk:
+    		desc += "HD \n"
+    		desc += "\tTamanho: %s Mb \n" % hd.getTamanho()
+    		desc += "\tDescricao: %s \n" % hd.getDescricao()
+    		desc += "\tFabricante: %s \n" % hd.getFabricante()
+    	desc += "Teclado \n"
+    	desc += "\tDescricao: %s \n" % self.getTeclado()
+    	desc += "Mouse \n"
+    	desc += "\tDescricao: %s \n" % self.getMouse()
+    	for v in self.video:
+    		desc += "Video \n"
+    		desc += "\tRam: %s Mb \n" % v.getRam()
+    		desc += "\tCores: %s \n" % v.getCores()
+    		desc += "\tDescricao: %s \n" % v.getDescricao()
+    	for a in self.audio:
+    		desc += "Audio \n"
+    		desc += "\tDescricao: %s \n" % a
+    	for m in self.modem:
+    		desc += "Modem \n"
+    		desc += "\tDescricao: %s \n" % m
+    	desc += "Ram \n"
+    	desc += "\tTamanho: %s Mb \n" % self.ram.getTamanho()
+    	desc += "\tDescricao: %s \n" % self.ram.getDescricao()
+    	for r in self.rom:
+    		desc += "Rom \n"
+    		desc += "\tDescricao: %s \n" % r
+    	for pr in self.placaRede:
+    		desc += "Placa de Rede \n"
+    		desc += "\tFabricante: %s \n" % pr.getFabricante()
+    		desc += "\tDescricao: %s \n" % pr.getDescricao()
+    		desc += "\tEndereco IP: %s \n" % pr.getIP()
+    		desc += "\tMascara de Rede: %s \n" % pr.getMascara()
+    		desc += "\tEndereco Mac: %s \n" % pr.getMAC()
+    		desc += "\tLogicalname Mac: %s \n" % pr.getLogicalName()
+    	return desc 
+    
+    def toString(self):
+    	"""Metodo toString da Classe"""
+    	return self.__toString()
