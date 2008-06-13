@@ -90,7 +90,7 @@ def writeGnomeAutoStart():
     content.append("[Desktop Entry]")
     content.append("Name=PyCacic")
     content.append("Comment=Configurador Automático e Coletor de Informações Computacionais")
-    content.append("Exec=python /usr/share/pycacic/gui.py")
+    content.append("Exec=/usr/share/pycacic/gui.py")
     content.append("Icon=/usr/share/pycacic/img/logo.png")
     content.append("StartupNotify=true")
     content.append("Terminal=false")
@@ -115,8 +115,7 @@ def install():
     writeStartLink(4)
     writeStartLink(5)
     print "[OK]"
-    # para comunidade forcar geracao do pre-configurado
-    configAndPackage(1)
+    configAndPackage()
     print "Generating Version Hash",
     writeMD5()
     print "[OK]"
@@ -155,7 +154,7 @@ def mkconfig():
     print "\n\tapós preencher as informacoes abaixo o programa irá iniciar\n"
     op = ''
     while not op in ('S', 'Y'):
-        addr = raw_input("End. do  Servidor ('ex: http://<endereco>'): ").lower()
+        addr = raw_input("Endereço do  Servidor ('ex: http://<endereco>'): ").lower()
         if len(addr.split('//')) != 2:
             print "Endereco invalido"
         else:
@@ -171,7 +170,7 @@ def mkconfig():
                     print "[OK]"
                     user = raw_input("Usuario do Servidor: ")
                     pwd = raw_input("Senha: ")
-                    op = raw_input("\nOs dados estao corretos? (Y|N)").upper()
+                    op = raw_input("\nOs dados estao corretos? (S|N)").upper()
     # remove a barra do final
     if addr[len(addr)-1] == '/':
         addr = addr[:-1]

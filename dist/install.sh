@@ -57,6 +57,7 @@ install_cacic()
 	#mv /usr/share/pycacic/coletores/lib/ccrypt.pycomp /usr/share/pycacic/coletores/lib/ccrypt.pyc > /dev/null 2>&1
 	
 	python $progdir/setservice.py
+	chmod 0755 /usr/share/pycacic/gui.py
 }
 
 start_cacic()
