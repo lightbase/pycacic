@@ -21,6 +21,7 @@ from coletores.lib.ccrypt import *
 from coletores.lib.url import *
 from coletores.lib.computador import *
 from coletores.coletor import *
+from config.io import *
 
 from xml.dom import minidom, Node
 
@@ -40,6 +41,12 @@ class MapaCacic:
         self.currentValues = {}
         self.labels = {}
         self.reinitDict()
+        server = Reader.getServer()
+        self.cacic_server = server['address']
+        self.cacic_ws = server['ws']
+        self.endereco = '%s%s' % (self.cacic_server, self.cacic_ws)
+        #print self.endereco
+        #sys.exit(0)
         
     
     def reinitDict(self):
@@ -67,7 +74,7 @@ class MapaCacic:
         self.reinitDict()
         self.dicionario['te_versao_mapa'] = self.encripta('1.0.0.11')
         self.dicionario['cs_MapaCacic'] = self.encripta('S')
-        xml = self.url.enviaRecebeDados(self.dicionario, 'http://10.71.0.121/cacic2/ws/mapa_acesso.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
+        xml = self.url.enviaRecebeDados(self.dicionario, self.endereco+'mapa_acesso.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
         xml = xml.replace("?>", "?><REPLY>")
         xml += "</REPLY>"
         #print "XML:\n["+xml+"]\n------"
@@ -90,7 +97,7 @@ class MapaCacic:
         So pdoe ser chamado depois de auth() ja ter sido chamado
         """
         self.reinitDict()
-        self.computer.ipAtivo = self.computer.getIPAtivo("http://10.71.0.121")
+        self.computer.ipAtivo = self.computer.getIPAtivo(self.cacic_server)
         net = Rede()
         netmask = net.__getMask__(self.computer.ipAtivo)
         iprede = net.__getIPRede__(self.computer.ipAtivo, netmask);
@@ -103,7 +110,7 @@ class MapaCacic:
         self.dicionario['te_workgroup'] = self.encripta('Desconhecido')
         self.dicionario['id_usuario'] = self.encripta(self.id_usuario)
         #print "PADDING: "+self.dicionario['padding_key']
-        xmlstr = self.url.enviaRecebeDados(self.dicionario, 'http://10.71.0.121/cacic2/ws/mapa_get_patrimonio.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
+        xmlstr = self.url.enviaRecebeDados(self.dicionario, self.endereco+'mapa_get_patrimonio.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
         #print "XML:\n"+xmlstr+"\n---"
         xml = minidom.parseString(xmlstr)
         self.__parseLabels__(xml)
@@ -118,7 +125,7 @@ class MapaCacic:
     def save(self, dict):
         """ Salva os valores passados em 'dict' no servidor """
         self.reinitDict()
-        self.computer.ipAtivo = self.computer.getIPAtivo("http://10.71.0.121")
+        self.computer.ipAtivo = self.computer.getIPAtivo(self.cacic_server)
         net = Rede()
         netmask = net.__getMask__(self.computer.ipAtivo)
         iprede = net.__getIPRede__(self.computer.ipAtivo, netmask);
@@ -146,7 +153,7 @@ class MapaCacic:
         self.dicionario['te_info_patrimonio6'] = '678'
         """
         
-        xmlstr = self.url.enviaRecebeDados(self.dicionario, 'http://10.71.0.121/cacic2/ws/mapa_set_patrimonio.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
+        xmlstr = self.url.enviaRecebeDados(self.dicionario, self.endereco+'mapa_set_patrimonio.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
         #print "XML:\n"+xmlstr+"\n--------\n"
         return xmlstr.find("<STATUS>OK</STATUS>") != -1
         """xml = minidom.parseString(xmlstr)
@@ -158,13 +165,25 @@ class MapaCacic:
         dict = {}
         for no in root.childNodes:
             if no.nodeName == "ID_UON1a":
-                dict['ID1a'] = self.decripta(no.firstChild.nodeValue)
+                if len(no.childNodes) > 0:
+                    dict['ID1a'] = self.decripta(no.firstChild.nodeValue)
+                else:
+                    dict['ID1a'] = ''
             elif no.nodeName == "ID_UON2":
-                dict['ID2'] = self.decripta(no.firstChild.nodeValue)
+                if len(no.childNodes) > 0:
+                    dict['ID2'] = self.decripta(no.firstChild.nodeValue)
+                else:
+                    dict['ID2'] = ''
             elif no.nodeName == "ID_LOCAL":
-                dict['ID1'] = self.decripta(no.firstChild.nodeValue)
+                if len(no.childNodes) > 0:
+                    dict['ID1'] = self.decripta(no.firstChild.nodeValue)
+                else:
+                    dict['ID1'] = ''
             elif no.nodeName.startswith("TE_"):
-                dict[no.nodeName] = self.decripta(no.firstChild.nodeValue)
+                if len(no.childNodes) > 0:
+                    dict[no.nodeName] = self.decripta(no.firstChild.nodeValue)
+                else:
+                    dict[no.nodeName] = ''
         return dict
     
     def __parseLabels__(self, xml):

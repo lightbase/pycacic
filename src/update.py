@@ -14,6 +14,16 @@
     
     Você deve ter recebido uma cópia da Licença Pública Geral GNU, sob o título "LICENCA.txt", junto com este programa, se não, escreva para a Fundação do Software
     Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    
+    
+    
+    Módulo update
+    
+    Tem a finalidade de extrair o novo pacote disponível, sobrescrever o 
+    instalado atualmente e reiniciar o programa após um intervalo determinado.
+    
+    @author Dataprev - ES 
+    
 
 """
 
@@ -22,6 +32,8 @@ import sys
 import time
 
 from config.io import Writer
+from logs.log import CLog
+
 
 if __name__ == '__main__':
     time.sleep(5)
@@ -37,7 +49,8 @@ if __name__ == '__main__':
         elif sys.argv[i] == '-tmp':
             temp_dir = sys.argv[i+1]
     if temp_dir != '' and pacote_disponivel != '':
-        # descompactando o pacote novo    
+        # descompactando o pacote novo
+        CLog.appendLine('AutoUpdate', 'Iniciado processo de autoupdate.')
         os.system('mkdir /tmp/%s' % temp_dir)
         os.system('tar -xf /tmp/%s -C /tmp/%s' % (pacote_disponivel, temp_dir))
         os.system('tar -xf /tmp/%s/pycacic/cacic.tar -C /usr/share' % temp_dir)
@@ -45,8 +58,8 @@ if __name__ == '__main__':
         os.system('rm -Rf /tmp/%s' % temp_dir)
         os.system('rm -f /tmp/%s' % pacote_disponivel)
         open("/usr/share/pycacic/config/MD5SUM", "w").write(novo_hash)
-        print 'PyCacic atualizado com sucesso.'
-        print 'reiniciando sistema...'
+        CLog.appendLine('AutoUpdate', 'PyCacic atualizado com sucesso.')
+        CLog.appendLine('AutoUpdate', 'O Programa vai ser reiniciado em instantes.')
     # reiniciando o PyCacic
     os.system('python /usr/share/pycacic/cacic.py &')
     sys.exit(1)

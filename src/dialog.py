@@ -46,7 +46,7 @@ guage_message(message,percent)
 guage_stop()
 """
 
-import sys, tty, termios, curses, string, os, types
+import sys, tty, termios, string, os, types
 
 def y_or_n_p(prompt):
     """Ask user a "y or n" question.  Return 1 if answer is "y", 0 otherwise.

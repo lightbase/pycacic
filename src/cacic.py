@@ -141,19 +141,18 @@ class Cacic:
     def conecta(self):
         """Conecta ao Gerente Web para pegar informacoes de configuracao"""
         xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
-        self.gc.readXML(xml)
-        """
+        self.gc.readXML(xml)        
         # verifica atualizacao
         if self.gc.hasNew():
             CLog.appendLine('Cacic', 'Nova Versao Disponivel !!!')
-            CLog.appendLine('Cacic', 'Iniciando Atualização')
+            CLog.appendLine('Cacic', 'Iniciando Atualizacao')
+            # baixa o novo pacote para o diretorio temporario
             self.gc.atualiza()
-            #chama atualizador e sai
-            CLog.appendLine('Cacic', 'Programa Atualizado Com Sucesso')
+            CLog.appendLine('Cacic', 'Novo Pacote Copiado Com Sucesso')
+            #chama atualizador e sai            
             os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
-            CLog.appendLine('Cacic', 'O Programa vai ser reiniciado em instantes.')
             self.quit()
-        """
+        
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""

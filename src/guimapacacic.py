@@ -21,6 +21,7 @@
 import pygtk
 pygtk.require('2.0')
 import gtk, gtk.glade, gobject
+from urllib2 import URLError
 
 from globals import Globals
 from libmapacacic import MapaCacic
@@ -49,7 +50,11 @@ class GUIMapaCacic:
         # Labels
         for k, v in self.mc.labels.items():
             label = self.xml.get_widget('label'+k)
-            label.set_text(unicode(v.getText(), 'latin_1', 'ignore'))
+            text = v.getText()
+            if type(text) != unicode:
+                text = unicode(text, 'latin_1', 'ignore')
+            label.set_text(text)
+            
         
         # Valores atuais
         dict = self.mc.getCurrentValues()
@@ -97,7 +102,10 @@ class GUIMapaCacic:
         idx = 0
         for v in self.mc.labels['1'].getValues():
             self.combo1list.append(v)
-            liststore1.append([ v.getText() ])
+            text = v.getText()
+            if type(text) != unicode:
+                text = unicode(text, 'latin_1', 'ignore')
+            liststore1.append([ text ])
             v.index = idx
             idx = idx + 1
             
@@ -153,7 +161,10 @@ class GUIMapaCacic:
         index = 0
         for v in sel.getSubItems():
             self.combo1alist.append(v)
-            self.liststore1a.append([ v.getText() ])
+            text = v.getText()
+            if type(text) != unicode:
+                text = unicode(text, 'latin_1', 'ignore')
+            self.liststore1a.append([ text ])
             v.index = index
             index = index + 1
             
@@ -165,7 +176,10 @@ class GUIMapaCacic:
         index = 0
         for v in sel.getSubItems():
             self.combo2list.append(v)
-            self.liststore2.append([ v.getText() ])
+            text = v.getText()
+            if type(text) != unicode:
+                text = unicode(text, 'latin_1', 'ignore')
+            self.liststore2.append([ text ])
             v.index = index
             index = index + 1
     
@@ -252,17 +266,24 @@ class GUIMapaCacicAuth:
         infoWindow = self.showInfo("Autenticando...")
         
         mc = MapaCacic(user, pswd)
-        if mc.auth():
-            mc.getInfo()
-            infoWindow.destroy()
-            
-            self.state = 1
-            self.window.destroy()
-            self.showPatr(mc)
-        else:
-            infoWindow.destroy()
-            
-            self.showAlert("Login incorreto.")
+        try:
+            if mc.auth():
+                mc.getInfo()
+                infoWindow.destroy()
+                
+                self.state = 1
+                self.window.destroy()
+                self.showPatr(mc)
+            else:
+                infoWindow.destroy()
+                self.showAlert("Login incorreto.")
+        except URLError, e:
+            try:
+                infoWindow.destroy()
+            except:
+                pass
+            self.showAlert("Erro na comunicação.\nDetalhes: %s " % e)
+            gtk.main_quit()
     
     def showPatr(self, mc):
         GUIMapaCacic(mc).show()
