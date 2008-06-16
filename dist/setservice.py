@@ -32,6 +32,9 @@ def getDir():
     else:
         return os.path.dirname(os.getcwd()+"/"+va)
 
+def cmd_exists(cmd):
+    return os.system(cmd+' > /dev/null 2>&1') == 0
+
 DIR = getDir()
 CACIC_CONF = "/usr/share/pycacic/config/cacic.conf"
 CACIC_CONF_ENC = "/usr/share/pycacic/config/cacic.dat"
@@ -134,15 +137,38 @@ def configAndPackage(force = 0):
     if not isPreconfigured() or force:
         mkconfig()
         resp = ''
-        while (not resp in ('S', 'Y')) and resp != 'N':
-            resp = raw_input("Deseja gerar um novo pacote de instalação pre-configurado? (Y/N)")
+        while (not resp in ('S', 'Y', 'N')):
+            resp = raw_input("Deseja gerar um novo pacote de instalação pre-configurado (Formato: .tgz) ? (Y/N)")
             resp = resp.upper()
         if resp in ('S', 'Y'):
             import os
             os.system("tar -C /usr/share -cf "+DIR+"/cacic.tar pycacic/")
             #print DIR+"/cacic.tar foi substituido pela versao configurada"
-            os.system("tar -C "+DIR+"/.. -czf /tmp/pycacic-preconf.tar.gz pycacic/")
-            print "Gerado pacote de instalacao pre-configurado: /tmp/pycacic-preconf.tar.gz"
+            os.system("tar -C "+DIR+"/.. -czf /tmp/pycacic-preconf.tgz pycacic/")
+            print "Gerado pacote de instalacao pre-configurado: /tmp/pycacic-preconf.tgz"
+        resp = ''
+        while (not resp in ('S', 'Y', 'N')):
+            resp = raw_input("Deseja gerar um novo pacote de instalação pre-configurado (Formato: .deb) ? (Y/N)")
+            resp = resp.upper()
+        if resp in ('S', 'Y'):
+            import os
+            resp = ''
+            while (not resp in ('S', 'Y', 'N')):
+                resp = raw_input("Deseja que o coletor patrimonial seja invocado automaticamente após a instalação? (Y/N)")
+                resp = resp.upper()
+            if resp in ('S', 'Y'):
+                f = open(DIR+"/gdeb/postinst" , 'a')
+                str = 'if [ "$1" = "configure" ]; then\n'
+                str+= '    if [ "$DISPLAY" = "" ]; then\n'
+                str+= '        (nohup python /usr/share/pycacic/mapacacic.py > /dev/null 2>&1)\n'
+                str+= '    else\n'
+                str+= '        (nohup python /usr/share/pycacic/guimapacacic.py > /dev/null 2>&1)&\n'
+                str+= '    fi\n'
+                str+= 'fi\n'
+                f.write(str)
+                f.close()
+            os.chmod(DIR+"/gdeb/gera-deb.sh", 0755)
+            os.system('cd '+DIR+'/gdeb/;'+DIR+"/gdeb/gera-deb.sh")
     else:
         print "Preconfiguracao detectada!"
 
@@ -154,7 +180,7 @@ def mkconfig():
     print "\n\tapós preencher as informacoes abaixo o programa irá iniciar\n"
     op = ''
     while not op in ('S', 'Y'):
-        addr = raw_input("Endereço do  Servidor ('ex: http://<endereco>'): ").lower()
+        addr = raw_input("Endereço do  Servidor ('ex: http://<endereco>/'): ").lower()
         if len(addr.split('//')) != 2:
             print "Endereco invalido"
         else:
@@ -168,9 +194,9 @@ def mkconfig():
                     print "Erro ao tentar conectar ao servidor"
                 else:
                     print "[OK]"
-                    user = raw_input("Usuario do Servidor: ")
+                    user = raw_input("Usuario do Agente: ")
                     pwd = raw_input("Senha: ")
-                    op = raw_input("\nOs dados estao corretos? (S|N)").upper()
+                    op = raw_input("\nOs dados estao corretos? (Y|N)").upper()
     # remove a barra do final
     if addr[len(addr)-1] == '/':
         addr = addr[:-1]

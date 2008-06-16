@@ -120,16 +120,16 @@ class Ger_Cols:
         netmask = net.__getMask__(self.computador.ipAtivo)
         iprede = net.__getIPRede__(self.computador.ipAtivo, netmask);
         self.defaults = {
-            'cs_cipher'   : '1',
-            'AgenteLinux' : self.coletor.encripta('PyCacic'),
-            'agent'        : self.coletor.encripta(server['agent']),     
-            'id_so'        : self.coletor.encripta('-1'),
-            'te_so'        : self.coletor.encripta(self.computador.getSO()),
-            'te_nome_computador'     : self.coletor.encripta(self.computador.getHostName()),
-            'id_ip_estacao'           : self.coletor.encripta(self.computador.ipAtivo),
-            'id_ip_rede'      : self.coletor.encripta(iprede),
-            'te_node_address'          : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ipAtivo)),
-            'padding_key'  : self.coletor.getPadding(),
+            'cs_cipher'          : '1',
+            'AgenteLinux'        : self.coletor.encripta('PyCacic'),
+            'agent'              : self.coletor.encripta(server['agent']),     
+            'id_so'              : self.coletor.encripta('-1'),
+            'te_so'              : self.coletor.encripta(self.computador.getSO()),
+            'te_nome_computador' : self.coletor.encripta(self.computador.getHostName()),
+            'id_ip_estacao'      : self.coletor.encripta(self.computador.ipAtivo),
+            'id_ip_rede'         : self.coletor.encripta(iprede),
+            'te_node_address'    : self.coletor.encripta(self.computador.getMACAtivo(self.computador.ipAtivo)),
+            'padding_key'        : self.coletor.getPadding(),
         }
         self.dicionario = {
             'in_chkcacic'        : self.coletor.encripta(''),
@@ -334,50 +334,9 @@ class Ger_Cols:
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_MONI', '20080604171031')
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_PATR', '')
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_SOFT', '')
-        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_UNDI', '') 
-        self.coletor.addChave('Coletas.HOJE', '20080606#Informações sobre Anti-Vírus OfficeScan,10:04:22,10:04:22,0#Informações sobre Compartilhamentos,10:04:22,10:04:22,0#Informações sobre Hardware,10:04:22,10:04:23,0#Informações sobre Sistemas Monitorados,10:04:24,10:07:23,0#Informações sobre Softwares,10:07:24,10:07:25,1#Informações sobre Unidades de Disco,10:07:26,10:07:32,1#Informações sobre Anti-Vírus OfficeScan,13:54:20,13:54:20,0#Informações sobre Compartilhamentos,13:54:20,13:54:20,0#Informações sobre Hardware,13:54:20,13:54:21,0#Informações sobre Sistemas Monitorados,13:54:22,13:54:32,1#Informações sobre Softwares,13:54:39,13:54:39,0#Informações sobre Unidades de Disco,13:54:41,13:54:46,1')
-        
-        '20080606#'
-        """Informações sobre Hardware,
-            10:04:22,
-            10:04:23,
-            0#
-        """
-        """Informações sobre Sistemas Monitorados,
-            10:04:24,
-            10:07:23,
-            0#
-        """
-        """Informações sobre Softwares,
-            10:07:24,
-            10:07:25,
-            1#
-        """
-        """Informações sobre Unidades de Disco,
-            10:07:26,
-            10:07:32,
-            1#
-        """
-        """Informações sobre Hardware,
-            13:54:20,
-            13:54:21,
-            0#
-        """
-        """Informações sobre Sistemas Monitorados,
-            13:54:22,
-            13:54:32,
-            1#
-        """
-        """Informações sobre Softwares,
-            13:54:39,
-            13:54:39,
-            0#
-        """
-        """Informações sobre Unidades de Disco,
-            13:54:41,
-            13:54:46,
-            1
-        """
+        self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_UNDI', '')        
+        # Coletas HOJE
+        self.coletor.addChave('Coletas.HOJE', self.getColetasHoje())       
         # COLETORES
         self.coletor.addChave('Configs.CS_COLETA_HARDWARE', 'S')
         self.coletor.addChave('Configs.CS_COLETA_SOFTWARE', 'S')
@@ -421,6 +380,35 @@ class Ger_Cols:
         self.coletor.createDat(self.coletor.dicionario, self.OUTPUT_DAT, '')      
         
 
+    def getColetasHoje(self):
+        """
+            Retorna uma string contendo os valores das coletas do dia
+            
+            Formato:
+                <YYYYMMDD>#<Nome_Coletor>#<Inicio>#<Fim>#<Status>
+        """
+        # restaura o dicionario
+        cacic_dat = self.coletor.getDatToDict(self.OUTPUT_DAT, '')
+        # data do dia
+        date = strftime("%Y%m%d")        
+        col_hoje = []
+        # popula a lista
+        for col in self.coletores.values():
+            col_hoje.append(col.getName())
+            col_hoje.append(col.getChave('Inicio'))
+            col_hoje.append(col.getChave('Fim'))
+            col_hoje.append('1')
+        # verifica a existencia da chave
+        if cacic_dat.has_key('Coletas.HOJE'):
+            # se ja tem do dia, incrementa
+            if cacic_dat['Coletas.HOJE'][0:8] == date:                
+                col_hoje.insert(0, cacic_dat['Coletas.HOJE'])                
+        else:
+            # caso nao tenha a do dia, adiciona
+            col_hoje.insert(0, strftime("%Y%m%d"))
+        return '#'.join(col_hoje)
+
+
     def toString(self):
         """Metodo toString da Classe"""
         s = []
@@ -440,12 +428,12 @@ class Ger_Cols:
 
     def __tostring(self):
         """Metodo toString da Classe"""
-        return self.toString()  
-  
-  
+        return self.toString()
+
+
 class GCException(Exception):
     """Classe GCException, para exibir mensagens de exceptions"""
-    
+
     def __init__(self, msg):
         Exception.__init__(self)
         self.message = msg
