@@ -36,7 +36,7 @@ _l = Language()
 
 class Cacic:
     
-    VERSION = '0.0.1'
+    VERSION = Reader.getPycacic()['version']
     
     def __init__(self):
         try:

@@ -54,6 +54,7 @@
 		</units>
 		<windows>
 			<string name="app_server">Application Server</string>
+			<string name="update_server">Update Server</string>
 			<string name="network_settings">TCP/IP Settings</string>
 			<string name="systems_monit_on">Sistemas Monitorados nessa Estação</string>
 			<string name="cols_on_this_date">Coletas Realizadas Nesta Data</string>

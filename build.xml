@@ -29,7 +29,6 @@
 	
     <target name="init" description="Create/Cleans the output directories.">
     	<delete dir="${build}"/>
-    	<tstamp />
         <mkdir dir="${build}"/>
     </target>
     
@@ -37,6 +36,9 @@
     	<copy todir="${build.pycacic}/pycacic">
 			<fileset dir="${src}" />
 		</copy>
+    	<exec dir="." executable="svnversion" outputproperty="revision" failifexecutionfails="false">
+    		<arg line="-n ."/>
+		</exec>
     </target>
 	
 	<target name="build"  depends="prebuild" description="Removes/replaces temporary files generated during PyCacic Agent execution">
@@ -56,6 +58,17 @@
 	</target>
     
     <target name="tar" depends="build" description="Creates the tar file">
+    	<replace file="${build.pycacic}/pycacic/config/cacic.conf">
+    		<replacefilter token="@revision@" value="${revision}"/>
+    	</replace>
+    	<replace file="${build}/setservice.py">
+			<replacefilter token="@revision@" value="${revision}"/>
+    	</replace>
+    	<replace file="${build}/gera-deb.sh">
+    		<replacefilter token="@revision@" value="${revision}"/>
+    	</replace>
+		<chmod file="${build.pycacic}/pycacic/gui.py" perm="0755" />
+		<chmod file="${build.pycacic}/pycacic/cacic.py" perm="0755" />
 		<tar basedir="${build.pycacic}" excludes="**/*.pyc, **/*.pyo" destfile="${build}/cacic.tar" />
 	</target>
 	
@@ -68,6 +81,13 @@
 				<include name="io.py"/>
 				<include name="globals.py"/>
 			</tarfileset>
+			<tarfileset dir="${build}" prefix="/pycacic/gdeb" preserveLeadingSlashes="false">
+				<include name="control"/>
+				<include name="postinst"/>
+				<include name="gera-deb.sh"/>
+				<include name="postrm"/>
+				<include name="prerm"/>
+			</tarfileset>
 			<tarfileset dir="${build}" prefix="/pycacic" mode="0755" preserveLeadingSlashes="false">
 				<include name="install.sh"/>
 			</tarfileset>
@@ -75,10 +95,10 @@
 	</target>
 	
 	<target name="gzip" depends="tar2" description="Creates the tar.gz file">
-		<gzip src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1.tgz" />
+		<gzip src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1.${revision}.tgz" />
 	</target>
 	
 	<target name="bzip2" depends="tar2" description="Creates the tar.bz2 file">
-		<bzip2 src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1.tar.bz2" />
+		<bzip2 src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1.${revision}.tar.bz2" />
 	</target>
 </project>

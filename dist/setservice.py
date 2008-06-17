@@ -38,6 +38,7 @@ def cmd_exists(cmd):
 DIR = getDir()
 CACIC_CONF = "/usr/share/pycacic/config/cacic.conf"
 CACIC_CONF_ENC = "/usr/share/pycacic/config/cacic.dat"
+VERSION = "0.0.1.@revision@"
 
 def getSOLang():
     """Retorna o idioma padrão do sistema operacional"""
@@ -144,8 +145,9 @@ def configAndPackage(force = 0):
             import os
             os.system("tar -C /usr/share -cf "+DIR+"/cacic.tar pycacic/")
             #print DIR+"/cacic.tar foi substituido pela versao configurada"
-            os.system("tar -C "+DIR+"/.. -czf /tmp/pycacic-preconf.tgz pycacic/")
-            print "Gerado pacote de instalacao pre-configurado: /tmp/pycacic-preconf.tgz"
+            tarname = "PyCACIC_"+VERSION+".preconf.tgz"
+            os.system("tar --preserve-permissions -C "+DIR+"/.. -czf /tmp/"+tarname+" pycacic/")
+            print "Gerado pacote de instalacao pre-configurado: /tmp/"+tarname
         resp = ''
         while (not resp in ('S', 'Y', 'N')):
             resp = raw_input("Deseja gerar um novo pacote de instalação pre-configurado (Formato: .deb) ? (Y/N)")

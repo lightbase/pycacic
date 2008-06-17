@@ -93,6 +93,11 @@ class IOConfig:
         root = IOConfig.getRoot()
         return root.getElementsByTagName('server')[0]
     
+    def getUpdate():
+        """Retorna o node do server"""
+        root = IOConfig.getRoot()
+        return root.getElementsByTagName('update')[0]
+    
     def getColetores():
         """Retorna o node dos coletores"""
         root = IOConfig.getRoot()
@@ -121,6 +126,7 @@ class IOConfig:
     encryptFile = staticmethod(encryptFile)
     getRoot = staticmethod(getRoot)
     getServer = staticmethod(getServer)
+    getUpdate = staticmethod(getUpdate)
     getColetores = staticmethod(getColetores)
     getPycacic = staticmethod(getPycacic)
     getPycacicStatus = staticmethod(getPycacicStatus)
@@ -137,12 +143,18 @@ class Reader:
     """
 
     def getServer():
-        """
-            Retorna um dicionario contendo o endereco do servidor,
-            a  e o arquivo
-        """
+        """Retorna um dicionario contendo o endereco do servidor de aplicacao"""
         server = {'address':'', 'page': '', 'agent':'', 'username':'', 'password':''}
         config = IOConfig.getServer()
+        for no in config.childNodes:
+            if no.nodeType == Node.ELEMENT_NODE:
+                server[no.nodeName] = no.firstChild.nodeValue                
+        return server
+    
+    def getUpdate():
+        """Retorna um dicionario contendo o endereco do servidor de update"""
+        server = {'address':'', 'dir': '', 'username': '', 'password': ''}
+        config = IOConfig.getUpdate()
         for no in config.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
                 server[no.nodeName] = no.firstChild.nodeValue                
@@ -165,7 +177,7 @@ class Reader:
 
     def getPycacic():
         """Retorna um dicionario contendo as informacoes sobre o PyCacic"""
-        pycacic = {'dir' : '', 'hash' : '', 'password' : '', 'locale' : ''}
+        pycacic = {'dir' : '', 'hash' : '', 'password' : '', 'locale' : '', 'version' : '0.0.1.-1'}
         config = IOConfig.getPycacic()
         for no in config.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
@@ -197,6 +209,7 @@ class Reader:
     
     
     getServer = staticmethod(getServer)
+    getUpdate = staticmethod(getUpdate)    
     getPycacic = staticmethod(getPycacic)
     getColetor = staticmethod(getColetor)
     getPycacicStatus = staticmethod(getPycacicStatus)
@@ -238,13 +251,33 @@ class Writer:
         return node.replace(old, ('%s="%s"' % (attrib, value)))
 
     def setServer(node, value, config = '', enc = True):
-        """Altera o no especificado das informacoes do servidor"""
+        """Altera o no especificado das informacoes do servidor aplicação"""
         configfile = ''
         if config == '':
             config = IOConfig.getDecryptedFile()
         else:
             configfile, config = config, IOConfig.getFile(config)
         re_sv = re.compile('<server(?:.|\n)*</server>')
+        re_node = re.compile('<%s.*</%s>' % (node, node))
+        sv = re_sv.findall(config)[0]        
+        if len(re_node.findall(sv)) == 0:
+            return 0 # False
+        node = re_node.findall(sv)[0]        
+        server = sv
+        server = server.replace(node, Writer.setNodeValue(node, value))
+        if enc:
+            Writer.saveXML(config.replace(sv, server), configfile)
+        else:
+            Writer.saveNotEncryptedXML(config.replace(sv, server), configfile)
+            
+    def setUpdate(node, value, config = '', enc = True):
+        """Altera o no especificado das informacoes do servidor de ftp"""
+        configfile = ''
+        if config == '':
+            config = IOConfig.getDecryptedFile()
+        else:
+            configfile, config = config, IOConfig.getFile(config)
+        re_sv = re.compile('<update(?:.|\n)*</update>')
         re_node = re.compile('<%s.*</%s>' % (node, node))
         sv = re_sv.findall(config)[0]        
         if len(re_node.findall(sv)) == 0:
@@ -276,7 +309,6 @@ class Writer:
         else:
             Writer.saveNotEncryptedXML(config.replace(pc, pycacic), configfile)
         
-        
     def setPycacicStatus(s, v):
         """Modifica o status do Pycacic"""
         config = IOConfig.getFile()
@@ -297,6 +329,7 @@ class Writer:
     saveNotEncryptedXML = staticmethod(saveNotEncryptedXML)
     setServer = staticmethod(setServer)
     setPycacic = staticmethod(setPycacic)
+    setUpdate = staticmethod(setUpdate)
     setPycacicStatus = staticmethod(setPycacicStatus)
     setNodeValue = staticmethod(setNodeValue)
     setNodeAttrib = staticmethod(setNodeAttrib)

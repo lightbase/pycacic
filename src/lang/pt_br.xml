@@ -54,6 +54,7 @@
 		</units>
 		<windows>
 			<string name="app_server">Servidor de Aplicação</string>
+			<string name="update_server">Servidor de Atualização</string>
 			<string name="network_settings">Configurações de TCP/IP</string>
 			<string name="systems_monit_on">Sistemas Monitorados nessa Estação</string>
 			<string name="cols_on_this_date">Coletas Realizadas Nesta Data</string>

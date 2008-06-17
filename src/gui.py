@@ -74,6 +74,7 @@ class GUI:
     def start(self):
         self.infoGeral = InfoGeral()
         self.logAtivit = LogAtividades()
+        self.configs = Configuracoes()
         self.createTray()
         
     def connect(self):
@@ -202,7 +203,7 @@ class GUI:
         self.showWindow(widget, self.logAtivit)           
         
     def showConfiguracoes(self, widget):
-        login = Login('')
+        login = Login(self.configs.show)
         self.showWindow(widget, login)
         
     def showExecAgora(self, widget):
@@ -238,9 +239,11 @@ class Login(GUI):
             self.showAlert('Senha Invalida.')
         self.on_window_destroy(self.window)
 
+
 class LogAtividades(GUI):
     """
         Classe LogAtividades
+        
         Para controlar as acoes da janela correspondente a exibicao do
         log do Sistema
     """
@@ -293,11 +296,64 @@ class LogAtividades(GUI):
         if self.current_line > 0:
             self.tv_log.scroll_to_cell(self.current_line - 1)
         return 1
+                
+
+class Configuracoes(GUI):
+    """
+        Classe Configuracoes
+        
+        Para controlar as acoes da janela correspondente a exibição 
+        das Configurações
+    """
+
+    def __init__(self):
+        GUI.__init__(self)
+        
+    def show(self):
+        self.visible = 1
+        self.xml = gtk.glade.XML(self.GLADE_PATH + 'configuracoes.glade')
+        self.xml.signal_autoconnect(self)
+        self.window = self.xml.get_widget('settings')
+        # Labels
+        self.setLabels()        
+        # Buttons
+        self.setButtons()
+        # Inputs
+        self.setInputs()
+        
+    def setLabels(self):
+        self.xml.get_widget('lb_server').set_text('%s:' % _l.get('app_server'))
+        self.xml.get_widget('lb_ftp').set_text('%s:' % _l.get('update_server'))
+        
+    def setButtons(self):
+        self.xml.get_widget('btn_save').set_label(_l.get('save'))
+        self.xml.get_widget('btn_close').set_label(_l.get('close'))
+        
+    def setInputs(self):
+        self.txt_server = self.xml.get_widget('txt_server')
+        self.txt_server.set_text(Reader.getServer()['address'])
+        self.txt_ftp = self.xml.get_widget('txt_ftp')
+        self.txt_ftp.set_text(Reader.getUpdate()['address']) 
+        
+    def on_btn_save_clicked(self, widget):
+        try:
+            from config.io import Writer
+            Writer.setServer('address', self.txt_server.get_text())
+            Writer.setUpdate('address', self.txt_ftp.get_text())
+            self.on_btn_close_clicked(widget)
+        except IOError, e:
+            print 'Erro de escrita: ' % e
+        except Exception, e:
+            print e
+        
+    def on_btn_close_clicked(self, widget):
+        self.on_window_destroy(self.window)
                         
         
 class InfoGeral(GUI):
     """
         Classe InfoGeral
+        
         Para controlar as acoes da janela correspondente a exibicao das
         Informacoes Gerais do Sistema
     """

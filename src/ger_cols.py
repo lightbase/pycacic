@@ -84,7 +84,7 @@ class Ger_Cols:
         # configuracoes gerais
         self.versao_atual = version
         self.password = ''
-        self.hash_atual = open(self.MD5SUM, "r").read()
+        self.hash_atual = self.getHash()
         self.hash_disponivel = ''
         self.pacote_disponivel = ''
         self.exibe_bandeja = 'N'
@@ -143,6 +143,11 @@ class Ger_Cols:
             'te_tripa_perfis'    : self.coletor.encripta(''),
         }       
         self.separador = '=CacicIsFree='
+        
+    def getHash(self):
+        if os.path.exists(self.MD5SUM):
+            return open(self.MD5SUM, "r").read()
+        return ''
         
     def getInterval(self):
         """Retorna o tempo em minutos do intervalo da coleta"""
@@ -225,15 +230,17 @@ class Ger_Cols:
                         self.password = self.decode(no.firstChild.nodeValue)
                         Writer.setPycacic('password', self.password)
                     elif no.nodeName == 'te_enderecos_mac_invalidos':
-                        self.mac_invalidos = (self.decode(no.firstChild.nodeValue)).replace('-',':')
+                        self.mac_invalidos = (self.decode(no.firstChild.nodeValue)).replace(':','-')
                     elif no.nodeName == 'TE_SERV_CACIC':
                         #self.cacic_server = self.decode(no.firstChild.nodeValue)
                         pass
                     # UPDATES
                     elif no.nodeName == 'TE_SERV_UPDATES':
                         self.update_server = self.decode(no.firstChild.nodeValue)
+                        Writer.setUpdate('address', self.update_server)
                     elif no.nodeName == 'NU_PORTA_SERV_UPDATES':
                         self.update_port = self.decode(no.firstChild.nodeValue)
+                        Writer.setUpdate('address', self.update_server)
                     elif no.nodeName == 'TE_PATH_SERV_UPDATES':
                         self.update_path = self.decode(no.firstChild.nodeValue)
                     elif no.nodeName == 'NM_USUARIO_LOGIN_SERV_UPDATES':
