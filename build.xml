@@ -54,6 +54,9 @@
 		<copy overwrite="true" todir="${build}">
 			<fileset file="${src}/globals.py"/>
 		</copy>
+		<copy overwrite="true" todir="${build}">
+			<fileset file="${src}/README"/>
+		</copy>
 		<delete file="{build.pycacic}/cacic2.dat"/>
 	</target>
     
@@ -86,6 +89,7 @@
 				<include name="ccrypt.py"/>
 				<include name="io.py"/>
 				<include name="globals.py"/>
+				<include name="README"/>
 			</tarfileset>
 			<tarfileset dir="${build}" prefix="/pycacic/gdeb" preserveLeadingSlashes="false">
 				<include name="control"/>
