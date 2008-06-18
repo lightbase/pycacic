@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+if [ "$1" = "configure" ]; then
+	ln -sf /etc/init.d/cacic /etc/rc2.d/S99cacic
+	ln -sf /etc/init.d/cacic /etc/rc3.d/S99cacic
+	ln -sf /etc/init.d/cacic /etc/rc4.d/S99cacic
+	ln -sf /etc/init.d/cacic /etc/rc5.d/S99cacic
+	chmod 0755 /usr/share/pycacic/cacic.py
+	chmod 0755 /usr/share/pycacic/gui.py
+	chmod 0755 /etc/init.d/cacic
+	(nohup python /usr/share/pycacic/cacic.py > /dev/null 2>&1)&
+	(nohup python /usr/share/pycacic/gui.py > /dev/null 2>&1)&
+fi
+
