@@ -43,7 +43,7 @@
 	
 	<target name="build"  depends="prebuild" description="Removes/replaces temporary files generated during PyCacic Agent execution">
 		<copy overwrite="true" todir="${build}">
-			<fileset dir="${dist}"  /> <!--includes="**/*"-->
+			<fileset dir="${dist}" />
 		</copy>
 		<copy overwrite="true" todir="${build}">
 			<fileset file="${src}/coletores/lib/ccrypt.py"/>
@@ -67,9 +67,15 @@
     	<replace file="${build}/gera-deb.sh">
     		<replacefilter token="@revision@" value="${revision}"/>
     	</replace>
-		<chmod file="${build.pycacic}/pycacic/gui.py" perm="0755" />
-		<chmod file="${build.pycacic}/pycacic/cacic.py" perm="0755" />
-		<tar basedir="${build.pycacic}" excludes="**/*.pyc, **/*.pyo" destfile="${build}/cacic.tar" />
+    	<tar destfile="${build}/cacic.tar">
+    		<tarfileset dir="${build.pycacic}" excludes="**/*.pyc, **/*.pyo, pycacic/gui.py, pycacic/cacic.py, pycacic/mapacacic.py, pycacic/guimapacacic.py" />
+    		<tarfileset dir="${build.pycacic}/pycacic" prefix="/pycacic" mode="0755" preserveLeadingSlashes="false">
+    			<include name="gui.py"/>
+    			<include name="cacic.py"/>
+    			<include name="mapacacic.py"/>
+    			<include name="guimapacacic.py"/>
+    		</tarfileset>
+    	</tar>
 	</target>
 	
 	<target name="tar2" depends="tar" description="Creates the tar file">
