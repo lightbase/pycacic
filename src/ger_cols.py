@@ -298,11 +298,11 @@ class Ger_Cols:
             if self.url.isOK(xml):
                 # adiciona o UVC ao dicionario principal
                 self.coletor.addChave(self.coletas_enviar[col]['UVCKEY'], self.coletas_enviar[col]['UVC'])
-                self.col_status[col] = 'Dados da Coleta Enviado Com Sucesso'
+                self.col_status[col] = 1
                 # adiciona linha ao log
                 CLog.appendLine('%s' % _l.get(col), 'Dados da Coleta Enviado Com Sucesso')
             else:
-                self.col_status[col] = _l.get('error_on_send_data')
+                self.col_status[col] = 0
                 # adiciona linha ao log
                 CLog.appendLine('%s' % _l.get(col), _l.get('error_on_send_data'))
 
@@ -343,6 +343,7 @@ class Ger_Cols:
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_SOFT', '')
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_UNDI', '')        
         # Coletas HOJE
+        print 'Coletas Hoje: %s' % self.getColetasHoje()
         self.coletor.addChave('Coletas.HOJE', self.getColetasHoje())       
         # COLETORES
         self.coletor.addChave('Configs.CS_COLETA_HARDWARE', 'S')
@@ -404,12 +405,14 @@ class Ger_Cols:
             col_hoje.append(col.getName())
             col_hoje.append(col.getChave('Inicio'))
             col_hoje.append(col.getChave('Fim'))
-            col_hoje.append('1')
+            if self.col_status.has_key(col.getName()):                
+                col_hoje.append(str(self.col_status[col.getName()]))
+            else:
+                col_hoje.append('0')
         # verifica a existencia da chave
-        if cacic_dat.has_key('Coletas.HOJE'):
+        if cacic_dat.has_key('Coletas.HOJE') and cacic_dat['Coletas.HOJE'][0:8] == date:
             # se ja tem do dia, incrementa
-            if cacic_dat['Coletas.HOJE'][0:8] == date:                
-                col_hoje.insert(0, cacic_dat['Coletas.HOJE'])                
+            col_hoje.insert(0, cacic_dat['Coletas.HOJE'])
         else:
             # caso nao tenha a do dia, adiciona
             col_hoje.insert(0, strftime("%Y%m%d"))

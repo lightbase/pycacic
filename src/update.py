@@ -35,6 +35,10 @@ import time
 from config.io import Writer
 from logs.log import CLog
 
+from lang.language import Language
+
+# Languages
+_l = Language()
 
 if __name__ == '__main__':
     time.sleep(5)
@@ -59,8 +63,8 @@ if __name__ == '__main__':
         os.system('rm -Rf /tmp/%s' % temp_dir)
         os.system('rm -f /tmp/%s' % pacote_disponivel)
         open("/usr/share/pycacic/config/MD5SUM", "w").write(novo_hash)
-        CLog.appendLine('AutoUpdate', 'PyCacic atualizado com sucesso.')
-        CLog.appendLine('AutoUpdate', 'O Programa vai ser reiniciado em instantes.')
+        CLog.appendLine('AutoUpdate', _l.get('update_sucess'))
+        CLog.appendLine('AutoUpdate', _l.get('program_restart'))
     # reiniciando o PyCacic
     os.system('python /usr/share/pycacic/cacic.py &')
     sys.exit(1)

@@ -441,7 +441,21 @@ class InfoGeral(GUI):
             try:
                 self.tv_tcp_model.append([i, cacic_dat[itens[i]]])
             except:
-                pass        
+                pass
+        self.tv_cols_model.clear()
+        k = 0
+        row = []
+        # a primeira posicao e a data
+        for i in cacic_dat['Coletas.HOJE'].split('#')[1:]:
+            k += 1
+            if k == 1:
+                row.append(_l.get(i))
+            else:
+                row.append(i)
+            if k >= 4:
+                self.tv_cols_model.append(row)
+                k = 0
+                row = []
 
 
 if __name__ == '__main__':

@@ -25,6 +25,11 @@
 			<string name="welcome">Bem Vindo ao PyCacic</string>
 			<string name="need_root">Para executar o programa é necessário ser super-usuário (root)</string>
 			<string name="program_started">Iniciado Programa</string>
+			<string name="new_version">Nova Versão Disponível !!!</string>
+			<string name="starting_update">Iniciando Atualização</string>
+			<string name="download_sucess">Novo Pacote Copiado Com Sucesso</string>
+			<string name="update_sucess">PyCacic atualizado com sucesso</string>
+			<string name="program_restart">O Programa vai ser reiniciado em instantes</string>
 			<string name="contact_with">Contato com</string>
 			<string name="collection_starts_in">Coleta iniciará em</string>
 			<string name="collections_started">Coletas Iniciadas</string>
@@ -87,6 +92,8 @@
 			<string name="error_invalid_server_address">Endereço do Servidor inválido. Não foi possível detectar o ip ativo.</string>
 		</errors>
 		<words>
+			<string name="save">Salvar</string>
+			<string name="close">Fechar</string>
 			<string name="action">Atividade</string>
 			<string name="date">Data</string>
 			<string name="end">Fim</string>

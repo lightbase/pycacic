@@ -144,11 +144,11 @@ class Cacic:
         self.gc.readXML(xml)        
         # verifica atualizacao
         if self.gc.hasNew():
-            CLog.appendLine('Cacic', 'Nova Versao Disponivel !!!')
-            CLog.appendLine('Cacic', 'Iniciando Atualizacao')
+            CLog.appendLine('Cacic', _l.get('new_version'))
+            CLog.appendLine('Cacic', _l.get('starting_update'))
             # baixa o novo pacote para o diretorio temporario
             self.gc.atualiza()
-            CLog.appendLine('Cacic', 'Novo Pacote Copiado Com Sucesso')
+            CLog.appendLine('Cacic', _l.get('download_sucess'))
             #chama atualizador e sai            
             os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
             self.quit()

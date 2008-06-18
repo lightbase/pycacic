@@ -23,8 +23,13 @@
 		</names>
 		<main>
 			<string name="welcome">Welcome to PyCacic</string>
-			<string name="need_root">You must superuser (root) to run the program</string>
+			<string name="need_root">This application requires superuser (root) to run.</string>
 			<string name="program_started">Program Started</string>
+			<string name="new_version">New Version Available !!!</string>
+			<string name="starting_update">Starting Update</string>
+			<string name="download_sucess">New Package Successfully Downloaded</string>
+			<string name="update_sucess">Update Has Successfully Finished</string>
+			<string name="program_restart">The Program will be restarted</string>			
 			<string name="contact_with">Contact With</string>
 			<string name="collection_starts_in">Collection Starts in</string>
 			<string name="collections_started">Collections Started</string>
@@ -87,6 +92,8 @@
 			<string name="error_invalid_server_address">Invalid Server Ip Address. Could not detect active Host Ip Address.</string>
 		</errors>		
 		<words>
+			<string name="save">Save</string>
+			<string name="close">Close</string>
 			<string name="action">Action</string>
 			<string name="date">Date</string>
 			<string name="end">End</string>
