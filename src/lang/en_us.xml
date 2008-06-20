@@ -7,6 +7,7 @@
 		<agentversion>0.0.1</agentversion>
 		<author>Dataprev - ES</author>
 		<date>15 January 2008</date>
+		<dateformat>m/d/Y</dateformat>
 		<description> </description>
 	</header>
 	<body>

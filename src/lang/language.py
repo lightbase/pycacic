@@ -37,10 +37,21 @@ class Language:
     def __init__(self):
         """Construtor da classe"""
         self.dict = {}
-        self.languages = []
+        self.langInfo = {}
+        self.languages = []        
         self.scanAvailableLanguages()
         self.lang = self.getLang()
         self.setActiveLanguageDict(self.openXML(self.lang))
+        
+        
+    def convertDate(self, date):
+        """ date = 'YYYYMMDD' """
+        dtformat = self.getLanguageInfo().getDateFormat() 
+        dtformat = dtformat.replace('Y', date[0:4])
+        dtformat = dtformat.replace('m', date[4:6])
+        dtformat = dtformat.replace('d', date[6:8])
+        return dtformat
+    
         
     def scanAvailableLanguages(self):
         """Procura no diretório por arquivos de tradução"""
@@ -50,6 +61,7 @@ class Language:
                 try:
                     langInfo = self.getXMLHeader(file)
                     self.languages.append(langInfo.getCode().lower())
+                    self.langInfo[langInfo.getCode().lower()] = langInfo 
                 except Exception, e:
                     # log error
                     CLog.appendLine('Language', e)
@@ -60,7 +72,7 @@ class Language:
     def getLanguageByCode(self, code):
         """Retorna o código do arquivo de idioma"""
         try:
-            return Language.languages[code.lower()]
+            return self.languages[code.lower()]
         except:
             return None
     
@@ -85,9 +97,17 @@ class Language:
                             code = c.firstChild.nodeValue
                         elif c.nodeName == "name":
                             name = c.firstChild.nodeValue
-                if code != '' and name != '':
-                    return LanguageInfo(file, code, name)
-        raise Exception("Language code and/or name missing/empty.")
+                        elif c.nodeName == "dateformat":
+                            dtformat = c.firstChild.nodeValue
+                if code != '' and name != '' and dtformat != '':
+                    return LanguageInfo(file, code, name, dtformat)
+        raise Exception("Language code and/or name and/or dateformat missing/empty.")
+    
+    def getLanguageInfo(self):
+        try:
+            return self.langInfo[self.lang.lower()]
+        except:
+            return LanguageInfo('', '', '', '')
     
     def getLanguageInfoByCode(self, code):
         for lang in self.languages:
@@ -133,26 +153,12 @@ class Language:
         else:
             self.lang = DEFAULT
         self.openXML()
-        self.setXMLInfo()        
-    
-    def getHeader(self):
-        """Retorna o cabecalho do programa"""
-        no = self.getMode(self.mode)
-        if not no:
-            return 0 # False
-        header = {}
-        for filho in no.childNodes:
-            if filho.nodeType == Node.ELEMENT_NODE and filho.nodeName == 'header':
-                for item in filho.childNodes:
-                    if item.nodeType == Node.ELEMENT_NODE:
-                        header[item.nodeName] = item.firstChild.nodeValue
-        return header   
+        self.setXMLInfo()
                     
     def getRoot(self, xml):
         """Retorna o no raiz do XML"""        
         root = xml.getElementsByTagName('pycacic')[0]
-        return root
-    
+        return root    
     
     def getLang(self):
         """Retorna o idioma salvo no arquivo de configuracao"""
@@ -189,10 +195,11 @@ class Language:
     
 class LanguageInfo:
     
-    def __init__(self, file, code, name):
+    def __init__(self, file, code, name, dtformat):
         self.file = file
         self.code = code
         self.name = name
+        self.dateformat = dtformat
     
     def getName(self):
         return self.name
@@ -202,6 +209,9 @@ class LanguageInfo:
     
     def getFile(self):
         return self.file
+    
+    def getDateFormat(self):
+        return self.dateformat
     
     def load(self):
         Language.loadFromFile(self, self.getFile())     

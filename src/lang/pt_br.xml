@@ -7,6 +7,7 @@
 		<agentversion>0.0.1</agentversion>
 		<author>Dataprev - ES</author>
 		<date>15 January 2008</date>
+		<dateformat>d/m/Y</dateformat>
 		<description>Tradução do Pycacic para português do Brasil</description>
 	</header>
 	<body>
@@ -43,8 +44,8 @@
 			<string name="action_log">Log de Atividades</string>
 			<string name="settings">Configurações</string>
 			<string name="run_now">Executar Agora</string>
-			<string name="general_info">Informaçõs Gerais</string>
-			<string name="patr_info">Informaçõs Patrimoniais</string>
+			<string name="general_info">Informações Gerais</string>
+			<string name="patr_info">Informações Patrimoniais</string>
 			<string name="exit">Finalizar PyCacic</string>
 		</menu>
 		<keymsgs>
