@@ -142,11 +142,11 @@ class Cacic:
         self.gc.readXML(xml)        
         # verifica atualizacao
         if self.gc.hasNew():
-            CLog.appendLine('Cacic', _l.get('new_version'))
-            CLog.appendLine('Cacic', _l.get('starting_update'))
+            CLog.appendLine(_l.get('pycacic'), _l.get('new_version'))
+            CLog.appendLine(_l.get('pycacic'), _l.get('starting_update'))
             # baixa o novo pacote para o diretorio temporario
             self.gc.atualiza()
-            CLog.appendLine('Cacic', _l.get('download_sucess'))
+            CLog.appendLine(_l.get('pycacic'), _l.get('download_sucess'))
             #chama atualizador e sai            
             os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
             self.quit()
@@ -176,9 +176,8 @@ if __name__ == '__main__':
         try:            
             Cacic()
         except socket.error:
-            print 'dormindo %s segundos' % SLEEP_TIME
+            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
-            print 'acordou'
         except:
             break
         

@@ -104,6 +104,7 @@
 			<string name="module">Módulo</string>
 			<string name="name">Nome</string>						
 			<string name="start">Início</string>
+			<string name="sleeping">Dormindo</string>
 			<string name="status">Status</string>
 			<string name="value">Valor</string>
 			<string name="version">Versão</string>		

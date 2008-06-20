@@ -102,8 +102,9 @@
 			<string name="item">Item</string>
 			<string name="license">License</string>			
 			<string name="module">Module</string>
-			<string name="name">Name</string>						
+			<string name="name">Name</string>
 			<string name="start">Start</string>
+			<string name="sleeping">Sleeping</string>
 			<string name="status">Status</string>
 			<string name="value">Value</string>	
 			<string name="version">Version</string>			
