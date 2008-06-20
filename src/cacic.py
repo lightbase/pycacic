@@ -94,20 +94,18 @@ class Cacic:
             self.quit()
         except socket.error, e:
             CLog.appendLine(_l.get('pycacic'), e)
-            # remover depois
-            import traceback
-            traceback.print_exc()
-            
+            raise socket.error
+                        
         except GCException, e:
             error = "%s: %s" % (_l.get('error'), e.getMessage())
             CLog.appendLine(_l.get('pycacic'), error)
-            # remover depois
-            import traceback
-            traceback.print_exc()
+            
         except Exception, e:
             error = "%s: %s" % (_l.get('error'), e)
-            CLog.appendLine(_l.get('pycacic'), error)            
-            # remover depois
+            CLog.appendLine(_l.get('pycacic'), error)
+        
+        # remover depois
+        finally:           
             import traceback
             traceback.print_exc()
         
@@ -171,4 +169,17 @@ if __name__ == '__main__':
     if version < 230:
         print _l.get('python_required')
         sys.exit(1)
-    Cacic()
+    
+    # seconds to sleep (socket erros)
+    SLEEP_TIME = 600
+    while 1:
+        try:            
+            Cacic()
+        except socket.error:
+            print 'dormindo %s segundos' % SLEEP_TIME
+            time.sleep(SLEEP_TIME)
+            print 'acordou'
+        except:
+            break
+        
+        
