@@ -343,7 +343,6 @@ class Ger_Cols:
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_SOFT', '')
         self.coletor.addChave('Configs.DT_HR_COLETA_FORCADA_UNDI', '')        
         # Coletas HOJE
-        print 'Coletas Hoje: %s' % self.getColetasHoje()
         self.coletor.addChave('Coletas.HOJE', self.getColetasHoje())       
         # COLETORES
         self.coletor.addChave('Configs.CS_COLETA_HARDWARE', 'S')

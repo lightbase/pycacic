@@ -372,7 +372,7 @@ class InfoGeral(GUI):
         self.xml.get_widget('lb_host_name').set_text('"%s"' % Reader.getServer()['address'])
         self.xml.get_widget('lb_tcp_ip').set_text(_l.get('network_settings'))
         self.xml.get_widget('lb_sis_monitor').set_text(_l.get('systems_monit_on'))
-        self.xml.get_widget('lb_cols').set_text('%s (%s)' % (_l.get('cols_on_this_date'), strftime('%d/%m/%Y')))
+        self.xml.get_widget('lb_cols').set_text('%s' % _l.get('cols_on_this_date'))        
         # TreeViews
         self.tv_tcp_ip = self.xml.get_widget('tv_tcp_ip')
         self.tv_tcp_model = gtk.ListStore(str, str)
@@ -444,8 +444,11 @@ class InfoGeral(GUI):
                 pass
         self.tv_cols_model.clear()
         k = 0
-        row = []
-        # a primeira posicao e a data
+        row = []        
+        lbl = self.xml.get_widget('lb_cols').get_text()
+        date = cacic_dat['Coletas.HOJE'].split('#')[0]
+        self.xml.get_widget('lb_cols').set_text('%s (%s)' % (lbl, _l.convertDate(date)))        
+        # a primeira posicao eh a data
         for i in cacic_dat['Coletas.HOJE'].split('#')[1:]:
             k += 1
             if k == 1:

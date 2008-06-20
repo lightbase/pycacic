@@ -34,8 +34,21 @@
 
  Primeiramente executar o arquivo install.sh, como super usuário (root), e irá 
  iniciar a instalação, caso o pacote não contenha uma pré-configuração algumas
- informações (como ip do gerente web, usuário e senha) serão pedidas. Ao término
- deste procedimento o PyCacic já estará rodando na máquina do usuário.
+ informações serão pedidas:
+ 
+   + Endereço do  Servidor : endereço do host aonde está o gerente web, incluindo
+                             o protocolo (http:// ou https://).
+                             *ex*: 
+                                http://meu_servidor/
+                                http://127.0.0.1/
+ 
+   + Usuario do Agente     : usuário para autenticação básica (Basic Authentication)
+                             http. O Cacic usa como padrão "USER_CACIC" (sem aspas).
+                         
+   + Senha                 : senha para autenticação básica (Basic Authentication) 
+                             http. O Cacic usa como padrão "PW_CACIC" (sem aspas).                             
+ 
+ Ao término deste procedimento o PyCacic já estará rodando na máquina do usuário.
  
   2.1) Executar como "root"
       

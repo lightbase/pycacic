@@ -257,12 +257,18 @@ def authDialog():
         dialog.msgbox("MapaCacic", 7, 60, msg0)
         
         user = ''
-        while user == '' or user == 0:
+        while user == '':
             user = dialog.inputbox("Autenticação", 7, 40, "Login:", "")
-            
+        
+        if user == 0:
+            return None
+        
         pwd = ''
-        while pwd == '' or pwd == 0:
+        while pwd == '':
             pwd = dialog.password("Autenticação", 7, 40, "Password:")
+        
+        if pwd == 0:
+            return None
         
         return (user, pwd)
 
