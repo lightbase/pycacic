@@ -119,16 +119,21 @@ def install():
     writeStartLink(4)
     writeStartLink(5)
     print "[OK]"
-    configAndPackage()
+    
     print "Generating Version Hash",
     writeMD5()
     print "[OK]"
+    
     print "Adding to cron ",
     writeCron()
     print "[OK]"
+    
     print "Adding to Gnome AutoStart ",
     writeGnomeAutoStart()
     print "[OK]"
+    
+    configAndPackage()
+    
 
 def isPreconfigured():
     return not os.path.exists("/usr/share/pycacic/config/cacic.conf") and os.path.exists("/usr/share/pycacic/config/cacic.dat")

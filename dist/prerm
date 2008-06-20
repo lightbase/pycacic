@@ -11,4 +11,8 @@ if [ "$1" = "remove" ] || [ "$1" = "upgrade" ]; then
 		kill $pid
 	fi
 	rm -Rf /usr/share/pycacic
+	rm -f /etc/rc2.d/S99cacic
+	rm -f /etc/rc3.d/S99cacic
+	rm -f /etc/rc4.d/S99cacic
+	rm -f /etc/rc5.d/S99cacic
 fi
