@@ -588,6 +588,8 @@ class PC_XML:
                         self.getCPUInfo(filho)
                     elif a == 'id' and valor[0:3] == 'pci':
                         self.getPCIInfo(filho)
+                    elif a == 'id' and valor[0:4] == 'scsi':
+                        self.getSCSIInfo(filho)
                     elif a == 'id' and valor == 'display':
                          self.getVideoInfo(filho)
                     elif a == 'id' and valor == 'bridge':
