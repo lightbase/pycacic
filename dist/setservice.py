@@ -75,7 +75,7 @@ def writeCron():
     f.write("Cacic=''\n")
     f.write("Cacic=`ps x | grep cacic.py | grep -v grep 2> /dev/null`\n")
     f.write('if [ "$Cacic" = "" ]; then\n')
-    f.write("(python /usr/share/pycacic/cacic.py)&\n")
+    f.write("(python /usr/share/pycacic/cacic.py 1> /dev/null 2>&1)& \n")
     f.write("fi")
     f.close()
     os.chmod("/etc/cron.hourly/chksis", 0755)
