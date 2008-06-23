@@ -50,28 +50,14 @@
  
  Ao término deste procedimento o PyCacic já estará rodando na máquina do usuário.
  
-  2.1) Executar como "root"
-      
-      # ./install.sh
-
- 2.2) Endereço (nome ou IP) do servidor - URL para acesso ao servidor (gerente) do CACIC
-      exemplos: 
-        - http://server240       ou
-        - http://192.168.1.240
-
- 2.3) Usuário e senha - Para acesso ao web service das transações do agente com o gerente.
-                        Por enquanto está fixo e deve ser:
-      Usuário: USER_CACIC
-      Senha  : PW_CACIC
-
- 2.4) Para utilizar a interface deve-se executar o arquivo "/usr/share/pycacic/gui.py" ou
-      no menu "Ferramentas de Sistema" > "PyCacic", como usuario normal.
-      É necessario ter instalado o GTK+, PyGTK e o Glade. Caso execute corretamente irá
-      aparecer um icone no systray, clicando com o botão direito no mesmo aparecerão
-      ações pertinentes ao programa.
-      
-      *obs:* Ao clicar em "Executar Agora" observe na janela "Log de Atividades" as
-              mensagens geradas pelo programa (coletas, erros, etc.).
+ Para utilizar a interface deve executar o arquivo "/usr/share/pycacic/gui.py" ou
+ no menu "Ferramentas de Sistema" > "PyCacic", como usuario normal.
+ É necessario ter instalado o GTK+, python-gtk2 e o python-glade. Caso execute 
+ corretamente irá aparecer um icone no systray, clicando com o botão direito no 
+ mesmo aparecerão ações pertinentes ao programa.
+ 
+ *obs:* Ao clicar em "Executar Agora" observe na janela "Log de Atividades" as
+ mensagens geradas pelo programa (coletas, erros, etc.).
  
  
  

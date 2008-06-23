@@ -57,7 +57,7 @@ if __name__ == '__main__':
         # descompactando o pacote novo
         CLog.appendLine('AutoUpdate', 'Iniciado processo de autoupdate.')
         os.system('mkdir /tmp/%s' % temp_dir)
-        os.system('tar -xf /tmp/%s -C /tmp/%s' % (pacote_disponivel, temp_dir))
+        os.system('tar -xzf /tmp/%s -C /tmp/%s' % (pacote_disponivel, temp_dir))
         os.system('tar -xf /tmp/%s/pycacic/cacic.tar -C /usr/share' % temp_dir)
         # removendo o pacote novo no temporario
         os.system('rm -Rf /tmp/%s' % temp_dir)

@@ -104,10 +104,6 @@ class Cacic:
             error = "%s: %s" % (_l.get('error'), e)
             CLog.appendLine(_l.get('pycacic'), error)
         
-        # remover depois
-        finally:           
-            import traceback
-            traceback.print_exc()
         
     
     def isRoot(self):
@@ -146,7 +142,7 @@ class Cacic:
             CLog.appendLine(_l.get('pycacic'), _l.get('starting_update'))
             # baixa o novo pacote para o diretorio temporario
             self.gc.atualiza()
-            CLog.appendLine(_l.get('pycacic'), _l.get('download_sucess'))
+            CLog.appendLine(_l.get('pycacic'), '%s: %s' % (_l.get('download_sucess'), self.gc.pacote_disponivel))
             #chama atualizador e sai            
             os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
             self.quit()

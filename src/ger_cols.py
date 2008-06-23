@@ -89,6 +89,7 @@ class Ger_Cols:
         self.pacote_disponivel = ''
         self.exibe_bandeja = 'N'
         self.exibe_erros_criticos = 'N'
+        self.coleta_patr = 0
         self.exec_apos = 0
         self.intervalo_exec = 0
         self.intervalo_renovacao_patrim = 0
@@ -190,10 +191,12 @@ class Ger_Cols:
         self.addColeta(Col_Network(self.computador), 'S')
         for no in root.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
-                if no.firstChild.nodeValue != '':      
+                if no.firstChild.nodeValue != '':
                     if no.nodeName == 'cs_auto_update':
                         self.update_auto = self.decode(no.firstChild.nodeValue)
                     # COLETAS
+                    elif no.nodeName == 'cs_coleta_patrimonio' and self.decode(no.firstChild.nodeValue) == 'S':
+                        self.coleta_patr = 1 # True
                     elif no.nodeName == 'cs_coleta_forcada' and self.decode(no.firstChild.nodeValue) == 'OK':
                         self.all_forcada = 1 # True
                     elif no.nodeName == 'cs_coleta_compart':                       
@@ -311,6 +314,7 @@ class Ger_Cols:
         # GERAL
         self.coletor.addChave('Configs.CS_CIPHER', '1')
         self.coletor.addChave('Configs.CS_COMPRESS', '3')
+        self.coletor.addChave('Configs.cs_coleta_patrimonio', self.coleta_patr)
         self.coletor.addChave('Configs.NU_EXEC_APOS', self.exec_apos)
         self.coletor.addChave('Configs.NU_INTERVALO_EXEC', self.intervalo_exec)
         self.coletor.addChave('Configs.NU_INTERVALO_RENOVACAO_PATRIM', self.intervalo_renovacao_patrim)

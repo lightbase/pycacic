@@ -110,9 +110,18 @@ class GUI:
         self.menuItem.connect('activate', self.showInfoGeral)
         self.menu.append(self.menuItem)
         
+        col = Coletor(None)
+        cacic_dat = col.getDatToDict(Ger_Cols.OUTPUT_DAT, '')
+        showPatr = 0
+        if cacic_dat.has_key('Configs.cs_coleta_patrimonio'):
+            if cacic_dat['Configs.cs_coleta_patrimonio'] == 1:
+                showPatr = 1
+        
         self.menuItem = gtk.ImageMenuItem(_l.get('patr_info'))
         self.menuItem.connect('activate', self.showInfoPatr)
         self.menu.append(self.menuItem)
+        if not showPatr:
+            self.menuItem.set_sensitive(0)
         
         self.menuItem = gtk.ImageMenuItem(_l.get('exit'))
         self.menuItem.connect('activate', self.quit_cb, self.statusIcon)
