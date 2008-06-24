@@ -150,7 +150,7 @@ def configAndPackage(force = 0):
             import os
             os.system("tar -C /usr/share -cf "+DIR+"/cacic.tar pycacic/")
             #print DIR+"/cacic.tar foi substituido pela versao configurada"
-            tarname = "PyCACIC_"+VERSION+".preconf.tgz"
+            tarname = "pycacic_"+VERSION+".preconf.tgz"
             os.system("tar --preserve-permissions -C "+DIR+"/.. -czf /tmp/"+tarname+" pycacic/")
             print "Gerado pacote de instalacao pre-configurado: /tmp/"+tarname
         resp = ''
