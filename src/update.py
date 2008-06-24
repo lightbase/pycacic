@@ -68,7 +68,7 @@ if __name__ == '__main__':
             CLog.appendLine('AutoUpdate', _l.get('update_sucess'))
             CLog.appendLine('AutoUpdate', _l.get('program_restart'))
             # reiniciando o PyCacic
-            os.system('python /usr/share/pycacic/cacic.py &')
+            os.system('/usr/share/pycacic/cacic.py &')
             sys.exit(1)
     except Exception, e:
         CLog.appendLine('AutoUpdate', 'Erro: %s' % e)

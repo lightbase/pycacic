@@ -39,8 +39,20 @@ class Cacic:
     VERSION = Reader.getPycacic()['version']
     
     def __init__(self):
-        CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
-        print _l.get('welcome')    
+        try:            
+            CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
+            print _l.get('welcome')
+            # abre conexao por socket
+            self.setSocket()
+            # flags do Gerente de Coletas
+            self.gc_stopped = 0 # False
+            self.gc_ok = 0 # False
+            self.coletas_forcadas = []
+            # Gerente de Coletas
+            self.gc = Ger_Cols(self.VERSION)
+        except:
+            print 'Erro ao instanciar Cacic()'
+            self.quit()
     
     def run(self):
         """Inicia o Cacic"""
@@ -50,19 +62,7 @@ class Cacic:
                 raise Exception(_l.get('need_root'))
             
             # Habilita o coletor de lixo do Python
-            garbage_collector.enable()            
-            # flags do Gerente de Coletas
-            self.gc_stopped = 0 # False
-            self.gc_ok = 0 # False
-            self.coletas_forcadas = []
-            # Gerente de Coletas
-            self.gc = Ger_Cols(self.VERSION)
-            # configuracao do socket para comunicacao interna
-            self.host, self.port, self.buf, self.addr = Globals.getSocketAttr()
-            # criando socket
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind(self.addr)
+            garbage_collector.enable()           
             # executa thread para escutar o socket
             thread.start_new_thread(self.checkSocket, ())
             while 1:
@@ -147,6 +147,15 @@ class Cacic:
         if self.gc.hasNew():
             self.update()
 
+    
+    def setSocket(self):
+        # configuracao do socket para comunicacao interna
+        self.host, self.port, self.buf, self.addr = Globals.getSocketAttr()
+        # criando socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind(self.addr)
+
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
@@ -170,7 +179,7 @@ class Cacic:
     def quit(self):
         """Sai do programa fechando conexao do socket"""
         self.sock.close()
-        sys.exit()
+        sys.exit(1)
 
 
 if __name__ == '__main__':
@@ -185,15 +194,18 @@ if __name__ == '__main__':
     
     cacic = Cacic()
     while 1:
-        try:            
+        try:
             cacic.run()
         except socket.error:
             CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
             continue
         except Exception, e:
-            CLog.appendLine(_l.get('pycacic'), e)
-            sys.exit(1)
+            CLog.appendLine(_l.get('pycacic'), '!%s: %s' % (_l.get('error'), e))
+            cacic.quit()
+        except:
+            CLog.appendLine(_l.get('pycacic'), 'Erro desconhecido')
+            cacic.quit()
         else:
-            CLog.appendLine(_l.get('pycacic'), 'Nenhuma exception, e segue o loop')
+            cacic.quit()
         
