@@ -109,6 +109,6 @@
 	</target>
 	
 	<target name="bzip2" depends="tar2" description="Creates the tar.bz2 file">
-		<bzip2 src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1.${revision}.tar.bz2" />
+		<bzip2 src="${build}/pycacic.tar" destfile="${build}/pycacic_2.4.0.${revision}.tar.bz2" />
 	</target>
 </project>
