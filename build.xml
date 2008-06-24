@@ -105,7 +105,7 @@
 	</target>
 	
 	<target name="gzip" depends="tar2" description="Creates the tar.gz file">
-		<gzip src="${build}/pycacic.tar" destfile="${build}/PyCACIC_0.0.1.${revision}.tgz" />
+		<gzip src="${build}/pycacic.tar" destfile="${build}/pycacic_2.4.0.${revision}.tgz" />
 	</target>
 	
 	<target name="bzip2" depends="tar2" description="Creates the tar.bz2 file">

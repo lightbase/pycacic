@@ -20,7 +20,7 @@ cp /etc/init.d/cacic pycacic/etc/init.d/cacic
 chown -R root:root pycacic/
 chmod -R 0755 pycacic/DEBIAN/*
 
-nome=PyCACIC_0.0.1.@revision@.deb
+nome=PyCACIC_2.4.0.@revision@.deb
 dpkg-deb -b pycacic /tmp/$nome
 echo "Gerado pacote .deb em: /tmp/$nome"
 
