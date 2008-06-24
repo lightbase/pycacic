@@ -39,15 +39,18 @@ class Cacic:
     VERSION = Reader.getPycacic()['version']
     
     def __init__(self):
+        CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
+        print _l.get('welcome')    
+    
+    def run(self):
+        """Inicia o Cacic"""
         try:
             # somente executa se estiver como root
             if not self.isRoot():
                 raise Exception(_l.get('need_root'))
             
             # Habilita o coletor de lixo do Python
-            garbage_collector.enable()
-            CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
-            print _l.get('welcome')
+            garbage_collector.enable()            
             # flags do Gerente de Coletas
             self.gc_stopped = 0 # False
             self.gc_ok = 0 # False
@@ -93,7 +96,8 @@ class Cacic:
             # sai
             self.quit()
         except socket.error, e:
-            CLog.appendLine(_l.get('pycacic'), e)
+            error = "Socket %s: %s" % (_l.get('error'), e)
+            CLog.appendLine(_l.get('pycacic'), error)
             raise socket.error
                         
         except GCException, e:
@@ -112,6 +116,7 @@ class Cacic:
             return 0 # False
         return 1 # True
 
+
     def start(self):
         """Inicia as coletas"""
         self.coletas_forcadas = []
@@ -123,6 +128,7 @@ class Cacic:
         self.gc.sendColetas()
         CLog.appendLine(_l.get('col_manager'), _l.get('collections_finished'))
 
+
     def timeout(self):
         """
             Espera determinado intervalo de tempo. E apos isto marca o estado
@@ -132,32 +138,40 @@ class Cacic:
         self.gc_stopped = 0 # False
         self.gc_ok = 1 # True
         
+        
     def conecta(self):
         """Conecta ao Gerente Web para pegar informacoes de configuracao"""
         xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
         self.gc.readXML(xml)        
         # verifica atualizacao
         if self.gc.hasNew():
-            CLog.appendLine(_l.get('pycacic'), _l.get('new_version'))
-            CLog.appendLine(_l.get('pycacic'), _l.get('starting_update'))
-            # baixa o novo pacote para o diretorio temporario
-            self.gc.atualiza()
-            CLog.appendLine(_l.get('pycacic'), '%s: %s' % (_l.get('download_sucess'), self.gc.pacote_disponivel))
-            #chama atualizador e sai            
-            os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
-            self.quit()
-        
+            self.update()
+
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
         while 1:
             data, self.addr = self.sock.recvfrom(self.buf)
             self.coletas_forcadas = data.split()
+           
+    
+    def update(self):
+        """Faz atualizacao do programa"""        
+        CLog.appendLine(_l.get('pycacic'), _l.get('new_version'))
+        CLog.appendLine(_l.get('pycacic'), _l.get('starting_update'))
+        # baixa o novo pacote para o diretorio temporario
+        self.gc.atualiza()
+        CLog.appendLine(_l.get('pycacic'), '%s: %s' % (_l.get('download_sucess'), self.gc.pacote_disponivel))
+        # chama atualizador e sai
+        os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
+        self.quit()
+
 
     def quit(self):
         """Sai do programa fechando conexao do socket"""
         self.sock.close()
         sys.exit()
+
 
 if __name__ == '__main__':
     ver =  sys.version_info
@@ -166,15 +180,20 @@ if __name__ == '__main__':
         print _l.get('python_required')
         sys.exit(1)
     
-    # seconds to sleep (socket erros)
+    # seconds to sleep (socket errors)
     SLEEP_TIME = 600
+    
+    cacic = Cacic()
     while 1:
         try:            
-            Cacic()
+            cacic.run()
         except socket.error:
             CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
-        except:
-            break
-        
+            continue
+        except Exception, e:
+            CLog.appendLine(_l.get('pycacic'), e)
+            sys.exit(1)
+        else:
+            CLog.appendLine(_l.get('pycacic'), 'Nenhuma exception, e segue o loop')
         
