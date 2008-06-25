@@ -199,13 +199,18 @@ if __name__ == '__main__':
         except socket.error:
             CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
-            continue
-        except Exception, e:
-            CLog.appendLine(_l.get('pycacic'), '!%s: %s' % (_l.get('error'), e))
+        
+        except SystemExit, e:
+            CLog.appendLine(_l.get('pycacic'), 'Programa encerrado com sucesso')
+            
+        except GCException, e:
+            CLog.appendLine(_l.get('pycacic'), '!%s: %s' % (_l.get('error'), e.getMessage()))
             cacic.quit()
+        
         except:
             CLog.appendLine(_l.get('pycacic'), 'Erro desconhecido')
             cacic.quit()
+            
         else:
             cacic.quit()
         
