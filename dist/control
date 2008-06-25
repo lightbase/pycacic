@@ -1,6 +1,6 @@
 Package:PyCACIC
 Priority: optional
-Version:0.0.1
+Version:@version@.@revision@
 Architecture:all
 Maintainer: DATAPREV
 Section: misc

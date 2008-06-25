@@ -38,7 +38,7 @@ def cmd_exists(cmd):
 DIR = getDir()
 CACIC_CONF = "/usr/share/pycacic/config/cacic.conf"
 CACIC_CONF_ENC = "/usr/share/pycacic/config/cacic.dat"
-VERSION = "2.4.0.@revision@"
+VERSION = "@version@.@revision@"
 
 def getSOLang():
     """Retorna o idioma padrão do sistema operacional"""

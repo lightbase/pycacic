@@ -26,6 +26,7 @@
 	<property name="dist" location="dist"/>
 	<property name="build" location="build"/>
 	<property name="build.pycacic" location="build/pycacic"/>
+	<property name="version" value="2.4.0"/>
 	
     <target name="init" description="Create/Cleans the output directories.">
     	<delete dir="${build}"/>
@@ -63,12 +64,19 @@
     <target name="tar" depends="build" description="Creates the tar file">
     	<replace file="${build.pycacic}/pycacic/config/cacic.conf">
     		<replacefilter token="@revision@" value="${revision}"/>
+    		<replacefilter token="@version@" value="${version}"/>    		
     	</replace>
     	<replace file="${build}/setservice.py">
 			<replacefilter token="@revision@" value="${revision}"/>
+			<replacefilter token="@version@" value="${version}"/>
     	</replace>
     	<replace file="${build}/gera-deb.sh">
     		<replacefilter token="@revision@" value="${revision}"/>
+    		<replacefilter token="@version@" value="${version}"/>
+    	</replace>
+    	<replace file="${build}/control">
+    		<replacefilter token="@revision@" value="${revision}"/>
+    		<replacefilter token="@version@" value="${version}"/>
     	</replace>
     	<tar destfile="${build}/cacic.tar">
     		<tarfileset dir="${build.pycacic}" excludes="**/*.pyc, **/*.pyo, pycacic/gui.py, pycacic/cacic.py, pycacic/mapacacic.py, pycacic/guimapacacic.py" />

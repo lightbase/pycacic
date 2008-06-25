@@ -85,7 +85,7 @@ class Ger_Cols:
         self.versao_atual = version
         self.password = ''
         self.hash_atual = self.getHash()
-        self.hash_disponivel = ''
+        self.hash_disponivel = self.getHash()
         self.pacote_disponivel = ''
         self.exibe_bandeja = 'N'
         self.exibe_erros_criticos = 'N'
