@@ -19,9 +19,11 @@
 
 import sys
 import os
+import stat
 import commands
 import md5
 import re
+import tempfile
 
 from ccrypt import CCrypt
 
@@ -36,8 +38,8 @@ def cmd_exists(cmd):
     return os.system(cmd+' > /dev/null 2>&1') == 0
 
 DIR = getDir()
-CACIC_CONF = "/usr/share/pycacic/config/cacic.conf"
-CACIC_CONF_ENC = "/usr/share/pycacic/config/cacic.dat"
+
+
 VERSION = "@version@.@revision@"
 
 def getSOLang():
@@ -85,7 +87,7 @@ def writeMD5():
     content = f.read()
     f.close()
     hexmd5 = md5.new(content).hexdigest()
-    f = open("/usr/share/pycacic/config/MD5SUM", "w")
+    f = open(TARGET_DIR+"/config/MD5SUM", "w")
     f.write(hexmd5)
     f.close()
     
@@ -112,6 +114,11 @@ def writeGnomeAutoStart():
         f.close()
     
 def install():
+    print "Unpacking installation...",
+    unpack()
+    print "[OK]"
+    
+    """
     print "Installing PyCacic Service...",
     writeService()
     writeStartLink(2)
@@ -119,11 +126,12 @@ def install():
     writeStartLink(4)
     writeStartLink(5)
     print "[OK]"
+    """
     
     print "Generating Version Hash",
     writeMD5()
     print "[OK]"
-    
+    """
     print "Adding to cron ",
     writeCron()
     print "[OK]"
@@ -131,9 +139,15 @@ def install():
     print "Adding to Gnome AutoStart ",
     writeGnomeAutoStart()
     print "[OK]"
-    
-    configAndPackage()
-    
+    """
+    mkconfig()
+
+def execute(cmd):
+    os.system(cmd+' > /dev/null 2>&1')
+
+def unpack():
+    print "UPACKING ON "+TARGET_BASE
+    execute('tar -xf '+DIR+'/cacic.tar -C '+TARGET_BASE)
 
 def isPreconfigured():
     return not os.path.exists("/usr/share/pycacic/config/cacic.conf") and os.path.exists("/usr/share/pycacic/config/cacic.dat")
@@ -183,11 +197,11 @@ def configAndPackage(force = 0):
 def mkconfig():
     """Abre console para configuracao do PyCacic"""
     from io import Writer
-    print "\n\t--- Bem-Vindo a Configuracao do PyCacic ---"
-    print "\n\tapós preencher as informacoes abaixo o programa irá iniciar\n"
+    print "\n- Bem-Vindo ao gerador de Pacotes do PyCacic ---"
+    print "\n- Após preencher as informacoes abaixo os pacotes poderao ser gerados\n"
     op = ''
     while not op in ('S', 'Y'):
-        addr = raw_input("Endereço do  Servidor ('ex: http://<endereco>/'): ").lower()
+        addr = raw_input("Endereço do  Servidor ('ex: http://<endereco>'): ").lower()
         if len(addr.split('//')) != 2:
             print "Endereco invalido"
         else:
@@ -213,7 +227,7 @@ def mkconfig():
     Writer.setServer('password', pwd, CACIC_CONF, False)
     Writer.setPycacic('locale', getSOLang(), CACIC_CONF, False)
     
-    print "\t--- Configuracao concluida com sucesso ---\n\n"
+    print "- Salvando e encriptando configuracao...",
     
     f = open(CACIC_CONF)
     content = f.read()
@@ -227,7 +241,105 @@ def mkconfig():
     f.close()
     
     os.unlink(CACIC_CONF)
-    print "\t--- Configuracao encryptada com sucesso ---\n\n"
+    print "[OK]"
+
+def mkPackage(type, arch):
+    if arch != '':
+        ap = '-a '+arch
+    else:
+        ap = ''
+    os.chmod('/.'+DIR+'/epm', 0755)
+    os.system('/.'+DIR+'/epm --output-dir '+DIR+' -g '+ap+' -f '+type+' pycacic '+DIR+'/pycacic.list')
+    os.chmod('/.'+DIR+'/epm', 0644)
+
+def mkDistList():
+    f = open(DIR+'/pycacic.list', 'w')
+    
+    list = []
+    list.append('%product PyCACIC')
+    list.append('%copyright Dataprev')
+    list.append('%vendor Dataprev')
+    list.append('%license '+DIR+'/COPYING')
+    list.append('%readme '+DIR+'/README')
+    list.append('%description Configurador Automatico e Coletor de Informacoes Computacionais')
+    list.append('%version '+VERSION)
+    list.append('%postinstall <'+DIR+'/internal/postinst')
+    list.append('%preremove <'+DIR+'/internal/prerm')
+    list.append('%system all\n\n')
+    f.write('\n'.join(list))
+    mkDirListImpl(TARGET_DIR, f)
+    appendInitList(f)
+    appendCron(f)
+    appendDesktop(f)
+    f.close()
+    
+def mkDirListImpl(path, f):
+    if os.path.isdir(path):
+        f.write('d 0755 root root '+src2dest(path)+' -\n')
+        for entry in os.listdir(path):
+            mkDirListImpl(path+'/'+entry, f)
+    elif os.path.isfile(path):
+        chmod = stat.S_IMODE(os.lstat(path)[stat.ST_MODE])
+        f.write('f '+oct(chmod)+' root root '+src2dest(path)+' '+path+'\n')
+
+def src2dest(path):
+    return path.replace(TARGET_BASE, "/usr/share")
+    
+def appendInitList(f):
+    f.write('i 755 root sys cacic '+DIR+'/internal/cacic\n')
+
+def appendCron(f):
+     f.write('f 644 root sys /etc/cron.hourly/chksis '+DIR+'/internal/chksis\n')
+
+def appendDesktop(f):
+     f.write('f 644 root sys /usr/share/applications/pycacic.desktop '+DIR+'/internal/pycacic.desktop\n')
+     f.write('f 644 root sys /etc/xdg/autostart/pycacic.desktop '+DIR+'/internal/pycacic.desktop\n')
+
+def clean():
+    execute('rm -Rf '+TARGET_BASE)
 
 if __name__ == '__main__':
-    install()
+    print "Unpacking necessary files...",
+    TARGET_BASE = tempfile.mkdtemp('pycacic')
+    TARGET_DIR = TARGET_BASE+"/pycacic"
+    CACIC_CONF = TARGET_DIR+"/config/cacic.conf"
+    CACIC_CONF_ENC = TARGET_DIR+"/config/cacic.dat"
+    unpack()
+    print "[OK]"
+    
+    print "Generating Version Hash",
+    writeMD5()
+    print "[OK]"
+    
+    mkconfig();
+    
+    print '\n'
+    mkDistList();
+    choice = ''
+    types = ['deb', 'rpm', 'portable']
+    archs = ['all', 'noarch', 'noarch']
+    while choice != '5':
+        print '\t1 - Debian Package (.deb)'
+        print '\t2 - RPM Package Manager (.rpm)'
+        print '\t3 - Generic Install for others distributions'
+        print '\t---'
+        print '\t4 - Update Package'
+        print '\t---'
+        print '\t5 - Exit'
+        print '\n\tPackages Destination: '+DIR
+        choice = ''
+        while choice not in ('1', '2', '3', '4', '5'):
+            choice = raw_input('\n\tChoice: ').strip()
+        if choice != '4' and choice != '5':
+            type = types[int(choice) - 1]
+            arch = archs[int(choice) - 1]
+            print '\n\t-> Generating ('+type+') package ',
+            mkPackage(type, arch)
+            print '[OK]\n'
+        elif choice == '4':
+            print "\n\t-> Generating update package for Web auto-update ",
+            tarname = "pycacic_"+VERSION+".update.tgz"
+            os.system("tar --preserve-permissions -C "+TARGET_DIR+"/.. -czf "+DIR+"/"+tarname+" pycacic/")
+            print "[OK]\n"
+    clean()
+    print "-- Done"

@@ -42,6 +42,7 @@ class Cacic:
         try:            
             CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
             print _l.get('welcome')
+            self.running = 0
             # abre conexao por socket
             self.setSocket()
             # flags do Gerente de Coletas
@@ -60,7 +61,7 @@ class Cacic:
             # somente executa se estiver como root
             if not self.isRoot():
                 raise Exception(_l.get('need_root'))
-            
+            self.running = 1
             # Habilita o coletor de lixo do Python
             garbage_collector.enable()           
             # executa thread para escutar o socket
@@ -99,7 +100,11 @@ class Cacic:
             error = "Socket %s: %s" % (_l.get('error'), e)
             CLog.appendLine(_l.get('pycacic'), error)
             raise socket.error
+        
+        except SystemExit:          
+            raise SystemExit('Programa encerrado com sucesso')
                         
+        
         except GCException, e:
             error = "%s: %s" % (_l.get('error'), e.getMessage())
             CLog.appendLine(_l.get('pycacic'), error)
@@ -141,12 +146,15 @@ class Cacic:
         
     def conecta(self):
         """Conecta ao Gerente Web para pegar informacoes de configuracao"""
-        xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
-        self.gc.readXML(xml)        
-        # verifica atualizacao
-        if self.gc.hasNew():
-            self.update()
-
+        try:
+            xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
+            self.gc.readXML(xml)        
+            # verifica atualizacao
+            if self.gc.hasNew():
+                self.update()
+        except SystemExit:
+            raise SystemExit
+        
     
     def setSocket(self):
         # configuracao do socket para comunicacao interna
@@ -160,20 +168,26 @@ class Cacic:
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
         while 1:
-            data, self.addr = self.sock.recvfrom(self.buf)
-            self.coletas_forcadas = data.split()
+            try:
+                data, self.addr = self.sock.recvfrom(self.buf)
+                self.coletas_forcadas = data.split()
+            except:
+                self.quit()
            
     
     def update(self):
-        """Faz atualizacao do programa"""        
-        CLog.appendLine(_l.get('pycacic'), _l.get('new_version'))
-        CLog.appendLine(_l.get('pycacic'), _l.get('starting_update'))
-        # baixa o novo pacote para o diretorio temporario
-        self.gc.atualiza()
-        CLog.appendLine(_l.get('pycacic'), '%s: %s' % (_l.get('download_sucess'), self.gc.pacote_disponivel))
-        # chama atualizador e sai
-        os.system('python %s/update.py -pkg %s -hash %s -tmp %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel, 'pycacic_temp'))
-        self.quit()
+        try:
+            """Faz atualizacao do programa"""        
+            CLog.appendLine(_l.get('pycacic'), _l.get('new_version'))
+            CLog.appendLine(_l.get('pycacic'), _l.get('starting_update'))
+            # baixa o novo pacote para o diretorio temporario
+            self.gc.atualiza()
+            CLog.appendLine(_l.get('pycacic'), '%s: %s' % (_l.get('download_sucess'), self.gc.pacote_disponivel))
+            # chama atualizador e sai
+            os.system('python %s/update.py -pkg %s -hash %s &' % (Globals.PATH, self.gc.pacote_disponivel, self.gc.hash_disponivel))
+            self.quit()
+        except SystemExit:
+            raise SystemExit
 
 
     def quit(self):
@@ -195,22 +209,24 @@ if __name__ == '__main__':
     cacic = Cacic()
     while 1:
         try:
-            cacic.run()
+            if not cacic.running:
+                cacic.run()
+                
         except socket.error:
             CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
         
         except SystemExit, e:
-            CLog.appendLine(_l.get('pycacic'), 'Programa encerrado com sucesso')
+            CLog.appendLine(_l.get('pycacic'), e)
+            break
             
         except GCException, e:
             CLog.appendLine(_l.get('pycacic'), '!%s: %s' % (_l.get('error'), e.getMessage()))
             cacic.quit()
+            break
         
         except:
             CLog.appendLine(_l.get('pycacic'), 'Erro desconhecido')
             cacic.quit()
-            
-        else:
-            cacic.quit()
+            break
         

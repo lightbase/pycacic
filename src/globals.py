@@ -32,7 +32,6 @@ import commands
 
 class Globals:
         
-    VERSION = "1.0.0"
     PATH = ""
     INSTALLED = 0 # False
     PC_XML = ""

@@ -6,7 +6,7 @@
 #           |  |      /  /   | \_/ | |  | \  \ |  \_/ ||  | | \_/ |           #
 #           |__|     /__/    \____/ |__|   \__\ \____/ |__|  \____/           #
 #                                                                             #
-#                                                       versão 0.0.1          #
+#                                                       versão 2.4.0          #
 #                                                                             #
 ###############################################################################
 
@@ -32,9 +32,10 @@
  
  2. INSTALAÇÃO
 
- Primeiramente executar o arquivo install.sh, como super usuário (root), e irá 
- iniciar a instalação, caso o pacote não contenha uma pré-configuração algumas
- informações serão pedidas:
+ Primeiramente executar o arquivo mkpackage.sh, como super usuário (root), para gerar
+ pacotes pré-configurados para uma variedade de distribuições, permitindo uma rápida
+ instalação do agente em sua organização, nessa etapa serão solicitadas as configrações 
+ do agente:
  
    + Endereço do  Servidor : endereço do host aonde está o gerente web, incluindo
                              o protocolo (http:// ou https://).
@@ -48,7 +49,8 @@
    + Senha                 : senha para autenticação básica (Basic Authentication) 
                              http. O Cacic usa como padrão "PW_CACIC" (sem aspas).                             
  
- Ao término deste procedimento o PyCacic já estará rodando na máquina do usuário.
+ Ao término deste procedimento serão oferecidas as opções de empacotamento disponíveis.
+ A partir dos pacotes o agente pode ser efetivamente instalado.
  
  Para utilizar a interface deve executar o arquivo "/usr/share/pycacic/gui.py" ou
  no menu "Ferramentas de Sistema" > "PyCacic", como usuario normal.

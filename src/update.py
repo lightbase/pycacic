@@ -43,8 +43,7 @@ if __name__ == '__main__':
         # Languages
         _l = Language()
         
-        time.sleep(5)
-        temp_dir = ''
+        time.sleep(10)
         pacote_disponivel = ''
         novo_hash = ''
         # pegando argumentos
@@ -53,16 +52,11 @@ if __name__ == '__main__':
                 pacote_disponivel = sys.argv[i+1]
             elif sys.argv[i] == '-hash':
                 novo_hash = sys.argv[i+1]
-            elif sys.argv[i] == '-tmp':
-                temp_dir = sys.argv[i+1]
-        if temp_dir != '' and pacote_disponivel != '':
+        if novo_hash != '' and pacote_disponivel != '':
             # descompactando o pacote novo
             CLog.appendLine('AutoUpdate', 'Iniciado processo de autoupdate.')
-            os.system('mkdir /tmp/%s' % temp_dir)
-            os.system('tar -xzf /tmp/%s -C /tmp/%s' % (pacote_disponivel, temp_dir))
-            os.system('tar -xf /tmp/%s/pycacic/cacic.tar -C /usr/share' % temp_dir)
-            # removendo o pacote novo no temporario
-            os.system('rm -Rf /tmp/%s' % temp_dir)
+            os.system('tar -xzf /tmp/%s -C /usr/share' % pacote_disponivel)
+            # removendo o pacote novo
             os.system('rm -f /tmp/%s' % pacote_disponivel)
             open("/usr/share/pycacic/config/MD5SUM", "w").write(novo_hash)
             CLog.appendLine('AutoUpdate', _l.get('update_sucess'))
@@ -70,6 +64,10 @@ if __name__ == '__main__':
             # reiniciando o PyCacic
             os.system('/usr/share/pycacic/cacic.py &')
             sys.exit(1)
+    
+    except SystemExit:
+        pass
+            
     except Exception, e:
         CLog.appendLine('AutoUpdate', 'Erro: %s' % e)
         sys.exit(1)
