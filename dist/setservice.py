@@ -289,7 +289,7 @@ def appendInitList(f):
     f.write('i 755 root sys cacic '+DIR+'/internal/cacic\n')
 
 def appendCron(f):
-     f.write('f 644 root sys /etc/cron.hourly/chksis '+DIR+'/internal/chksis\n')
+    f.write('f 755 root sys /etc/cron.hourly/chksis '+DIR+'/internal/chksis\n')
 
 def appendDesktop(f):
      f.write('f 644 root sys /usr/share/applications/pycacic.desktop '+DIR+'/internal/pycacic.desktop\n')
