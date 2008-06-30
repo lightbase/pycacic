@@ -338,25 +338,3 @@ class MapaValue:
         
     def getSubItems(self):
         return self.subitems.values()
-    
-
-def showAll(mp):
-    aux = mp.labels.keys()
-    aux.sort()
-    for k in aux:
-        v = mp.labels[k]
-        print k+" => "+unicode(v.getText(), 'latin_1', 'ignore')
-        for k1, v1 in v.values.items():
-            print "\t"+k1+" => "+v1.getText()
-            for k3, v3 in v1.subitems.items():
-                print "\t\t"+k3+" => "+v3.getText()
-                for k4, v4 in v3.subitems.items():
-                    print "\t\t\t"+k4+" => "+v4.getText()
-                    
-if __name__ == '__main__':
-    mp = MapaCacic('tecteste', 'tecteste')
-    mp.auth()
-    mp.getInfo()
-    showAll(mp)
-    #mp.save()
-    sys.exit(0)

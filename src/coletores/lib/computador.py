@@ -39,7 +39,6 @@ from xml.dom import minidom, Node
 
 from lang.language import Language
 from globals import Globals
-
 DEFAULT_STRING_VALUE = ''
 
 _l = Language()
@@ -588,6 +587,10 @@ class PC_XML:
                         self.getCPUInfo(filho)
                     elif a == 'id' and valor[0:3] == 'pci':
                         self.getPCIInfo(filho)
+                    elif a == 'id' and valor[0:3] == 'ide':
+                        self.getIDEInfo(filho)
+                    elif a == 'id' and valor == 'multimedia':
+                        self.getAudioInfo(filho)
                     elif a == 'id' and valor[0:4] == 'scsi':
                         self.getSCSIInfo(filho)
                     elif a == 'id' and valor == 'display':

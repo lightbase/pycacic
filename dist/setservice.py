@@ -143,7 +143,7 @@ def install():
     mkconfig()
 
 def execute(cmd):
-    os.system(cmd+' > /dev/null 2>&1')
+    return os.system(cmd+' > /dev/null 2>&1') == 0
 
 def unpack():
     print "UPACKING ON "+TARGET_BASE
@@ -242,6 +242,20 @@ def mkconfig():
     
     os.unlink(CACIC_CONF)
     print "[OK]"
+    
+    resp = ''
+    while (not resp in ('S', 'Y', 'N')):
+        resp = raw_input("Deseja que o coletor patrimonial seja invocado automaticamente após a instalação? (Y/N)")
+        resp = resp.upper()
+    if resp in ('S', 'Y'):
+        f = open(DIR+"/internal/postinst" , 'a')
+        str = 'if [ "$$DISPLAY" = "" ]; then\n'
+        str+= '    (nohup python /usr/share/pycacic/mapacacic.py > /dev/null 2>&1)\n'
+        str+= 'else\n'
+        str+= '    (nohup python /usr/share/pycacic/guimapacacic.py > /dev/null 2>&1)&\n'
+        str+= 'fi\n'
+        f.write(str)
+        f.close()
 
 def mkPackage(type, arch):
     if arch != '':
@@ -249,8 +263,8 @@ def mkPackage(type, arch):
     else:
         ap = ''
     os.chmod('/.'+DIR+'/epm', 0755)
-    output = ''
-    output = commands.getoutput('/.'+DIR+'/epm --output-dir '+DIR+' -g '+ap+' -f '+type+' pycacic '+DIR+'/pycacic.list')
+    output = 0
+    output = execute('/.'+DIR+'/epm --output-dir '+DIR+' -g '+ap+' -f '+type+' pycacic '+DIR+'/pycacic.list')
     os.chmod('/.'+DIR+'/epm', 0644)
     return output
 
@@ -263,6 +277,7 @@ def mkDistList():
     list.append('%vendor Dataprev')
     list.append('%license '+DIR+'/COPYING')
     list.append('%readme '+DIR+'/README')
+    list.append('%requires python 2.3.0')
     list.append('%description Configurador Automatico e Coletor de Informacoes Computacionais')
     list.append('%version '+VERSION)
     list.append('%postinstall <'+DIR+'/internal/postinst')
@@ -301,6 +316,9 @@ def appendDesktop(f):
 def clean():
     execute('rm -Rf '+TARGET_BASE)
 
+def cmd_exists(cmd):
+    return os.system(cmd+' > /dev/null 2>&1') == 0
+
 if __name__ == '__main__':
     print "Unpacking necessary files...",
     TARGET_BASE = tempfile.mkdtemp('pycacic')
@@ -320,6 +338,7 @@ if __name__ == '__main__':
     choice = ''
     output = ''
     types = ['deb', 'rpm', 'portable']
+    cmds = ['dpkg', 'rpmbuild', '']
     archs = ['all', 'noarch', 'noarch']
     while choice != '5':
         os.system('clear')
@@ -332,7 +351,7 @@ if __name__ == '__main__':
         print '\t---'
         print '\t5 - Exit'
         print '\n\tPackages Destination: '+DIR
-        print '\n\t %s' % output
+        print '\n\t%s' % output
         choice = ''
         while choice not in ('1', '2', '3', '4', '5'):
             choice = raw_input('\n\tChoice: ').strip()
@@ -341,7 +360,15 @@ if __name__ == '__main__':
             arch = archs[int(choice) - 1]
             print '\n\t-> Generating ('+type+') package ',
             output = mkPackage(type, arch)
-            print '[OK]\n'
+            if output:
+                output = 'Package successfully created.'
+                print '[OK]\n'
+            else:
+                print '[FAILED]'
+                output = 'Packaging failed.'
+                command = cmds[int(choice) - 1]
+                if command != '' and not cmd_exists(command):
+                    output += "\n\t- Command: '"+command+"' is required for building this type of package.\n"
         elif choice == '4':
             print "\n\t-> Generating update package for Web auto-update ",
             tarname = "pycacic_"+VERSION+".update.tgz"

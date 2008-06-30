@@ -2,5 +2,5 @@
 # Cacic Init
 
 if [ "$1" = "start" ]; then
-	(sudo nohup python /usr/share/pycacic/cacic.py > /usr/share/pycacic/logs/agent.log 2>&1)&
+	(nohup python /usr/share/pycacic/cacic.py > /usr/share/pycacic/logs/agent.log 2>&1)&
 fi
