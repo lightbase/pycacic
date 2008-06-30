@@ -22,6 +22,7 @@
         
     </description>
     
+    
     <property name="src" location="src"/>
 	<property name="dist" location="dist"/>
 	<property name="build" location="build"/>
@@ -70,14 +71,6 @@
 			<replacefilter token="@revision@" value="${revision}"/>
 			<replacefilter token="@version@" value="${version}"/>
     	</replace>
-    	<replace file="${build}/gera-deb.sh">
-    		<replacefilter token="@revision@" value="${revision}"/>
-    		<replacefilter token="@version@" value="${version}"/>
-    	</replace>
-    	<replace file="${build}/control">
-    		<replacefilter token="@revision@" value="${revision}"/>
-    		<replacefilter token="@version@" value="${version}"/>
-    	</replace>
     	<tar destfile="${build}/cacic.tar">
     		<tarfileset dir="${build.pycacic}" excludes="**/*.pyc, **/*.pyo, pycacic/gui.py, pycacic/cacic.py, pycacic/mapacacic.py, pycacic/guimapacacic.py" />
     		<tarfileset dir="${build.pycacic}/pycacic" prefix="/pycacic" mode="0755" preserveLeadingSlashes="false">
@@ -98,16 +91,18 @@
 				<include name="io.py"/>
 				<include name="globals.py"/>
 				<include name="README"/>
+				<include name="COPYING"/>
+				<include name="epm"/>
 			</tarfileset>
-			<tarfileset dir="${build}" prefix="/pycacic/gdeb" preserveLeadingSlashes="false">
-				<include name="control"/>
-				<include name="postinst"/>
-				<include name="gera-deb.sh"/>
-				<include name="postrm"/>
+			<tarfileset dir="${build}" prefix="/pycacic/internal" preserveLeadingSlashes="false">
+				<include name="cacic"/>
+				<include name="chksis"/>
+				<include name="pycacic.desktop"/>
 				<include name="prerm"/>
+				<include name="postinst"/>
 			</tarfileset>
 			<tarfileset dir="${build}" prefix="/pycacic" mode="0755" preserveLeadingSlashes="false">
-				<include name="install.sh"/>
+				<include name="mkpackage.sh"/>
 			</tarfileset>
 		</tar>
 	</target>
