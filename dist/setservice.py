@@ -249,8 +249,10 @@ def mkPackage(type, arch):
     else:
         ap = ''
     os.chmod('/.'+DIR+'/epm', 0755)
-    os.system('/.'+DIR+'/epm --output-dir '+DIR+' -g '+ap+' -f '+type+' pycacic '+DIR+'/pycacic.list')
+    output = ''
+    output = commands.getoutput('/.'+DIR+'/epm --output-dir '+DIR+' -g '+ap+' -f '+type+' pycacic '+DIR+'/pycacic.list')
     os.chmod('/.'+DIR+'/epm', 0644)
+    return output
 
 def mkDistList():
     f = open(DIR+'/pycacic.list', 'w')
@@ -295,6 +297,7 @@ def appendDesktop(f):
      f.write('f 644 root sys /usr/share/applications/pycacic.desktop '+DIR+'/internal/pycacic.desktop\n')
      f.write('f 644 root sys /etc/xdg/autostart/pycacic.desktop '+DIR+'/internal/pycacic.desktop\n')
 
+
 def clean():
     execute('rm -Rf '+TARGET_BASE)
 
@@ -311,14 +314,16 @@ if __name__ == '__main__':
     writeMD5()
     print "[OK]"
     
-    mkconfig();
+    mkconfig()
     
-    print '\n'
-    mkDistList();
+    mkDistList()
     choice = ''
+    output = ''
     types = ['deb', 'rpm', 'portable']
     archs = ['all', 'noarch', 'noarch']
     while choice != '5':
+        os.system('clear')
+        print '\n'
         print '\t1 - Debian Package (.deb)'
         print '\t2 - RPM Package Manager (.rpm)'
         print '\t3 - Generic Install for others distributions'
@@ -327,6 +332,7 @@ if __name__ == '__main__':
         print '\t---'
         print '\t5 - Exit'
         print '\n\tPackages Destination: '+DIR
+        print '\n\t %s' % output
         choice = ''
         while choice not in ('1', '2', '3', '4', '5'):
             choice = raw_input('\n\tChoice: ').strip()
@@ -334,7 +340,7 @@ if __name__ == '__main__':
             type = types[int(choice) - 1]
             arch = archs[int(choice) - 1]
             print '\n\t-> Generating ('+type+') package ',
-            mkPackage(type, arch)
+            output = mkPackage(type, arch)
             print '[OK]\n'
         elif choice == '4':
             print "\n\t-> Generating update package for Web auto-update ",
@@ -343,3 +349,5 @@ if __name__ == '__main__':
             print "[OK]\n"
     clean()
     print "-- Done"
+    
+    
