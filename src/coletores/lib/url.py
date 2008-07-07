@@ -51,17 +51,6 @@ class URL :
             @param dados: dict
         """
         # returns string
-        """
-        dados['cs_cipher']          = '1'
-        dados['id_ip_estacao']      = defaults['ip']
-        dados['id_ip_rede']         = defaults['id_rede']
-        dados['te_node_address']    = defaults['mac']
-        dados['id_so']              = defaults['id_so']
-        dados['te_so']              = defaults['te_so']
-        dados['te_nome_computador'] = defaults['hostname']
-        dados['padding_key']        = defaults['padding_key']
-        dados['AgenteLinux']        = defaults['agente_linux']
-        """
         for key, value in defaults.items():
             dados[key] = value
         
