@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Jun 10 13:23:10 2008 -->
+<!--Generated with glade3 3.4.5 on Fri Jun 27 12:45:24 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="mapacacic">
     <property name="visible">True</property>
@@ -139,83 +139,37 @@ equipamentos.</property>
                             <property name="n_rows">4</property>
                             <property name="n_columns">3</property>
                             <child>
-                              <widget class="GtkEntry" id="entry7">
+                              <widget class="GtkLabel" id="label4">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Etiqueta 4</property>
                               </widget>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="right_attach">3</property>
-                                <property name="top_attach">3</property>
-                                <property name="bottom_attach">4</property>
-                              </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="entry6">
+                              <widget class="GtkLabel" id="label5">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Etiqueta 5</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">3</property>
-                                <property name="bottom_attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="entry5">
+                              <widget class="GtkLabel" id="label6">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">3</property>
-                                <property name="bottom_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkEntry" id="entry4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Etiqueta 6</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">2</property>
                                 <property name="right_attach">3</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="entry3">
+                              <widget class="GtkLabel" id="label7">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Etiqueta 7</property>
                               </widget>
                               <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkEntry" id="entry2">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="width_chars">11</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                                <property name="x_options">GTK_FILL</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label9">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Etiqueta 9</property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="right_attach">3</property>
                                 <property name="top_attach">2</property>
                                 <property name="bottom_attach">3</property>
                               </packing>
@@ -233,40 +187,86 @@ equipamentos.</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label7">
+                              <widget class="GtkLabel" id="label9">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Etiqueta 7</property>
+                                <property name="label" translatable="yes">Etiqueta 9</property>
                               </widget>
                               <packing>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
                                 <property name="top_attach">2</property>
                                 <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label6">
+                              <widget class="GtkEntry" id="entry2">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Etiqueta 6</property>
+                                <property name="can_focus">True</property>
+                                <property name="width_chars">11</property>
                               </widget>
                               <packing>
-                                <property name="left_attach">2</property>
-                                <property name="right_attach">3</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label5">
+                              <widget class="GtkEntry" id="entry3">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Etiqueta 5</property>
+                                <property name="can_focus">True</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label4">
+                              <widget class="GtkEntry" id="entry4">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Etiqueta 4</property>
+                                <property name="can_focus">True</property>
                               </widget>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="entry5">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="entry6">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="entry7">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                              </packing>
                             </child>
                           </widget>
                           <packing>
@@ -320,7 +320,7 @@ equipamentos.</property>
                 <property name="visible">True</property>
                 <property name="xalign">1</property>
                 <property name="yalign">1</property>
-                <property name="label" translatable="yes">versão 0.0.1 </property>
+                <property name="label" translatable="yes">versão 1.0.0.11</property>
               </widget>
               <packing>
                 <property name="position">1</property>

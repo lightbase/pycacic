@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Mon Jun 16 15:46:36 2008 -->
+<!--Generated with glade3 3.4.5 on Tue Jun 17 12:46:54 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="settings">
     <property name="visible">True</property>
+    <property name="title" translatable="yes">PyCacic</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <signal name="destroy" handler="on_window_destroy"/>
     <child>
@@ -80,6 +81,7 @@
                 <property name="border_width">5</property>
                 <property name="label" translatable="yes">btn_save</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_save_clicked"/>
               </widget>
             </child>
             <child>
@@ -90,6 +92,7 @@
                 <property name="border_width">5</property>
                 <property name="label" translatable="yes">btn_close</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_close_clicked"/>
               </widget>
               <packing>
                 <property name="position">1</property>

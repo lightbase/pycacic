@@ -153,7 +153,7 @@ class Reader:
     
     def getUpdate():
         """Retorna um dicionario contendo o endereco do servidor de update"""
-        server = {'address':'', 'dir': '', 'username': '', 'password': ''}
+        server = {'address' : '', 'port' : '', 'path': '', 'username': '', 'password': ''}
         config = IOConfig.getUpdate()
         for no in config.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
@@ -177,7 +177,7 @@ class Reader:
 
     def getPycacic():
         """Retorna um dicionario contendo as informacoes sobre o PyCacic"""
-        pycacic = {'dir' : '', 'hash' : '', 'password' : '', 'locale' : '', 'version' : '0.0.1.-1'}
+        pycacic = {'path' : '', 'hash' : '', 'password' : '', 'locale' : '', 'version' : '0.0.1.-1'}
         config = IOConfig.getPycacic()
         for no in config.childNodes:
             if no.nodeType == Node.ELEMENT_NODE:
@@ -230,11 +230,14 @@ class Writer:
             
     def saveNotEncryptedXML(xml, file = ''):
         """Salva o XML (nao encriptado) de configuracoes"""
-        if file == '':
-            file = IOConfig.FILE
-        f = open(file, 'w')
-        f.write(xml)
-        f.close()
+        try:
+            if file == '':
+                file = IOConfig.FILE
+            f = open(file, 'w')
+            f.write(xml)
+            f.close()
+        except IOError, e:
+            raise IOError(e)
     
     def setNodeValue(node, value):
         """Altera o valor do node passado por parametro"""

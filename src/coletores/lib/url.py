@@ -105,4 +105,4 @@ class URL :
         try:
             self.ftp.retrbinary("RETR " + arquivo, open(destino, 'wb').write)
         except Exception, e:
-            raise Exception('Tentando baixar arquivo %s. %s' % (arquivo, e.message))
+            raise Exception('Tentando baixar arquivo: %s. Causa: %s' % (arquivo, e))

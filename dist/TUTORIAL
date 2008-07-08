@@ -54,7 +54,7 @@
        2 - Pacote .rpm
              Usado para distribuições com tal suporte, como por exemplo:
              Red Hat, CentOS, Fedora, etc.
-             É necessário possuir instalado o "rpmbuild".
+             É necessário possuir instalado o "rpmbuild" (geralmente pacote rpm).
              
        3 - Pacote genérico .tgz
              Usado para distribuições que não possuem suporte aos tipos 
@@ -80,7 +80,7 @@
                  
                  + Linha de Comando
                         Estando no mesmo diretório do pacote executar o 
-                        seguinte comando: "dpkg -i <nome_do_pacote.deb>"
+                        seguinte comando (como root ou sudo): "dpkg -i <nome_do_pacote.deb>"
              
        2 - Pacote .rpm
              Pode ser instalado tanto pela interface gráfica quanto por 
@@ -91,10 +91,10 @@
                  
                  + Linha de Comando
                         Estando no mesmo diretório do pacote executar o 
-                        seguinte comando: "rpm -ivh <nome_do_pacote.rpm>".
+                        seguinte comando (como root ou sudo): "rpm -ivh <nome_do_pacote.rpm>".
                           
        3 - Pacote genérico .tgz
              Com o pacote gerado, basta extrai-lo em qualquer diretório
-             e executar (como super usuário) o arquivo pycacic.install. 
+             e executar (como root ou sudo) o arquivo pycacic.install (./pycacic.install). 
     
     
