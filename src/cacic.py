@@ -148,10 +148,15 @@ class Cacic:
         """Conecta ao Gerente Web para pegar informacoes de configuracao"""
         try:
             xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
-            self.gc.readXML(xml)        
+            self.gc.readXML(xml) 
             # verifica atualizacao
             if self.gc.hasNew():
                 self.update()
+        
+        except GCException, e:
+            error = "%s: %s" % (_l.get('error'), e.getMessage())
+            CLog.appendLine(_l.get('pycacic'), error)               
+        
         except SystemExit:
             raise SystemExit
         
