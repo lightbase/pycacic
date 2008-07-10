@@ -36,6 +36,8 @@ _l = Language()
 
 class Cacic:
     
+    # seconds to sleep (socket errors)
+    SLEEP_TIME = 600
     VERSION = Reader.getPycacic()['version']
     
     def __init__(self):
@@ -51,6 +53,11 @@ class Cacic:
             self.coletas_forcadas = []
             # Gerente de Coletas
             self.gc = Ger_Cols(self.VERSION)
+                       
+        except socket.error:
+            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), self.SLEEP_TIME, _l.get('seconds')))             
+            time.sleep(SLEEP_TIME)
+            
         except:
             print 'Erro ao instanciar Cacic()'
             self.quit()
@@ -208,8 +215,6 @@ if __name__ == '__main__':
         print _l.get('python_required')
         sys.exit(1)
     
-    # seconds to sleep (socket errors)
-    SLEEP_TIME = 600
     
     cacic = Cacic()
     while 1:
@@ -218,7 +223,7 @@ if __name__ == '__main__':
                 cacic.run()
                 
         except socket.error:
-            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
+            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), cacic.SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
         
         except SystemExit, e:
