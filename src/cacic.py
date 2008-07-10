@@ -36,15 +36,12 @@ _l = Language()
 
 class Cacic:
     
-    # seconds to sleep (socket errors)
-    SLEEP_TIME = 600
     VERSION = Reader.getPycacic()['version']
     
     def __init__(self):
         try:            
             CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
             print _l.get('welcome')
-            self.running = 0
             # abre conexao por socket
             self.setSocket()
             # flags do Gerente de Coletas
@@ -55,8 +52,7 @@ class Cacic:
             self.gc = Ger_Cols(self.VERSION)
                        
         except socket.error:
-            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), self.SLEEP_TIME, _l.get('seconds')))             
-            time.sleep(SLEEP_TIME)
+            raise socket.error
             
         except:
             print 'Erro ao instanciar Cacic()'
@@ -68,7 +64,6 @@ class Cacic:
             # somente executa se estiver como root
             if not self.isRoot():
                 raise Exception(_l.get('need_root'))
-            self.running = 1
             # Habilita o coletor de lixo do Python
             garbage_collector.enable()           
             # executa thread para escutar o socket
@@ -215,15 +210,17 @@ if __name__ == '__main__':
         print _l.get('python_required')
         sys.exit(1)
     
+    # seconds to sleep (socket errors)
+    SLEEP_TIME = 600
     
-    cacic = Cacic()
     while 1:
         try:
-            if not cacic.running:
-                cacic.run()
+            
+            cacic = Cacic()
+            cacic.run()
                 
         except socket.error:
-            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), cacic.SLEEP_TIME, _l.get('seconds')))             
+            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
         
         except SystemExit, e:
