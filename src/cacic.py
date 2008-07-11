@@ -36,10 +36,9 @@ _l = Language()
 
 class Cacic:
     
-    VERSION = Reader.getPycacic()['version']
     
     def __init__(self):
-        try:            
+        try:
             CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
             print _l.get('welcome')
             # abre conexao por socket
@@ -49,7 +48,7 @@ class Cacic:
             self.gc_ok = 0 # False
             self.coletas_forcadas = []
             # Gerente de Coletas
-            self.gc = Ger_Cols(self.VERSION)
+            self.gc = Ger_Cols(self.getVersion())
                        
         except socket.error:
             raise socket.error
@@ -122,6 +121,11 @@ class Cacic:
         if os.getuid() != 0:
             return 0 # False
         return 1 # True
+    
+
+    def getVersion(self):
+        """Retorna a versao atual do agente"""
+        return Reader.getPycacic()['version']
 
 
     def start(self):
@@ -149,6 +153,9 @@ class Cacic:
     def conecta(self):
         """Conecta ao Gerente Web para pegar informacoes de configuracao"""
         try:
+            # atualiza a versao do agente
+            self.gc.versao_atual = self.getVersion()
+            # pega xml de retorno do servidor
             xml = self.gc.conecta(self.gc.cacic_url, self.gc.dicionario)
             self.gc.readXML(xml) 
             # verifica atualizacao
@@ -205,7 +212,7 @@ class Cacic:
 
 if __name__ == '__main__':
     ver =  sys.version_info
-    version = int(''.join([ '%s' %sys.version_info[x] for x in range(3)]))
+    version = int(''.join([ '%s' % sys.version_info[x] for x in range(3)]))
     if version < 230:
         print _l.get('python_required')
         sys.exit(1)
