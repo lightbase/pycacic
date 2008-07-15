@@ -144,10 +144,14 @@ class Cacic:
         """
             Espera determinado intervalo de tempo. E apos isto marca o estado
             do Gerente de Coletas como nao parado e habilita execucao das coletas
-        """       
-        time.sleep(self.interval)
-        self.gc_stopped = 0 # False
-        self.gc_ok = 1 # True
+        """
+        try:
+            time.sleep(self.interval)
+            self.gc_stopped = 0 # False
+            self.gc_ok = 1 # True
+        except Exception, e:
+            error = "%s (Cacic.timeout): %s" % (_l.get('error'), e)
+            CLog.appendLine(_l.get('pycacic'), error)
         
         
     def conecta(self):
@@ -181,12 +185,12 @@ class Cacic:
 
     def checkSocket(self):
         """Verifica comunicacao com a interface"""
-        while 1:
-            try:
+        try:
+            while 1:
                 data, self.addr = self.sock.recvfrom(self.buf)
                 self.coletas_forcadas = data.split()
-            except:
-                self.quit()
+        except:
+            self.quit()
            
     
     def update(self):
@@ -239,8 +243,8 @@ if __name__ == '__main__':
             cacic.quit()
             break
         
-        except:
-            CLog.appendLine(_l.get('pycacic'), 'Erro desconhecido')
+        except Exception, e:
+            CLog.appendLine(_l.get('pycacic'), '%s' % e)
             cacic.quit()
             break
         
