@@ -204,27 +204,31 @@ def mkconfig():
         addr = raw_input("Endereço do  Servidor ('ex: http://<endereco>'): ").lower()
         if len(addr.split('//')) != 2:
             print "Endereco invalido"
+            op = ''
         else:
             http = addr.split('//')[0]
             host = addr.split('//')[1]
             if not http in ('http:', 'https:') or host.strip() == '':
-                print "Endereco invalido"            
+                print "Endereco invalido"
+                op = ''            
+            elif host.strip() == "localhost" or host.strip() == "127.0.0.1":
+                print "Não é permitido utilizar um endereço da interface de loopback(127.0.0.1 ou localhost) para o gerente"
+                op = ''
             else:            
                 print "Testando conexão...",
                 if commands.getoutput('ping %s -c 1; echo $?' % host)[-1:] != '0':
                     print "Erro ao tentar conectar ao servidor"
+                    op = ''
                 else:
                     print "[OK]"
-                    user = raw_input("Usuario do Agente: ")
-                    pwd = raw_input("Senha: ")
-                    op = raw_input("\nOs dados estao corretos? (Y|N)").upper()
+                    op = raw_input("\nOs dados estao corretos? (Y/N)").upper()
     # remove a barra do final
     if addr[len(addr)-1] == '/':
         addr = addr[:-1]
     # sava as configuracoes
     Writer.setServer('address', addr, CACIC_CONF, False)
-    Writer.setServer('username', user, CACIC_CONF, False)
-    Writer.setServer('password', pwd, CACIC_CONF, False)
+    Writer.setServer('username', "USER_CACIC", CACIC_CONF, False)
+    Writer.setServer('password', "PW_CACIC", CACIC_CONF, False)
     Writer.setPycacic('locale', getSOLang(), CACIC_CONF, False)
     
     print "- Salvando e encriptando configuracao...",

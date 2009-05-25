@@ -31,15 +31,8 @@
                                  incluindo o protocolo (http:// ou https://).
                                  *ex*: 
                                     http://meu_servidor/
-                                    http://127.0.0.1/
- 
-       + Usuario do Agente     : usuário para autenticação básica (Basic 
-                                 Authentication) http. O Cacic usa como 
-                                 padrão "USER_CACIC" (sem aspas).
-                         
-       + Senha                 : senha para autenticação básica (Basic 
-                                 Authentication) http. O Cacic usa como 
-                                 padrão "PW_CACIC" (sem aspas).
+                                    http://192.168.0.254/
+    OBS: O ip NÃO pode ser da interface loopback(127.0.0.1 ou localhost), nesse caso utilize o IP de LAN da máquina.
     
         
     Após confirmar os dados acima, outra confirmação é requisita sobre a

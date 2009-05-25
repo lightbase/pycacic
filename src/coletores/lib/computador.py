@@ -894,10 +894,11 @@ class SO_Info:
             descr = "Debian"
             version = commands.getoutput("cat /etc/debian_version")
             if(os.path.exists("/etc/lsb-release")):
-                descr = "Ubuntu"
-                version = commands.getoutput("cat /etc/lsb-release")
-                pos = version.find("_RELEASE=")+9
-                version = version[pos:version.find("\n",pos)]
+                release = commands.getoutput("cat /etc/lsb-release")
+                pos = release.find("DISTRIB_ID=")+11
+                descr = release[pos:release.find("\n",pos)]
+                pos = release.find("_RELEASE=")+9
+                version = release[pos:release.find("\n",pos)]
             elif(os.path.exists("/etc/kurumin_version")):
                 descr = "Kurumin"
                 version = commands.getoutput("cat /etc/kurumin_version")

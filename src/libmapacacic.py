@@ -35,7 +35,7 @@ class MapaCacic:
         self.url = URL()
         self.cipher = CCrypt()
         self.computer = Computador()
-        self.versao_atual = '0.0.1'
+        self.versao_atual = '2.4.0.787'
         self.cs_cipher = 1
         self.dicionario = {}
         self.currentValues = {}
@@ -48,6 +48,9 @@ class MapaCacic:
         #print self.endereco
         #sys.exit(0)
         
+    def getVersao(self):
+        """ Retorna a versão do mapa cacic """
+        return self.versao_atual
     
     def reinitDict(self):
         """ Recria o dicionario de dados, contendo somente as variaveis de autenticacao """
@@ -72,7 +75,7 @@ class MapaCacic:
     def auth(self):
         """ Autentica o login com o servidor e recebe o ID_USUARIO"""
         self.reinitDict()
-        self.dicionario['te_versao_mapa'] = self.encripta('1.0.0.11')
+        self.dicionario['te_versao_mapa'] = self.encripta(self.versao_atual)
         self.dicionario['cs_MapaCacic'] = self.encripta('S')
         xml = self.url.enviaRecebeDados(self.dicionario, self.endereco+'mapa_acesso.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
         xml = xml.replace("?>", "?><REPLY>")
@@ -89,6 +92,8 @@ class MapaCacic:
                 self.id_usuario = self.decripta(no.firstChild.nodeValue)
             elif no.nodeName == "NM_USUARIO_COMPLETO":
                 self.nm_usuario_completo = self.decripta(no.firstChild.nodeValue)
+            elif no.nodeName == "TE_VERSAO_MAPA":
+                raise Exception("O servidor requer a versão %s do coletor patrimonial.\nSua versão: %s" % (self.decripta(no.firstChild.nodeValue), self.versao_atual))
         return self.id_usuario != ''
         
     def getInfo(self):

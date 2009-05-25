@@ -46,6 +46,7 @@ class GUIMapaCacic:
         self.xml.signal_autoconnect(self)
         self.window = self.xml.get_widget('mapacacic')
         self.window.set_title(self.TITLE)
+        self.xml.get_widget('label_versao').set_text(self.mc.getVersao())
         
         # Labels
         for k, v in self.mc.labels.items():
@@ -277,7 +278,7 @@ class GUIMapaCacicAuth:
             else:
                 infoWindow.destroy()
                 self.showAlert("Login incorreto.")
-        except URLError, e:
+        except Exception, e:
             try:
                 infoWindow.destroy()
             except:
