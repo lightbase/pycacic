@@ -60,8 +60,12 @@ class URL :
         
         passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
         passman.add_password(None, url, user, pwd)
+        
+        """ Lista de proxies vazia para forçar nenhuma """
+        proxy_handler = urllib2.ProxyHandler({})
+        
         auth_handler = urllib2.HTTPBasicAuthHandler(passman)
-        opener = urllib2.build_opener(auth_handler)
+        opener = urllib2.build_opener(proxy_handler, auth_handler)
         urllib2.install_opener(opener)
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)

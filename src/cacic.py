@@ -53,8 +53,8 @@ class Cacic:
         except socket.error:
             raise socket.error
             
-        except:
-            print 'Erro ao instanciar Cacic()'
+        except Exception, e:
+            CLog.appendException(e, _l.get('pycacic'), 'Erro ao instanciar Cacic()')
             self.quit()
     
     def run(self):
@@ -99,7 +99,7 @@ class Cacic:
             self.quit()
         except socket.error, e:
             error = "Socket %s: %s" % (_l.get('error'), e)
-            CLog.appendLine(_l.get('pycacic'), error)
+            CLog.appendException(e, _l.get('pycacic'), error)
             raise socket.error
         
         except SystemExit:          
@@ -108,11 +108,11 @@ class Cacic:
         
         except GCException, e:
             error = "%s: %s" % (_l.get('error'), e.getMessage())
-            CLog.appendLine(_l.get('pycacic'), error)
+            CLog.appendException(e, _l.get('pycacic'), error)
             
         except Exception, e:
             error = "%s: %s" % (_l.get('error'), e)
-            CLog.appendLine(_l.get('pycacic'), error)
+            CLog.appendException(e, _l.get('pycacic'), error)
         
         
     
@@ -168,7 +168,7 @@ class Cacic:
         
         except GCException, e:
             error = "%s: %s" % (_l.get('error'), e.getMessage())
-            CLog.appendLine(_l.get('pycacic'), error)               
+            CLog.appendException(e, _l.get('pycacic'), error)               
         
         except SystemExit:
             raise SystemExit
@@ -230,21 +230,21 @@ if __name__ == '__main__':
             cacic = Cacic()
             cacic.run()
                 
-        except socket.error:
-            CLog.appendLine(_l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
+        except socket.error, e:
+            CLog.appendException(e, _l.get('pycacic'), '%s %s %s' % (_l.get('sleeping'), SLEEP_TIME, _l.get('seconds')))             
             time.sleep(SLEEP_TIME)
         
         except SystemExit, e:
-            CLog.appendLine(_l.get('pycacic'), e)
+            CLog.appendException(e, _l.get('pycacic'), e)
             break
             
         except GCException, e:
-            CLog.appendLine(_l.get('pycacic'), '!%s: %s' % (_l.get('error'), e.getMessage()))
+            CLog.appendException(e, _l.get('pycacic'), '!%s: %s' % (_l.get('error'), e.getMessage()))
             cacic.quit()
             break
         
         except Exception, e:
-            CLog.appendLine(_l.get('pycacic'), '%s' % e)
+            CLog.appendException(e, _l.get('pycacic'), '%s' % e)
             cacic.quit()
             break
         

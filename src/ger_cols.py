@@ -90,7 +90,7 @@ class Ger_Cols:
         self.exibe_bandeja = 'N'
         self.exibe_erros_criticos = 'N'
         self.coleta_patr = 0
-        self.exec_apos = 0
+        self.exec_apos = 60
         self.intervalo_exec = 0
         self.intervalo_renovacao_patrim = 0
         # CACIC
@@ -152,9 +152,10 @@ class Ger_Cols:
         
     def getInterval(self):
         """Retorna o tempo em minutos do intervalo da coleta"""
-        interval = self.intervalo_exec
         if self.first_time:
             self.first_time = 0 # False
+            interval = self.intervalo_exec
+        else:
             interval = self.exec_apos
         return interval
            
