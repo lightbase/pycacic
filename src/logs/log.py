@@ -20,6 +20,7 @@
 import os
 import codecs
 import commands
+import traceback
 from time import strftime
 
 class CLog:
@@ -65,9 +66,26 @@ class CLog:
         f.write(l.encode("utf-8"))
         f.close()
         
+    def appendException(e, module, desc, data = ""):
+        """Adiciona uma linha contendo o data, nome do modulo e a descricao da acao no final """
+        fileName = '/usr/share/pycacic/logs/exceptions.log'
+        if not os.path.exists(fileName):
+            CLog.createNew(fileName)
+        f = file(fileName, 'a')
+        l =  '* %s\t%s\t%s\n' % (strftime("%H:%M:%S %d/%m/%Y"), module, desc)
+        f.write(l.encode("utf-8"))
+        if data != "":
+            f.write("\n\nData:\n".encode("utf-8"))
+            f.write(data)
+            f.write("\n\n".encode("utf-8"))
+        f.write(traceback.format_exc().encode("utf-8"))
+        f.write("\n\n\n".encode("utf-8"))
+        f.close()
+        
     getCurrentFileName = staticmethod(getCurrentFileName)
     getCurrentFile = staticmethod(getCurrentFile)
     removeOlds = staticmethod(removeOlds)
     createNew = staticmethod(createNew)
     appendLine = staticmethod(appendLine)
+    appendException = staticmethod(appendException)
     

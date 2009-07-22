@@ -168,7 +168,7 @@ class Cacic:
         
         except GCException, e:
             error = "%s: %s" % (_l.get('error'), e.getMessage())
-            CLog.appendException(e, _l.get('pycacic'), error)               
+            CLog.appendException(e, _l.get('pycacic'), error, xml)               
         
         except SystemExit:
             raise SystemExit
