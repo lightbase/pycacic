@@ -27,7 +27,7 @@
 	<property name="dist" location="dist"/>
 	<property name="build" location="build"/>
 	<property name="build.pycacic" location="build/pycacic"/>
-	<property name="version" value="2.4.0"/>
+	<property name="version" value="2.4.1"/>
 	
     <target name="init" description="Create/Cleans the output directories.">
     	<delete dir="${build}"/>
@@ -108,10 +108,10 @@
 	</target>
 	
 	<target name="gzip" depends="tar2" description="Creates the tar.gz file">
-		<gzip src="${build}/pycacic.tar" destfile="${build}/pycacic_2.4.0.${revision}.tgz" />
+		<gzip src="${build}/pycacic.tar" destfile="${build}/pycacic_${version}.${revision}.tgz" />
 	</target>
 	
 	<target name="bzip2" depends="tar2" description="Creates the tar.bz2 file">
-		<bzip2 src="${build}/pycacic.tar" destfile="${build}/pycacic_2.4.0.${revision}.tar.bz2" />
+		<bzip2 src="${build}/pycacic.tar" destfile="${build}/pycacic_${version}.${revision}.tar.bz2" />
 	</target>
 </project>
