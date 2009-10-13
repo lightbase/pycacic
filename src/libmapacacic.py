@@ -35,7 +35,7 @@ class MapaCacic:
         self.url = URL()
         self.cipher = CCrypt()
         self.computer = Computador()
-        self.versao_atual = '2.4.0.787'
+        self.versao_atual = '2.4.2.862'
         self.cs_cipher = 1
         self.dicionario = {}
         self.currentValues = {}
