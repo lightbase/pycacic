@@ -72,7 +72,10 @@ def main():
                 else:
                     showError("Login ou senha inválidos.")
             except URLError, e:
-                showError("Erro na comunicação.\nDetalhes: %s " % e)
+                showError("Falha na comunicação.\nDetalhes: %s " % e)
+                loop = 0
+            except Exception, e:
+                showError("Falha na comunicação.\nDetalhes: %s " % e)
                 loop = 0
                 
 def parseCurrentValues():
@@ -253,7 +256,7 @@ def selectEnt():
 def authDialog():
     c = ""
     while 1:
-        msg0 = "MapaCacic - Coletor Avulso de Patrimônio\n\nPor favor informe um login de nivel 'tecnico'"
+        msg0 = "MapaCacic - Coletor Avulso de Patrimônio"
         dialog.msgbox("MapaCacic", 7, 60, msg0)
         
         user = ''

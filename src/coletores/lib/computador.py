@@ -384,10 +384,6 @@ class Rede:
         # returns string
         return self.ip
     
-    def getDHCP(self):
-        """ retorna o endereço IP do servidor DHCP """
-        return self.dhcp
-    
     def getMascara(self):
         """ retorna a máscara de rede da máquina """
         # returns string

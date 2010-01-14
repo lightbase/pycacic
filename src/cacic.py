@@ -39,7 +39,7 @@ class Cacic:
     
     def __init__(self):
         try:
-            CLog.appendLine(_l.get('pycacic'), _l.get('program_started'))
+            CLog.appendLine(_l.get('pycacic'), '%s (%s)' % (_l.get('program_started'), self.getVersion()))
             print _l.get('welcome')
             # abre conexao por socket
             self.setSocket()

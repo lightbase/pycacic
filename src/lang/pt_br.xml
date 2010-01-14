@@ -25,7 +25,7 @@
 		<main>
 			<string name="welcome">Bem Vindo ao PyCacic</string>
 			<string name="need_root">Para executar o programa é necessário ser super-usuário (root)</string>
-			<string name="program_started">Iniciado Programa</string>
+			<string name="program_started">PyCacic Iniciado</string>
 			<string name="new_version">Nova Versão Disponível !!!</string>
 			<string name="starting_update">Iniciando Atualização</string>
 			<string name="download_sucess">Novo Pacote Copiado Com Sucesso</string>

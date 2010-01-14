@@ -35,7 +35,7 @@ class MapaCacic:
         self.url = URL()
         self.cipher = CCrypt()
         self.computer = Computador()
-        self.versao_atual = '2.4.2.862'
+        self.versao_atual = '2.6.0.0'
         self.cs_cipher = 1
         self.dicionario = {}
         self.currentValues = {}
@@ -59,6 +59,7 @@ class MapaCacic:
         self.dicionario['te_senha'] = self.encripta(self.pwd)
         self.dicionario['padding_key'] = Coletor().getPadding()
         self.dicionario['cs_compress'] = 0
+        self.dicionario['AgenteLinux'] = '1'
     
     def encripta(self, text):
         """ Retorna o texto encriptado caso a encriptação esteja habilitada """
@@ -77,7 +78,7 @@ class MapaCacic:
         self.reinitDict()
         self.dicionario['te_versao_mapa'] = self.encripta(self.versao_atual)
         self.dicionario['cs_MapaCacic'] = self.encripta('S')
-        xml = self.url.enviaRecebeDados(self.dicionario, self.endereco+'mapa_acesso.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC') } )
+        xml = self.url.enviaRecebeDados(self.dicionario, self.endereco+'mapa_acesso.php', self.encripta('USER_CACIC'), self.encripta('PW_CACIC'), { 'cs_cipher' : self.cs_cipher, 'agent' : self.encripta('AGENTE_CACIC'), 'te_operacao' : self.encripta('Autentication') } )
         xml = xml.replace("?>", "?><REPLY>")
         xml += "</REPLY>"
         #print "XML:\n["+xml+"]\n------"

@@ -25,7 +25,7 @@
 		<main>
 			<string name="welcome">Welcome to PyCacic</string>
 			<string name="need_root">This application requires superuser (root) to run.</string>
-			<string name="program_started">Program Started</string>
+			<string name="program_started">Pycacic Started</string>
 			<string name="new_version">New Version Available !!!</string>
 			<string name="starting_update">Starting Update</string>
 			<string name="download_sucess">New Package Successfully Downloaded</string>
