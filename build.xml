@@ -27,7 +27,7 @@
 	<property name="dist" location="dist"/>
 	<property name="build" location="build"/>
 	<property name="build.pycacic" location="build/pycacic"/>
-	<property name="version" value="2.6.0"/>
+	<property name="version" value="2.5.9.907"/>
 	
     <target name="init" description="Create/Cleans the output directories.">
     	<delete dir="${build}"/>
