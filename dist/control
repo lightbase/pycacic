@@ -1,9 +1,0 @@
-Package:PyCACIC
-Priority: optional
-Version:@version@.@revision@
-Architecture:all
-Maintainer: DATAPREV
-Section: misc
-Installed-Size: 1434
-Depends: python(>=2.3), dialog, tar
-Description: Configurador Automatico e Coletor de Informacoes Computacionais
